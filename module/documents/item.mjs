@@ -125,6 +125,20 @@ export class BoilerplateItem extends Item {
       flavor: label,
     });
   }
+  async moveRollJustSend() {
+    const item = this;
+
+    const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+    const rollMode = game.settings.get('core', 'rollMode');
+    const label = this._getMoveLabelRollTemplate({move: this});
+    console.log(label)
+
+    ChatMessage.create({
+      speaker: speaker,
+      rollMode: rollMode,
+      flavor: label,
+    });
+  }
 
   _rankSkill(){
     let name = ""
@@ -166,8 +180,12 @@ export class BoilerplateItem extends Item {
       case "disadvantage":
         modeText = "Rolagem com desvantagem"
         break;
+      case "normal":
+        modeText = "Rolagem normal"
+        break;
+        
         default:
-          modeText = "Rolagem normal"
+          modeText = undefined
           break;
     }
     let attributeText
@@ -190,6 +208,9 @@ export class BoilerplateItem extends Item {
       case "cha":
         attributeText = "Carisma"
         break;
+      default: 
+        attributeText = undefined
+        break
     }
     const hasImg = move.img != "icons/svg/item-bag.svg"
     console.log(move)
@@ -199,8 +220,8 @@ export class BoilerplateItem extends Item {
         ${hasImg ? `<img src="${move.img}" name="${move.name}">` : ""}
         <div class="title">
           <h3>Movimento: ${move.name}</h3>
-          <i>${modeText}</i>
-          <i>Atributo escolhido: ${attributeText}</i>
+          ${modeText ? `<i>${modeText}</i>` : ''}
+          ${attributeText ? `<i>Atributo escolhido: ${attributeText}</i>` : ''}
         </div>
       </div>
       <div class="description">
