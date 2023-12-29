@@ -14,6 +14,7 @@ export class BoilerplateActor extends Actor {
     console.log(this)
     const attributes = this.system.attributes
 
+
     this._mapActualAttributes(attributes)
   }
 
@@ -37,7 +38,6 @@ export class BoilerplateActor extends Actor {
     const systemData = actorData.system;
     const flags = actorData.flags.boilerplate || {};
 
-    this._buildConditionsObj()
     this._prepareCharacterData(actorData);
     this._prepareNpcData(actorData);
   }
@@ -91,25 +91,26 @@ export class BoilerplateActor extends Actor {
   }
 
   _mapActualAttributes(attributes){
-    Object.keys(attributes).forEach((attributesKey, i) => {
-      const attribute = attributes[attributesKey]
-      attribute.actual = attribute.max
-    })
-  }
-
-  _buildConditionsObj() {
-    // Initialize containers.
-    const conditionsObj = {};
-
-    // Iterate through items, allocating to containers
-    for (let item of this.items) {
-      item.img = item.img || DEFAULT_TOKEN;
-      if (item.type === 'condition') {
-        conditionsObj[item.id] = item
+    // Object.keys(attributes).forEach((attributesKey, i) => {
+    //   const attribute = attributes[attributesKey]
+    //   attribute.actual = attribute.max
+    // })
+    console.log(1, attributes)
+    const conditionMods = {
+      str: 0, dex:0, con: 0, per: 0, int: 0, cha: 0
+    }
+    const conditions = this.items.filter(item => item.type === 'condition')
+    for (const condition of conditions) {
+      for (const [attributeName, attributeValue] of Object.entries(condition.system.attributes)) {
+        conditionMods[attributeName] += +attributeValue.mod
       }
     }
-
-    this.system.conditionsObj = conditionsObj;
+    console.log(2, attributes)
+    for(let [key, value] of Object.entries(attributes)){
+      value.actual = value.max + conditionMods[key]
+    }
+    console.log(3, attributes)
   }
+
 
 }

@@ -55,7 +55,7 @@
 		}
 	},
 	"Item": {
-		"types": ["move", "skill", "condition"],
+		"types": ["move", "skill", "condition", "ability"],
 		"templates": {
 			"base": {
 				"description": ""
@@ -129,6 +129,11 @@
           "name": "cha"
         }
       }
+    },
+
+    "ability" : {
+      "templates": ["base"],
+      "level": 1
     }
 	}
 }

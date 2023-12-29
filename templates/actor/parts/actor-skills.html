@@ -1,8 +1,8 @@
 <div class="skills-section">
-    <div class="skill-section-buttons">
-        <a class="add-skill-btn item-create" data-type="skill"><i class="fa-solid fa-plus"></i> Adicionar nova perícia</a>
-    </div>
-    <div class="skills-container">
+    <div class="skills-container left-section">
+        <div class="skill-section-buttons">
+            <a class="add-skill-btn item-create" data-type="skill"><i class="fa-solid fa-plus"></i> Adicionar nova perícia</a>
+        </div>
         <ol class="skills-list item-list">
             {{#each skills as |skill id|}}
                 <li class="skill-card item" data-item-id="{{skill._id}}">
@@ -18,5 +18,23 @@
                 </li>
             {{/each}}
         </ol>
+    </div>
+    <div class="abilities-container right-section">
+        <h3>Habilidades:</h3>
+        <ul class="abilities-list">
+            {{#each abilities as |ability|}}
+                <li class="ability-card item" data-item-id="{{ability._id}}">
+                    <div class="info">
+                        <span class="name">{{ability.name}}</span>
+                        <span class="level">(Nível: {{ability.system.level}})</span>
+                    </div>
+                    <div class="control">
+                        <span class="ability-send-log-btn rollable" data-roll-type="ability"><a><i class="fa-solid fa-comment"></i></a></span>
+                        <span class="ability-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
+                        <span class="ability-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
+                    </div>
+                </li>
+            {{/each}}
+        </ul>
     </div>
 </div>

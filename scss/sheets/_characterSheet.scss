@@ -1,172 +1,202 @@
-.resource-card{
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3px;
-    border: 1px dotted $c-beige;
-    border-right: 0;
-    border-left: 0;
-    
-    input[type="text"]{
-        width: 2em;
-    }
-    input{
-        text-align: center;
-    }
-    .resource-content{
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        justify-content: center;
-        span{
-            flex-grow: 0;
-        }
-        
-    }
+.resource-card {
+	display: flex;
+	gap: 5px;
+	align-items: center;
+	justify-content: space-between;
+	padding: 3px;
+	border: 1px dotted $c-beige;
+	border-right: 0;
+	border-left: 0;
+
+	input[type="text"] {
+		width: 2em;
+	}
+	input {
+		text-align: center;
+	}
+	.resource-content {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		justify-content: center;
+		span {
+			flex-grow: 0;
+		}
+	}
 }
 
-.moves-section{
+.moves-section {
+	display: flex;
+	gap: 10px;
+	.left-section {
+		width: 200px;
+		.tab {
+			width: 100%;
+		}
+		.tabs {
+			padding: 5px 0;
+			border-left: 1px solid $c-beige;
+			border-right: 1px solid $c-beige;
+		}
+		.attributes-container {
+			width: 100%;
+			max-width: 200px;
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+			.attribute-card {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				border: 1px solid $c-beige;
+				border-radius: 3px;
+				gap: 5px;
+				padding: 5px;
+				.attribute-title {
+					font-weight: bold;
+				}
+				.attribute-values {
+					border-top: 1px solid $c-beige;
+					padding-top: 5px;
+					display: flex;
+					align-items: center;
+					gap: 5px;
+					width: 100%;
+					justify-content: center;
+					.attribute-value {
+						width: 2em;
+						text-align: center;
+					}
+				}
+			}
+		}
+		.conditions-container {
+			width: 100%;
+			max-width: 200px;
+			border-right: 1px solid $c-beige;
+			.conditions-title {
+				border-bottom: 1px solid $c-beige;
+				font-size: 16px;
+				padding: 5px 0;
+				margin: 0;
+			}
+			.conditions-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				.condition-card {
+					padding: 0;
+					margin: 0;
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					border-bottom: 1px solid $c-beige;
+                    .controls{
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
+				}
+			}
+		}
+	}
+	.right-section {
+		display: flex;
+		flex-direction: column;
+		align-items: normal;
+		width: 100%;
+		.moves-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			.move-card {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: 10px;
+				padding: 3px 0;
+				border-top: 1px solid $c-beige;
+				border-bottom: 1px solid $c-beige;
+				.info {
+					display: flex;
+					align-items: center;
+					gap: 5px;
+					.roll-dice-btn {
+						font-size: 18px;
+					}
+				}
+				.move-card-btns {
+					display: flex;
+					gap: 5px;
+				}
+			}
+		}
+	}
+}
+
+.skills-section {
     display: flex;
-    gap: 10px;
-    .conditions-container{
-        width: 150px;
-        border-right: 1px solid $c-beige;
-        .conditions-title{
+    gap: 20px;
+	.skills-container {
+        width: 100%;
+        max-width: 200px;
+        .skill-section-buttons {
+            width: 100%;
             border-bottom: 1px solid $c-beige;
-            font-size: 16px;
-            padding: 5px 0;
+            padding: 10px 0;
+        }
+		.skills-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+			.skill-card {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-bottom: 1px solid $c-beige;
+				padding: 5px 0;
+				.info {
+					display: flex;
+					gap: 5px;
+					align-items: center;
+					.rank {
+						font-size: 12px;
+					}
+				}
+				.skill-card-buttons {
+					display: flex;
+					gap: 5px;
+					font-weight: bold;
+				}
+			}
+		}
+	}
+    .abilities-container{
+        flex-grow: 1;
+        h3{
+            padding: 8px 0;
+            border-bottom: 1px solid $c-beige;
             margin: 0;
         }
-        .conditions-list{
+        .abilities-list{
             list-style: none;
-            padding: 0;
             margin: 0;
-            .condition-card{
-                padding: 0;
-                margin: 0;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border-bottom: 1px solid $c-beige;
-            }
-        }
-
-    }
-    .left-section{
-        width: 150px;
-        .tab{
-            width: 100%;
-        }
-        .tabs{
-            padding: 5px 0;
-            border-left: 1px solid $c-beige;
-            border-right: 1px solid $c-beige;
-        }
-        .attributes-container{
-            width: 100%;
-            max-width: 150px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            .attribute-card{
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                border: 1px solid $c-beige;
-                border-radius: 3px;
-                gap: 5px;
-                padding: 5px;
-                .attribute-title{
-                    font-weight: bold;
-                }
-                .attribute-values{
-                    border-top: 1px solid $c-beige;
-                    padding-top: 5px;
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    width: 100%;
-                    justify-content: center;
-                    .attribute-value{
-                        width: 2em;
-                        text-align: center;
-                    }
-                }
-            }
-        }
-        .conditions-container{
-            width: 100%;
-            max-width: 150px;
-        }
-    }
-    .right-section{
-        display: flex;
-        flex-direction: column;
-        align-items: normal;
-        width: 100%;
-        .moves-list{
-            list-style: none;
             padding: 0;
-            margin: 0;
-            .move-card{
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 10px;
-                padding: 3px 0;
-                border-top: 1px solid $c-beige;
-                border-bottom: 1px solid $c-beige;
-                .info{
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    .roll-dice-btn{
-                        font-size: 18px;
-                    }
-                }
-                .move-card-btns{
-                    display: flex;
-                    gap: 5px;
-                }
-            }
-        }
-    }
-}
-
-.skills-section{
-    .skill-section-buttons{
-        width: 100%;
-        border-bottom: 1px solid $c-beige;
-        padding: 10px 0;
-    }
-    .skills-container{
-        .skills-list{
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            .skill-card{
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+            .ability-card{
                 border-bottom: 1px solid $c-beige;
                 padding: 5px 0;
+                display: flex ;
+                justify-content: space-between;
+                align-items: center;
+                
                 .info{
-                    display: flex;
-                    gap: 5px;
-                    align-items: center;
-                    .rank{
-                        font-size: 12px;
+                    .level{
+                        font-size: 0.8em;
                     }
-                }
-                .skill-card-buttons{
-                    display: flex;
-                    gap: 5px;
-                    font-weight: bold;
                 }
             }
         }
     }
-}
 
+}

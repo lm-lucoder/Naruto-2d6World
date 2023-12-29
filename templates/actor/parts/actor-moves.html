@@ -70,9 +70,9 @@
                             <input
                                 type="number"
                                 class="attribute-value"
-                                name="system.attributes.car.max"
-                                value="{{system.attributes.car.max}}" />
-                            <span>Atual: {{system.attributes.car.actual}}</span>
+                                name="system.attributes.cha.max"
+                                value="{{system.attributes.cha.max}}" />
+                            <span>Atual: {{system.attributes.cha.actual}}</span>
                         </div>
                     </div>
                 </div>
@@ -81,9 +81,13 @@
                 <h3 class="conditions-title">Condições</h3>
                 <ul class="conditions-list">
                     {{#each conditions as |condition|}}
-                        <li class="condition-card">
+                        <li class="condition-card item" data-item-id="{{condition._id}}">
                             <span class="title">{{condition.name}}</span>
-                            <input class="checkbox" type="checkbox" name="system.conditionsObj.{{condition.id}}.system.isActive" {{checked condition.system.isActive}} />
+                            <div class="controls">
+                                <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+                                <input class="checkbox condition-card-checkbox" type="checkbox" {{checked condition.system.isActive}} />
+                            </div>
                         </li>
                     {{/each}}
                 </ul>

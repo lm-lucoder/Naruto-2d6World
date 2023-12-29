@@ -80,7 +80,7 @@ export class BoilerplateActorSheet extends ActorSheet {
     const movesByCategoy = {};
     const skills = [];
     const conditions = [];
-    const conditionsObj = {};
+    const abilities = [];
 
     // Iterate through items, allocating to containers
     for (let item of context.items) {
@@ -104,7 +104,9 @@ export class BoilerplateActorSheet extends ActorSheet {
       }
       else if (item.type === 'condition') {
         conditions.push(item);
-        conditionsObj[item.id] = item
+      }
+      else if (item.type === 'ability') {
+        abilities.push(item);
       }
     }
     // Assign and return
@@ -112,6 +114,7 @@ export class BoilerplateActorSheet extends ActorSheet {
     context.movesByCategoy = movesByCategoy;
     context.skills = skills;
     context.conditions = conditions;
+    context.abilities = abilities;
   }
 
   /* -------------------------------------------- */
@@ -151,6 +154,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 
     html.find('.rollableWithDialog').click( (event) => {
         this._onRollMoveDialog(event)
+    })
+
+    html.find('.condition-card-checkbox').click( (event) => {
+      const conditionId = event.target.closest(".condition-card").getAttribute('data-item-id')
+      const condition = this.actor.items.get(conditionId)
+      condition.update({system: {isActive: !condition.system.isActive}})
     })
 
     // Drag events for macros.
@@ -217,6 +226,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 				const itemId = element.closest(".item").dataset.itemId;
 				const item = this.actor.items.get(itemId);
 				if (item) return item.moveRoll();
+			}
+      if (dataset.rollType == "ability") {
+				const itemId = element.closest(".item").dataset.itemId;
+				const item = this.actor.items.get(itemId);
+				if (item) return item.abilityRoll();
 			}
     }
 

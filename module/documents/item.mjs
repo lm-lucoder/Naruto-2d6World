@@ -75,7 +75,7 @@ export class BoilerplateItem extends Item {
     const speaker = ChatMessage.getSpeaker({ actor: this.actor });
     const rollMode = game.settings.get('core', 'rollMode');
 
-    const label = this._getSkillRollTemplate(item)
+    const label = this._getSkillLabelRollTemplate(item)
 
     
     
@@ -87,12 +87,25 @@ export class BoilerplateItem extends Item {
     });
     
   }
+  async abilityRoll() {
+    const ability = this;
+
+    const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+    const label = this._getAbilityLabelRollTemplate(ability);
+    
+
+    ChatMessage.create({
+      speaker: speaker,
+      flavor: label,
+      content: ability.system.description ?? ''
+    });
+  }
   async moveRoll({mode, attribute}) {
     const item = this;
 
     const speaker = ChatMessage.getSpeaker({ actor: this.actor });
     const rollMode = game.settings.get('core', 'rollMode');
-    const label = this._getMoveRollTemplate({move: this, mode, attribute});
+    const label = this._getMoveLabelRollTemplate({move: this, mode, attribute});
     
     const rollData = this.getRollData();
 
@@ -144,7 +157,7 @@ export class BoilerplateItem extends Item {
     this.system.rank.name = name
   }
 
-  _getMoveRollTemplate({move, mode, attribute}){
+  _getMoveLabelRollTemplate({move, mode, attribute}){
     let modeText
     switch (mode) {
       case "advantage":
@@ -199,7 +212,7 @@ export class BoilerplateItem extends Item {
     `
     return label
   }
-  _getSkillRollTemplate(skill){
+  _getSkillLabelRollTemplate(skill){
     let rank = ''
     if(skill.parent){
       rank = `<i>Rank: ${skill.system.rank.name}</i>`
@@ -213,6 +226,21 @@ export class BoilerplateItem extends Item {
       </div>
     `;
 
+    return label
+  }
+  _getAbilityLabelRollTemplate(ability){
+    const hasImg = ability.img != "icons/svg/item-bag.svg"
+    const label = `
+    <div class="abilityRollChatTemplate">
+      <div class="info">
+        ${hasImg ? `<img src="${ability.img}" name="${ability.name}">` : ""}
+        <div class="title">
+          <h3>Hablidade: ${ability.name}</h3>
+          <i>Nível: ${ability.system.level}</i>
+        </div>
+      </div>
+    </div>
+    `
     return label
   }
 }
