@@ -11,9 +11,7 @@ export class BoilerplateActor extends Actor {
     // prepareBaseData(), prepareEmbeddedDocuments() (including active effects),
     // prepareDerivedData().
     super.prepareData();
-    console.log(this)
     const attributes = this.system.attributes
-
 
     this._mapActualAttributes(attributes)
   }
@@ -91,11 +89,7 @@ export class BoilerplateActor extends Actor {
   }
 
   _mapActualAttributes(attributes){
-    // Object.keys(attributes).forEach((attributesKey, i) => {
-    //   const attribute = attributes[attributesKey]
-    //   attribute.actual = attribute.max
-    // })
-    console.log(1, attributes)
+    if (this.type != 'character') return;
     const conditionMods = {
       str: 0, dex:0, con: 0, per: 0, int: 0, cha: 0
     }
@@ -109,7 +103,6 @@ export class BoilerplateActor extends Actor {
     for(let [key, value] of Object.entries(attributes)){
       value.actual = value.max + conditionMods[key]
     }
-    console.log(3, attributes)
   }
 
 

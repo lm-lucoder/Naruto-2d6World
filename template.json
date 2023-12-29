@@ -17,7 +17,7 @@
 		"character": {
 			"templates": ["base"],
 			"params": {
-				"rank": 1,
+				"rank": "",
 				"village": "",
 				"age": "",
 				"clan": "",
@@ -48,10 +48,11 @@
 			}
 		},
 		"npc": {
-			"rank": 1,
+			"rank": "",
 			"village": "",
 			"age": "",
-			"clan": ""
+			"clan": "",
+			"biography": ""
 		}
 	},
 	"Item": {

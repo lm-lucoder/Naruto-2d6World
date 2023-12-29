@@ -7,6 +7,7 @@
   return loadTemplates([
 
     // Actor partials.
+    "systems/naruto2d6world/templates/actor/parts/actor-description-npc.html",
     "systems/naruto2d6world/templates/actor/parts/actor-description.html",
     "systems/naruto2d6world/templates/actor/parts/actor-skills.html",
     "systems/naruto2d6world/templates/actor/parts/actor-moves.html",
