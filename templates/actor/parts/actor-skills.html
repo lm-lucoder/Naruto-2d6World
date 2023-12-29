@@ -1,0 +1,22 @@
+<div class="skills-section">
+    <div class="skill-section-buttons">
+        <a class="add-skill-btn item-create" data-type="skill"><i class="fa-solid fa-plus"></i> Adicionar nova perícia</a>
+    </div>
+    <div class="skills-container">
+        <ol class="skills-list item-list">
+            {{#each skills as |skill id|}}
+                <li class="skill-card item" data-item-id="{{skill._id}}">
+                    <div class="info">
+                        <span class="title">{{skill.name}}</span>
+                        <span class="rank">({{skill.system.rank.name}})</span>
+                    </div>
+                    <div class="skill-card-buttons">
+                        <span class="skill-send-log-btn rollable" data-roll-type="skill"><a><i class="fa-solid fa-comment"></i></a></span>
+                        <span class="skill-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
+                        <span class="skill-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
+                    </div>
+                </li>
+            {{/each}}
+        </ol>
+    </div>
+</div>

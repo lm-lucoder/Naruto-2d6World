@@ -1,0 +1,11 @@
+.dialog-roll-move-content{
+    margin-bottom: 10px;
+    h3{
+        border-bottom: 1px solid $c-beige;
+    }
+    .options-container{
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+}

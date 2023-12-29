@@ -1,0 +1,32 @@
+{
+  "NARUTO2d6WORLD.others":{
+    "village": "village",
+    "clan": "clan",
+    "age": "age"
+  },
+
+  "NARUTO2d6WORLD.attributes":{
+    "con": "Constitution",
+    "str": "Strength",
+    "dex": "Dexterity",
+    "int": "Intelligence",
+    "per": "Perception",
+    "cha": "Charisma"
+  },
+
+  "NARUTO2d6WORLD.attributesAbbr": {
+    "str": "str",
+    "con": "con",
+    "dex": "dex",
+    "int": "int",
+    "wis": "wis",
+    "cha": "cha"
+  },
+
+  "NARUTO2d6WORLD.EffectCreate": "Create Effect",
+  "NARUTO2d6WORLD.EffectToggle": "Toggle Effect",
+  "NARUTO2d6WORLD.EffectEdit": "Edit Effect",
+  "NARUTO2d6WORLD.EffectDelete": "Delete Effect",
+
+  "NARUTO2d6WORLD.Add": "Add"
+}

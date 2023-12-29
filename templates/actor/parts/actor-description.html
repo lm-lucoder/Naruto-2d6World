@@ -1,0 +1,14 @@
+<div class="resource-content flexrow flex-center">
+    <label for="system.params.village">Aldeia:</label>
+    <input type="text" name="system.params.village" value="{{system.params.village}}" >
+</div>
+<div class="resource-content flexrow flex-center">
+    <label for="system.params.clan">Clã:</label>
+    <input type="text" name="system.params.clan" value="{{system.params.clan}}" >
+</div>
+<div class="resource-content flexrow flex-center">
+    <label for="system.params.age">Idade:</label>
+    <input type="text" name="system.params.age" value="{{system.params.age}}" >
+</div>
+<h3>Biografia</h3>
+{{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}

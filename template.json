@@ -1,0 +1,134 @@
+{
+	"Actor": {
+		"types": ["character", "npc"],
+		"templates": {
+			"base": {
+				"wounds": {
+					"value": 0,
+					"max": 5
+				},
+				"chakra": {
+					"value": 5,
+					"max": 5
+				},
+				"biography": ""
+			}
+		},
+		"character": {
+			"templates": ["base"],
+			"params": {
+				"rank": 1,
+				"village": "",
+				"age": "",
+				"clan": "",
+				"xp": {
+					"actual": 0,
+					"max": 5
+				}
+			},
+			"attributes": {
+				"str": {
+					"max": 0
+				},
+				"dex": {
+					"max": 0
+				},
+				"con": {
+					"max": 0
+				},
+				"int": {
+					"max": 0
+				},
+				"per": {
+					"max": 0
+				},
+				"cha": {
+					"max": 0
+				}
+			}
+		},
+		"npc": {
+			"rank": 1,
+			"village": "",
+			"age": "",
+			"clan": ""
+		}
+	},
+	"Item": {
+		"types": ["move", "skill", "condition"],
+		"templates": {
+			"base": {
+				"description": ""
+			}
+		},
+		"move": {
+			"templates": ["base"],
+			"category": "Normal",
+			"attributes": {
+				"str": {
+					"on": true,
+          "name": "str"
+				},
+				"dex": {
+					"on": false,
+          "name": "dex"
+				},
+				"con": {
+					"on": false,
+          "name": "con"
+				},
+				"per": {
+					"on": false,
+          "name": "per"
+				},
+				"int": {
+					"on": false,
+          "name": "int"
+				},
+				"cha": {
+					"on": false,
+          "name": "cha"
+				}
+			}
+
+			
+		},
+    "skill": {
+      "templates": ["base"],
+      "rank": {
+        "value": 0
+      }
+    },
+
+    "condition": {
+      "templates": ["base"],
+      "isActive": false,
+      "attributes": {
+        "str": {
+          "mod": 0,
+          "name": "str"
+        },
+        "dex": {
+          "mod": 0,
+          "name": "dex"
+        },
+        "con": {
+          "mod": 0,
+          "name": "con"
+        },
+        "per": {
+          "mod": 0,
+          "name": "per"
+        },
+        "int": {
+          "mod": 0,
+          "name": "int"
+        },
+        "cha": {
+          "mod": 0,
+          "name": "cha"
+        }
+      }
+    }
+	}
+}
