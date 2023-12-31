@@ -1,10 +1,8 @@
 <div class="moves-section">
-	
-
-	<div class="left-section att-cond-tabs">
+	<div class="left-section">
         <nav class="att-cond-tabs tabs" data-group="secondary">
-            <a class="item" data-tab="attributes"><i class="fa-brands fa-creative-commons-by"></i></a>
-            <a class="item" data-tab="conditions"><i class="fa-solid fa-person-walking-with-cane"></i></a>
+            <a class="item " data-tab="attributes"><i class="att-cond-icon fa-solid fa-person"></i></a>
+            <a class="item " data-tab="conditions"><i class="att-cond-icon fa-brands fa-creative-commons-by"></i></a>
         </nav>
         <div class="att-cond-body">
             <div class="tab" data-group="secondary" data-tab="attributes">
@@ -79,6 +77,9 @@
             </div>
             <div class="tab conditions-container" data-group="secondary" data-tab="conditions">
                 <h3 class="conditions-title">Condições</h3>
+                <div class="section-buttons">
+                    <a class="item-create" data-type="condition"><i class="fa-solid fa-plus"></i>Adicionar condição</a>
+                </div>
                 <ul class="conditions-list">
                     {{#each conditions as |condition|}}
                         <li class="condition-card item" data-item-id="{{condition._id}}">
@@ -95,7 +96,10 @@
         </div>
 	</div>
     <div class="right-section">
-        <h2>Movimentos</h2>
+        <h3>Movimentos</h3>
+        <div class="section-buttons">
+            <a class="add-move-btn item-create" data-type="move"><i class="fa-solid fa-plus"></i>Adicionar movimento</a>
+        </div>
         <ul class="moves-list">
             {{#each moves as |move id|}}
                 <li class="move-card item" data-item-id="{{move._id}}">
@@ -110,12 +114,5 @@
                 </li>
             {{/each}}
         </ul>
-<!--         
-        {{#each movesByCategory as |category|}}
-            <h3>{{#if category.name}}{{category.name}}{{else}}Without Category{{/if}}</h3>
-            {{#each category.items as |move id|}}
-                <span>{{move.name}}</span>
-            {{/each}}
-        {{/each}} -->
     </div>
 </div>

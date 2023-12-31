@@ -19,7 +19,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				{
 					navSelector: ".sheet-tabs",
 					contentSelector: ".sheet-body",
-					initial: "features",
+					initial: "skills",
 				},
 				{
 					navSelector: ".att-cond-tabs",
@@ -39,26 +39,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 	/** @override */
 	getData() {
-		// Retrieve the data structure from the base sheet. You can inspect or log
-		// the context variable to see the structure, but some key properties for
-		// sheets are the actor object, the data object, whether or not it's
-		// editable, the items array, and the effects array.
 		const context = super.getData();
 
-		// Use a safe clone of the actor data for further operations.
 		const actorData = this.actor.toObject(false);
 
-		// Add the actor's data to context.data for easier access, as well as flags.
 		context.system = actorData.system;
 		context.flags = actorData.flags;
 
-		// Prepare character data and items.
 		if (actorData.type == "character") {
 			this._prepareItems(context);
 			this._prepareCharacterData(context);
 		}
 
-		// Prepare NPC data and items.
 		if (actorData.type == "npc") {
 			// this._prepareItems(context);
 		}
@@ -258,18 +250,17 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 	}
 	_onRollMove(event) {
-    const target = event.currentTarget;
-    const li = target.closest("li");
+		const target = event.currentTarget;
+		const li = target.closest("li");
 		const item = this.object.items.find(
 			(item) => item.id === li.dataset.itemId
 		);
-    const isRollableMove = Object.values(item.system.attributes).find(attribute => attribute.on)
-    if (!isRollableMove) {
-      return item.moveRollJustSend()
-    }
-    console.log(isRollableMove)
-
-		
+		const isRollableMove = Object.values(item.system.attributes).find(
+			(attribute) => attribute.on
+		);
+		if (!isRollableMove) {
+			return item.moveRollJustSend();
+		}
 
 		const validAttributes = Object.values(item.system.attributes).filter(
 			(attribute) => attribute.on === true
@@ -296,74 +287,36 @@ export class BoilerplateActorSheet extends ActorSheet {
 			buttons: {
 				button1: {
 					label: "Vantagem",
-					callback: (e, a) => {
-						const options = a.target
-							.closest(".window-content")
-							.querySelector(".options-container")
-							.querySelectorAll('[name="option"]');
-						const checkedOption = [...options].find(
-							(option) => option.checked
-						);
-						if (!checkedOption) {
-							ui.notifications.info(
-								"Escolha um atributo para rolar com o movimento!"
-							);
-							return;
-						}
-						const chosenAttribute = checkedOption.value;
-						item.moveRoll({
-							mode: "advantage",
-							attribute: chosenAttribute,
-						});
-					},
+					callback: (_, e) => dialogCallback(e, 'advantage'),
 				},
 				button2: {
 					label: "Normal",
-					callback: (e, a) => {
-						const options = a.target
-							.closest(".window-content")
-							.querySelector(".options-container")
-							.querySelectorAll('[name="option"]');
-						const checkedOption = [...options].find(
-							(option) => option.checked
-						);
-						if (!checkedOption) {
-							ui.notifications.info(
-								"Escolha um atributo para rolar com o movimento!"
-							);
-							return;
-						}
-						const chosenAttribute = checkedOption.value;
-						item.moveRoll({
-							mode: "normal",
-							attribute: chosenAttribute,
-						});
-					},
+					callback: (_, e) => dialogCallback(e, 'normal'),
 				},
 				button3: {
 					label: "Desvantagem",
-					callback: (e, a) => {
-						const options = a.target
-							.closest(".window-content")
-							.querySelector(".options-container")
-							.querySelectorAll('[name="option"]');
-						const checkedOption = [...options].find(
-							(option) => option.checked
-						);
-						if (!checkedOption) {
-							ui.notifications.info(
-								"Escolha um atributo para rolar com o movimento!"
-							);
-							return;
-						}
-						const chosenAttribute = checkedOption.value;
-						item.moveRoll({
-							mode: "disadvantage",
-							attribute: chosenAttribute,
-						});
-					},
+					callback: (_, e) => dialogCallback(e, 'disadvantage'),
 				},
 			},
 		}).render(true);
+
+		function dialogCallback(e, mode) {
+			const options = e.target
+				.closest(".window-content")
+				.querySelector(".options-container")
+				.querySelectorAll('[name="option"]');
+			const checkedOption = [...options].find((option) => option.checked);
+			if (!checkedOption) {
+				ui.notifications.info(
+					"Escolha um atributo para rolar com o movimento!"
+				);
+				return;
+			}
+			const chosenAttribute = checkedOption.value;
+			item.moveRoll({
+				mode,
+				attribute: chosenAttribute,
+			});
+		}
 	}
 }

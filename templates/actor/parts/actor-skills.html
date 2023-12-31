@@ -1,6 +1,7 @@
 <div class="skills-section">
     <div class="skills-container left-section">
-        <div class="skill-section-buttons">
+        <h3>Perícias:</h3>
+        <div class="section-buttons">
             <a class="add-skill-btn item-create" data-type="skill"><i class="fa-solid fa-plus"></i> Adicionar nova perícia</a>
         </div>
         <ol class="skills-list item-list">
@@ -21,6 +22,9 @@
     </div>
     <div class="abilities-container right-section">
         <h3>Habilidades:</h3>
+        <div class="section-buttons">
+            <a class="add-ability-btn item-create" data-type="ability"><i class="fa-solid fa-plus"></i> Adicionar nova habilidade</a>
+        </div>
         <ul class="abilities-list">
             {{#each abilities as |ability|}}
                 <li class="ability-card item" data-item-id="{{ability._id}}">

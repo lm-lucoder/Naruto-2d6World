@@ -1,5 +1,5 @@
-<form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
-
+<div class="background-container"></div>
+<form class="{{cssClass}} {{actor.type}} flexcol actor-sheet" autocomplete="off">
   {{!-- Sheet Header --}}
   <header class="sheet-header">
     <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
@@ -39,12 +39,14 @@
       </div>
     </div>
   </header>
+  <!-- <img src="/systems/naruto2d6world/assets/1235px-Mudra-Naruto-Chevre.svg.png"> -->
 
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="description">Descrição</a>
     <a class="item" data-tab="moves">Movimentos</a>
     <a class="item" data-tab="skills">Perícias e Habilidades</a>
+    <a class="item" data-tab="effects">Efeitos</a>
   </nav>
 
   {{!-- Sheet Body --}}
@@ -64,6 +66,10 @@
     {{!-- Owned skills Tab --}}
     <div class="tab skills" data-group="primary" data-tab="skills">
       {{> "systems/naruto2d6world/templates/actor/parts/actor-skills.html"}}
+    </div>
+
+    <div class="tab effects" data-group="primary" data-tab="effects">
+      {{> "systems/naruto2d6world/templates/actor/parts/actor-effects.html"}}
     </div>
 
   </section>

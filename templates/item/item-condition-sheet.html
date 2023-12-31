@@ -28,10 +28,41 @@
             {{#each system.attributes as |attribute|}}
                 <li class="resource conditions-attributes-card">
                     <label class="resource-label">{{attribute.name}}</label>
-                    <input type="text" name="system.attributes.{{attribute.name}}.mod" value="{{attribute.mod}}" data-dtype="String"/>
+                    <input type="number" name="system.attributes.{{attribute.name}}.mod" value="{{attribute.mod}}" data-dtype="String"/>
                 </li>
             {{/each}}
         </ul>
+        <div class="condition-moves-config-container">
+          <a class="add-condition-move-config"><i class="fa-solid fa-plus"></i>Adicionar movimentos.</a>
+          <ul class="condition-moves-config-list">
+            {{#each system.movesConfigs as |moveConfig|}}
+              <li class="condition-moves-config-card" data-id="{{moveConfig.id}}">
+                <div class="info">
+                  <h3>Alterar movimento: <i>{{moveConfig.moveName}}</i></h3>
+                  <div class="input-name">
+                    <label>Move name:</label>
+                    <input type="text" name="system.movesConfigs.{{moveConfig.id}}.moveName" value="{{moveConfig.moveName}}">
+                  </div>
+                </div>
+                <div class="attributes-configs-container">
+                  <ul class="attributes-configs-list">
+                    {{#each moveConfig.attributes as |attributeConfig|}}
+                      <li class="attributes-configs-card">
+                          <div class="info">
+                            <label>{{attributeConfig.name}}</label>
+                            <input type="number" name="system.movesConfigs.{{moveConfig.id}}.attributes.{{attributeConfig.name}}.value" value="{{attributeConfig.value}}">
+                          </div>
+                      </li>
+                    {{/each}}
+                  </ul>
+                </div>
+                <div class="control">
+                  <a class="remove-condition-move-config"><i class="fa-solid fa-trash"></i></a>
+                </div>
+              </li>
+            {{/each}}
+          </ul>
+        </div>
       </div>
     </section>
   </form>

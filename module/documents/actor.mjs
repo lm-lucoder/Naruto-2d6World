@@ -11,15 +11,16 @@ export class BoilerplateActor extends Actor {
     // prepareBaseData(), prepareEmbeddedDocuments() (including active effects),
     // prepareDerivedData().
     super.prepareData();
-    const attributes = this.system.attributes
-
-    this._mapActualAttributes(attributes)
+    
   }
 
   /** @override */
   prepareBaseData() {
     // Data modifications in this step occur before processing embedded
     // documents or derived data.
+    const attributes = this.system.attributes
+    
+    this._mapActualAttributes(attributes)
   }
 
   /**
@@ -42,7 +43,7 @@ export class BoilerplateActor extends Actor {
 
   _prepareCharacterData(actorData) {
     if (actorData.type !== 'character') return;
-
+    
   }
 
   /**
@@ -93,14 +94,16 @@ export class BoilerplateActor extends Actor {
     const conditionMods = {
       str: 0, dex:0, con: 0, per: 0, int: 0, cha: 0
     }
-    const conditions = this.items.filter(item => item.type === 'condition')
+    const conditions = this.items.filter(item => item.type === 'condition').filter(condition => condition.system.isActive)
     for (const condition of conditions) {
       for (const [attributeName, attributeValue] of Object.entries(condition.system.attributes)) {
+        // console.log(attributeName, attributeValue)
         conditionMods[attributeName] += +attributeValue.mod
       }
     }
-    console.log(2, attributes)
+    // debugger
     for(let [key, value] of Object.entries(attributes)){
+      console.log(value, conditionMods[key])
       value.actual = value.max + conditionMods[key]
     }
   }

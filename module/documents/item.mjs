@@ -102,6 +102,19 @@ export class BoilerplateItem extends Item {
   }
   async moveRoll({mode, attribute}) {
     const item = this;
+    //Lidar com a existência de configurações específicas para este movimento, vinda de condições
+    let modifier = 0
+    const parentConditions = this.parent.items.filter(item => item.type === "condition")
+    const activeConditions = parentConditions.filter(condition => condition.system.isActive)
+    for (const activeCondition of activeConditions) {
+      if (activeCondition.system?.movesConfigs) {
+        Object.values(activeCondition.system.movesConfigs).forEach(moveConfig => {
+          if (moveConfig.moveName === this.name) {
+            modifier += moveConfig.attributes[attribute].value
+          }
+        })
+      }
+    }
 
     const speaker = ChatMessage.getSpeaker({ actor: this.actor });
     const rollMode = game.settings.get('core', 'rollMode');
@@ -111,13 +124,13 @@ export class BoilerplateItem extends Item {
 
     let roll
     if (mode  === "advantage") {
-      roll = new Roll(`3d6kh2 + @${attribute}`, rollData);
+      roll = new Roll(`3d6kh2 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
     }
     if (mode  === "normal") {
-      roll = new Roll(`2d6 + @${attribute}`, rollData);
+      roll = new Roll(`2d6 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
     }
     if (mode  === "disadvantage") {
-      roll = new Roll(`3d6kl2 + @${attribute}`, rollData);
+      roll = new Roll(`3d6kl2 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
     }
     roll.toMessage({
       speaker: speaker,

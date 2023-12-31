@@ -1,14 +1,14 @@
 header {
 	.header-fields {
-		input{
+		input {
 			background-color: rgba(0, 0, 0, 0.05);
 			border: 1px solid var(--color-border-light-tertiary);
 			border-radius: 3px;
-            padding: 3px;
+			padding: 3px;
 		}
-        .level-input{
-            width: 3em;
-        }
+		.level-input {
+			width: 3em;
+		}
 	}
 }
 
@@ -27,6 +27,10 @@ header {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
+	gap: 10px;
+	padding: 0;
+	margin: 0;
+	margin-top: 10px;
 	.conditions-attributes-card {
 		display: flex;
 		flex-direction: column;
@@ -37,5 +41,73 @@ header {
 		gap: 5px;
 		width: 30%;
 		text-align: center;
+	}
+}
+
+.condition-moves-config-container {
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid $c-beige;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	.add-condition-move-config {
+		font-weight: bold;
+		width: 100%;
+	}
+	.condition-moves-config-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		.condition-moves-config-card {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding: 10px;
+			border: 1px solid $c-beige;
+			.info{
+				
+				h3{
+					border-bottom: 1px solid $c-beige;
+				}
+				.input-name{
+					align-items: center;
+				justify-content: space-between;
+					display: flex;
+					gap: 5px;
+					label{
+						width: 30%;
+					}
+				}
+			}
+			.attributes-configs-container {
+				.attributes-configs-list {
+					display: flex;
+					list-style: none;
+					padding: 0;
+					margin: 0;
+					gap: 10px;
+					flex-wrap: wrap;
+					.attributes-configs-card{
+						border: 1px solid $c-beige;
+						padding: 5px 10px;
+						border-radius: 3px;
+						.info{
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							gap: 5px;
+							input{
+								width: 3em;
+							}
+						}
+					}
+				}
+			}
+			.control{
+				display: flex;
+				justify-content: center;
+			}
+		}
 	}
 }
