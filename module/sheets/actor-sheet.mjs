@@ -77,7 +77,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 	_prepareItems(context) {
 		// Initialize containers.
 		const moves = [];
-		const movesByCategoy = {};
+		const movesByCategory = {};
 		const skills = [];
 		const conditions = [];
 		const abilities = [];
@@ -88,10 +88,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 			// Append to gear.
 			if (item.type === "move") {
 				moves.push(item);
-				if (movesByCategoy[item.system.category]) {
-					movesByCategoy[item.system.category].items.push(item);
+				if (movesByCategory[item.system.category]) {
+					movesByCategory[item.system.category].items.push(item);
 				} else {
-					movesByCategoy[item.system.category] = {
+					movesByCategory[item.system.category] = {
 						name: item.system.category,
 						items: [item],
 					};
@@ -108,7 +108,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 		// Assign and return
 		context.moves = moves;
-		context.movesByCategoy = movesByCategoy;
+		context.movesByCategory = movesByCategory;
 		context.skills = skills;
 		context.conditions = conditions;
 		context.abilities = abilities;
