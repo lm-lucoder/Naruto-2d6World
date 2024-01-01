@@ -34,7 +34,80 @@
       "path": "lang/en.json"
     }
   ],
-  "packs": [],
+  "packs": [
+    {
+      "name": "skills",
+      "label": "Skills",
+      "path": "packs/skills",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "naruto2d6world",
+      "flags": {}
+    },
+    {
+      "name": "abilities",
+      "label": "Abilities",
+      "path": "packs/abilities",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "naruto2d6world",
+      "flags": {}
+    },
+    {
+      "name": "moves",
+      "label": "Moves",
+      "path": "packs/moves",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "naruto2d6world",
+      "flags": {}
+    },
+    {
+      "name": "conditions",
+      "label": "Conditions",
+      "path": "packs/conditions",
+      "type": "Item",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "naruto2d6world",
+      "flags": {}
+    },
+    {
+      "name": "characters",
+      "label": "Characters",
+      "path": "packs/characters",
+      "type": "Actor",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "naruto2d6world",
+      "flags": {}
+    },
+    {
+      "name": "npcs",
+      "label": "NPCs",
+      "path": "packs/npcs",
+      "type": "Actor",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "naruto2d6world",
+      "flags": {}
+    }
+  ],
   "packFolders": [],
   "socket": false,
   "manifest": "https://github.com/Make-it-fly/Naruto-2d6World/releases/download/production/system.json",
