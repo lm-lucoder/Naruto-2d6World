@@ -13,8 +13,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		return mergeObject(super.defaultOptions, {
 			classes: ["boilerplate", "sheet", "actor"],
 			// template: "systems/boilerplate/templates/actor/actor-sheet.html",
-			width: 600,
-			height: 600,
+			width: 700,
+			height: 700,
 			tabs: [
 				{
 					navSelector: ".sheet-tabs",
