@@ -12,6 +12,7 @@
     "systems/naruto2d6world/templates/actor/parts/actor-skills.html",
     "systems/naruto2d6world/templates/actor/parts/actor-moves.html",
     "systems/naruto2d6world/templates/actor/parts/actor-effects.html",
+    "systems/naruto2d6world/templates/actor/parts/actor-items.html",
     "systems/naruto2d6world/templates/item/item-skill-sheet.html"
   ]);
 };

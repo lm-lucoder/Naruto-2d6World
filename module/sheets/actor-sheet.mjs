@@ -81,6 +81,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const skills = [];
 		const conditions = [];
 		const abilities = [];
+		const gear = [];
 
 		// Iterate through items, allocating to containers
 		for (let item of context.items) {
@@ -104,6 +105,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 				conditions.push(item);
 			} else if (item.type === "ability") {
 				abilities.push(item);
+			}else if (item.type === "item") {
+				gear.push(item);
 			}
 		}
 		// Assign and return
@@ -112,6 +115,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.skills = skills;
 		context.conditions = conditions;
 		context.abilities = abilities;
+		context.gear = gear;
 	}
 
 	/* -------------------------------------------- */

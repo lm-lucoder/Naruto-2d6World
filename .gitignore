@@ -12,3 +12,5 @@ jsconfig.json
 foundry
 
 packs/*/LOCK
+packs/*/LOG
+packs

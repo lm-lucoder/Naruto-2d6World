@@ -21,6 +21,7 @@
 				"village": "",
 				"age": "",
 				"clan": "",
+				"ryos": 0,
 				"xp": {
 					"actual": 0,
 					"max": 5
@@ -56,7 +57,7 @@
 		}
 	},
 	"Item": {
-		"types": ["move", "skill", "condition", "ability"],
+		"types": ["move", "skill", "condition", "ability", "item"],
 		"templates": {
 			"base": {
 				"description": ""
@@ -68,73 +69,76 @@
 			"attributes": {
 				"str": {
 					"on": false,
-          "name": "str"
+					"name": "str"
 				},
 				"dex": {
 					"on": false,
-          "name": "dex"
+					"name": "dex"
 				},
 				"con": {
 					"on": false,
-          "name": "con"
+					"name": "con"
 				},
 				"per": {
 					"on": false,
-          "name": "per"
+					"name": "per"
 				},
 				"int": {
 					"on": false,
-          "name": "int"
+					"name": "int"
 				},
 				"cha": {
 					"on": false,
-          "name": "cha"
+					"name": "cha"
 				}
 			}
-
-			
 		},
-    "skill": {
-      "templates": ["base"],
-      "rank": {
-        "value": 0
-      }
-    },
+		"skill": {
+			"templates": ["base"],
+			"rank": {
+				"value": 0
+			}
+		},
 
-    "condition": {
-      "templates": ["base"],
-      "isActive": false,
-      "attributes": {
-        "str": {
-          "mod": 0,
-          "name": "str"
-        },
-        "dex": {
-          "mod": 0,
-          "name": "dex"
-        },
-        "con": {
-          "mod": 0,
-          "name": "con"
-        },
-        "per": {
-          "mod": 0,
-          "name": "per"
-        },
-        "int": {
-          "mod": 0,
-          "name": "int"
-        },
-        "cha": {
-          "mod": 0,
-          "name": "cha"
-        }
-      }
-    },
+		"condition": {
+			"templates": ["base"],
+			"isActive": false,
+			"attributes": {
+				"str": {
+					"mod": 0,
+					"name": "str"
+				},
+				"dex": {
+					"mod": 0,
+					"name": "dex"
+				},
+				"con": {
+					"mod": 0,
+					"name": "con"
+				},
+				"per": {
+					"mod": 0,
+					"name": "per"
+				},
+				"int": {
+					"mod": 0,
+					"name": "int"
+				},
+				"cha": {
+					"mod": 0,
+					"name": "cha"
+				}
+			}
+		},
 
-    "ability" : {
-      "templates": ["base"],
-      "level": 1
-    }
+		"ability": {
+			"templates": ["base"],
+			"level": 1
+		},
+		"item": {
+			"templates": ["base"],
+			"cost": 0,
+			"quantity": 0
+		}
 	}
 }

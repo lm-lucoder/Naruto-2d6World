@@ -46,6 +46,7 @@
     <a class="item" data-tab="description">Descrição</a>
     <a class="item" data-tab="moves">Movimentos</a>
     <a class="item" data-tab="skills">Perícias e Habilidades</a>
+    <a class="item" data-tab="iventory">Iventário</a>
     <a class="item" data-tab="effects">Efeitos</a>
   </nav>
 
@@ -66,6 +67,10 @@
     {{!-- Owned skills Tab --}}
     <div class="tab skills" data-group="primary" data-tab="skills">
       {{> "systems/naruto2d6world/templates/actor/parts/actor-skills.html"}}
+    </div>
+
+    <div class="tab effects" data-group="primary" data-tab="iventory">
+      {{> "systems/naruto2d6world/templates/actor/parts/actor-items.html"}}
     </div>
 
     <div class="tab effects" data-group="primary" data-tab="effects">

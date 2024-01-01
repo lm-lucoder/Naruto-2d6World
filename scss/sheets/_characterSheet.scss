@@ -1,3 +1,11 @@
+// .sheet-header {
+// 	.header-fields{
+// 		.charname{
+// 			font-family: naruto;
+// 		}
+// 	}
+// }
+
 .background-container {
 	position: absolute;
 	top: 30px;
@@ -240,4 +248,44 @@
         }
     }
 
+}
+
+.iventory-section{
+	h3{
+		padding: 8px 0;
+		border-bottom: 1px solid $c-beige;
+		margin: 0;
+	}
+	.section-buttons{
+		width: 100%;
+		border-bottom: 1px solid #b5b3a4;
+		padding: 10px 0;
+	}
+	.iventory-list{
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		.item-card{
+			border-bottom: 1px solid $c-beige;
+			padding: 5px 0;
+			display: flex ;
+			justify-content: space-between;
+			align-items: center;
+			
+			.info{
+				display: flex;
+				align-items: center;
+				img{
+					width: 20px;
+					border: none;
+					margin-right: 10px;
+				}
+				.quantity{
+					margin-left: 5px;
+					font-size: 0.7em;
+				}
+			}
+		}
+	}
+    
 }
