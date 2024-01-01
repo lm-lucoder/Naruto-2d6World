@@ -38,7 +38,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 	/* -------------------------------------------- */
 
 	/** @override */
-	getData() {
+	async getData() {
 		const context = super.getData();
 
 		const actorData = this.actor.toObject(false);
@@ -48,7 +48,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 		if (actorData.type == "character") {
 			this._prepareItems(context);
-			this._prepareCharacterData(context);
+			await this._prepareCharacterData(context);
+			
 		}
 
 		if (actorData.type == "npc") {
@@ -59,7 +60,6 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.rollData = context.actor.getRollData();
 
 		// Prepare active effects
-		context.effects = prepareActiveEffectCategories(this.actor.effects);
 
 		console.log(context);
 		return context;
@@ -72,7 +72,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 	 *
 	 * @return {undefined}
 	 */
-	_prepareCharacterData(context) {}
+	async _prepareCharacterData(context) {
+		context.effects = prepareActiveEffectCategories(this.actor.effects);
+		for (const item of context.gear) {
+			await this._prepareDescriptionData(item)
+		}
+		for (const move of context.moves) {
+			await this._prepareDescriptionData(move)
+		}
+	}
 
 	_prepareItems(context) {
 		// Initialize containers.
@@ -168,6 +176,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 				system: { isActive: !condition.system.isActive },
 			});
 		});
+
+		html.find(".show-description-window-btn").click((event) => {
+			this._toggleDescriptionWindow(event)
+		})
 
 		// Drag events for macros.
 		if (this.actor.isOwner) {
@@ -322,5 +334,29 @@ export class BoilerplateActorSheet extends ActorSheet {
 				attribute: chosenAttribute,
 			});
 		}
+	}
+
+	_toggleDescriptionWindow(event){
+		const itemId = event.target.closest("li").getAttribute("data-item-id");
+		const windowElement =  event.target.closest("li").querySelector(".description-window")
+		const item = this.actor.items.get(itemId)
+		if (windowElement.innerHTML.trim() === '') {
+			windowElement.style.height = "100%"
+			windowElement.innerHTML = item.system.description;
+		} else {
+			windowElement.style.height = "0%"
+			windowElement.innerHTML = ''
+		}
+	}
+
+	async _prepareDescriptionData(item){
+		item.description = await TextEditor.enrichHTML(
+			item.system.description,
+			{
+				async: true,
+				secrets: this.object.isOwner,
+				relativeTo: this.object,
+			}
+		);
 	}
 }

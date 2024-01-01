@@ -106,13 +106,17 @@
                 <ul class="moves-list">
                     {{#each category.items as |move id|}}
                         <li class="move-card item" data-item-id="{{move._id}}">
-                            <div class="info">
-                                <a class="rollableWithDialog"><i class="fa-solid fa-dice-d20 animate-roll-hover roll-dice-btn"></i></a>
-                                <span>{{move.name}}</span>
+                            <div class="content">
+                                <div class="info">
+                                    <a class="rollableWithDialog"><i class="fa-solid fa-dice-d20 animate-roll-hover roll-dice-btn"></i></a>
+                                    <span><a class="show-description-window-btn">{{move.name}}</a></span>
+                                </div>
+                                <div class="move-card-btns">
+                                    <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                                    <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+                                </div>
                             </div>
-                            <div class="move-card-btns">
-                                <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
-                                <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+                            <div class="description-window display_none">
                             </div>
                         </li>
                     {{/each}}
