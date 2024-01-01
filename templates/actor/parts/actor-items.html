@@ -1,22 +1,30 @@
 <div class="iventory-section">
-  <h3>Iventário:</h3>
-  <div class="section-buttons">
-      <a class="add-item-btn item-create" data-type="item"><i class="fa-solid fa-plus"></i> Adicionar novo item</a>
-  </div>
-  <ol class="iventory-list item-list">
-      {{#each gear as |item id|}}
-          <li class="item-card item" data-item-id="{{item._id}}">
-              <div class="info">
-                  <img class="img" src="{{item.img}}"> 
-                  <span class="title"><a class="item-edit">{{item.name}}</a></span>
-                  <span class="quantity">({{item.system.quantity}})</span>
-              </div>
-              <div class="item-card-buttons">
-                  <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>
-                  <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
-                  <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
-              </div>
-          </li>
-      {{/each}}
-  </ol>
+    <div class="resource-content flexrow flex-center ryos-container">
+        <label for="system.params.ryos">Ryos:</label>
+        <input type="number" name="system.params.ryos" value="{{system.params.ryos}}" >
+    </div>
+    <h3>Iventário:</h3>
+    <div class="section-buttons">
+        <a class="add-item-btn item-create" data-type="item"><i class="fa-solid fa-plus"></i> Adicionar novo item</a>
+    </div>
+    <ol class="iventory-list item-list">
+        {{#each gear as |item id|}}
+            <li class="item-card item" data-item-id="{{item._id}}">
+                    <div class="content">
+                        <div class="info">
+                            <img class="img" src="{{item.img}}"> 
+                            <span class="title"><a class="show-description-window-btn">{{item.name}}</a></span>
+                            <span class="quantity">({{item.system.quantity}})</span>
+                        </div>
+                        <div class="item-card-buttons">
+                            <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>
+                            <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
+                            <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
+                        </div>
+                    </div>
+                <div class="description-window display_none">
+                </div>
+            </li>
+        {{/each}}
+    </ol>
 </div>

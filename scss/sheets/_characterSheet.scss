@@ -159,13 +159,12 @@
 				padding: 0;
 				margin: 0;
 				.move-card {
-					transition: .1s height;
+					border-bottom: 1px solid $c-beige;
+					padding: 4px 0;
 					.content{
 						display: flex;
 						justify-content: space-between;
 						align-items: center;
-						padding: 4px 0;
-						border-bottom: 1px solid $c-beige;
 						.info {
 							display: flex;
 							align-items: center;
@@ -236,17 +235,25 @@
             margin: 0;
             padding: 0;
             .ability-card{
-                border-bottom: 1px solid $c-beige;
-                padding: 5px 0;
-                display: flex ;
-                justify-content: space-between;
-                align-items: center;
-                
-                .info{
-                    .level{
-                        font-size: 0.8em;
-                    }
-                }
+				border-bottom: 1px solid $c-beige;
+				padding: 5px 0;
+				.content{
+					display: flex ;
+					justify-content: space-between;
+					align-items: center;
+					.info{
+						display: flex;
+						align-items: center;
+						gap: 5px;
+						img{
+							width: 30px;
+							border: none;
+						}
+						.level{
+							font-size: 0.8em;
+						}
+					}
+				}
             }
         }
     }
@@ -254,6 +261,9 @@
 }
 
 .iventory-section{
+	.ryos-container{
+		margin-top: 10px;
+	}
 	h3{
 		padding: 8px 0;
 		border-bottom: 1px solid $c-beige;
@@ -271,23 +281,25 @@
 		.item-card{
 			border-bottom: 1px solid $c-beige;
 			padding: 5px 0;
-			display: flex ;
-			justify-content: space-between;
-			align-items: center;
-			
-			.info{
-				display: flex;
+			.content{
+				display: flex ;
+				justify-content: space-between;
 				align-items: center;
-				img{
-					width: 20px;
-					border: none;
-					margin-right: 10px;
-				}
-				.quantity{
-					margin-left: 5px;
-					font-size: 0.7em;
+				.info{
+					display: flex;
+					align-items: center;
+					img{
+						width: 20px;
+						border: none;
+						margin-right: 10px;
+					}
+					.quantity{
+						margin-left: 5px;
+						font-size: 0.7em;
+					}
 				}
 			}
+			
 		}
 	}
     
