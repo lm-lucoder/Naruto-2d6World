@@ -341,10 +341,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const windowElement =  event.target.closest("li").querySelector(".description-window")
 		const item = this.actor.items.get(itemId)
 		if (windowElement.innerHTML.trim() === '') {
-			windowElement.style.height = "100%"
 			windowElement.innerHTML = item.system.description;
 		} else {
-			windowElement.style.height = "0%"
 			windowElement.innerHTML = ''
 		}
 	}
