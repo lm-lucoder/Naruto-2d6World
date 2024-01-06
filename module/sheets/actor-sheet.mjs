@@ -19,7 +19,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				{
 					navSelector: ".sheet-tabs",
 					contentSelector: ".sheet-body",
-					initial: "skills",
+					initial: "description",
 				},
 				{
 					navSelector: ".att-cond-tabs",
@@ -74,6 +74,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 	 */
 	async _prepareCharacterData(context) {
 		context.effects = prepareActiveEffectCategories(this.actor.effects);
+		context.usedSpace = this._getItemsTotalSlot(context.gear);
+		context.isAboveSpace = this._getIsAboveSpaceCondition(context.usedSpace)
+
 		for (const item of context.gear) {
 			await this._prepareDescriptionData(item)
 		}
@@ -345,6 +348,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 		} else {
 			windowElement.innerHTML = ''
 		}
+	}
+
+	_getItemsTotalSlot(items){
+		const total = items.reduce(((total, item) => total + (item.system.slots * item.system.quantity)), 0)
+		return total
+	}
+
+	_getIsAboveSpaceCondition(usedSpace){
+		return usedSpace > this.object.system.params.space
 	}
 
 	async _prepareDescriptionData(item){

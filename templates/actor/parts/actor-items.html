@@ -1,7 +1,18 @@
 <div class="iventory-section">
-    <div class="resource-content flexrow flex-center ryos-container">
-        <label for="system.params.ryos">Ryos:</label>
-        <input type="number" name="system.params.ryos" value="{{system.params.ryos}}" >
+    <div class="iventory-attributes">
+        <div class="grid grid-2col">
+            <div class="resource">
+                <label for="system.params.ryos">Ryos:</label>
+                <input type="number" name="system.params.ryos" value="{{system.params.ryos}}" >
+            </div>
+            <div class="resource">
+                <label for="system.params.space">Capacidade de Espaço:</label>
+                <input type="number" name="system.params.space" value="{{system.params.space}}" >
+            </div>
+        </div>
+        <div class="info {{#if isAboveSpace}}above-space{{/if}}">
+            <span>Total/Capacidade: {{usedSpace}} | {{system.params.space}}</span>
+        </div>
     </div>
     <h3>Iventário:</h3>
     <div class="section-buttons">
@@ -14,7 +25,10 @@
                         <div class="info">
                             <img class="img" src="{{item.img}}"> 
                             <span class="title"><a class="show-description-window-btn">{{item.name}}</a></span>
-                            <span class="quantity">({{item.system.quantity}})</span>
+                            <div class="item-attributes">
+                                <span class="quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
+                                <span class="quantity"><i class="fa-solid fa-weight-hanging"></i> ({{item.system.slots}})</span>
+                            </div>
                         </div>
                         <div class="item-card-buttons">
                             <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>

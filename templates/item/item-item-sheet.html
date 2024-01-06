@@ -3,14 +3,18 @@
     <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
     <div class="header-fields">
       <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
-      <div class="grid grid-2col">
+      <div class="grid grid-3col">
         <div class="resource">
-          <label class="resource-label">Quantity</label>
+          <label class="resource-label">Quantidade</label>
           <input type="text" name="system.quantity" value="{{system.quantity}}" data-dtype="Number"/>
         </div>
         <div class="resource">
-          <label class="resource-label">Cost</label>
+          <label class="resource-label">Custo</label>
           <input type="text" name="system.cost" value="{{system.cost}}" data-dtype="Number"/>
+        </div>
+        <div class="resource">
+          <label class="resource-label">Espaço</label>
+          <input type="text" name="system.slots" value="{{system.slots}}" data-dtype="Number"/>
         </div>
       </div>
     </div>

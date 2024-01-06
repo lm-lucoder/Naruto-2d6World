@@ -25,7 +25,8 @@
 				"xp": {
 					"actual": 0,
 					"max": 5
-				}
+				},
+				"space": 5
 			},
 			"attributes": {
 				"str": {
@@ -139,7 +140,8 @@
 		"item": {
 			"templates": ["base"],
 			"cost": 0,
-			"quantity": 0
+			"quantity": 0,
+			"slots": 0
 		}
 	}
 }

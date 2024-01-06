@@ -261,8 +261,12 @@
 }
 
 .iventory-section{
-	.ryos-container{
+	.iventory-attributes{
 		margin-top: 10px;
+		.above-space{
+			color: red;
+			font-weight: bold;
+		}
 	}
 	h3{
 		padding: 8px 0;
@@ -289,13 +293,15 @@
 					display: flex;
 					align-items: center;
 					img{
-						width: 20px;
+						width: 30px;
 						border: none;
 						margin-right: 10px;
 					}
-					.quantity{
-						margin-left: 5px;
-						font-size: 0.7em;
+					.item-attributes{
+						display: flex;
+						gap: 5px;
+						margin-left: 10px;
+						font-size: 0.8em;
 					}
 				}
 			}

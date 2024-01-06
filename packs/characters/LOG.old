@@ -1,7 +1,7 @@
-2024/01/01-11:29:37.270 dcc Recovering log #62
-2024/01/01-11:29:37.272 dcc Delete type=0 #62
-2024/01/01-11:29:37.272 dcc Delete type=3 #60
-2024/01/01-12:51:38.150 3bc0 Level-0 table #67: started
-2024/01/01-12:51:38.150 3bc0 Level-0 table #67: 0 bytes OK
-2024/01/01-12:51:38.150 3bc0 Delete type=0 #65
-2024/01/01-12:51:38.151 3bc0 Manual compaction at level-0 from 'undefined' @ 72057594037927935 : 1 .. 'undefined' @ 0 : 0; will stop at (end)
+2024/01/06-11:08:35.969 bbc Recovering log #76
+2024/01/06-11:08:35.971 bbc Delete type=0 #76
+2024/01/06-11:08:35.971 bbc Delete type=3 #74
+2024/01/06-11:31:44.500 840 Level-0 table #81: started
+2024/01/06-11:31:44.500 840 Level-0 table #81: 0 bytes OK
+2024/01/06-11:31:44.501 840 Delete type=0 #79
+2024/01/06-11:31:44.504 840 Manual compaction at level-0 from 'undefined' @ 72057594037927935 : 1 .. 'undefined' @ 0 : 0; will stop at (end)
