@@ -135,10 +135,12 @@
 
 		"ability": {
 			"templates": ["base"],
+			"category": "Normal",
 			"level": 1
 		},
 		"item": {
 			"templates": ["base"],
+			"category": "Normal",
 			"cost": 0,
 			"quantity": 0,
 			"slots": 0

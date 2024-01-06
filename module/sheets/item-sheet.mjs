@@ -36,9 +36,9 @@ export class BoilerplateItemSheet extends ItemSheet {
 	getData() {
 		// Retrieve base data structure.
 		const context = super.getData();
-
-		// Use a safe clone of the item data for further operations.
-		const itemData = context.item;
+		const itemData = context.item;		
+		context.system = itemData.system;
+		context.flags = itemData.flags;
 
 		// Retrieve the roll data for TinyMCE editors.
 		context.rollData = {};
@@ -47,11 +47,6 @@ export class BoilerplateItemSheet extends ItemSheet {
 			context.rollData = actor.getRollData();
 		}
 
-		// Add the actor's data to context.data for easier access, as well as flags.
-		context.system = itemData.system;
-		context.flags = itemData.flags;
-
-		console.log(context);
 
 		if (itemData.type === "move") {
 			context.attributeChoice = {
@@ -67,7 +62,8 @@ export class BoilerplateItemSheet extends ItemSheet {
 				chosen: itemData.system.attribute,
 			};
 		}
-
+		
+		console.log(context);
 		return context;
 	}
 

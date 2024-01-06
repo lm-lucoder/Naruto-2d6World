@@ -92,7 +92,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const skills = [];
 		const conditions = [];
 		const abilities = [];
+		const abilitiesByCategory = {};
 		const gear = [];
+		const gearByCategory = {};
 
 		// Iterate through items, allocating to containers
 		for (let item of context.items) {
@@ -115,9 +117,25 @@ export class BoilerplateActorSheet extends ActorSheet {
 			} else if (item.type === "condition") {
 				conditions.push(item);
 			} else if (item.type === "ability") {
+				if (abilitiesByCategory[item.system.category]) {
+					abilitiesByCategory[item.system.category].items.push(item);
+				} else {
+					abilitiesByCategory[item.system.category] = {
+						name: item.system.category,
+						items: [item],
+					};
+				}
 				abilities.push(item);
 			}else if (item.type === "item") {
 				gear.push(item);
+				if (gearByCategory[item.system.category]) {
+					gearByCategory[item.system.category].items.push(item);
+				} else {
+					gearByCategory[item.system.category] = {
+						name: item.system.category,
+						items: [item],
+					};
+				}
 			}
 		}
 		// Assign and return
@@ -126,7 +144,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.skills = skills;
 		context.conditions = conditions;
 		context.abilities = abilities;
+		context.abilitiesByCategory = abilitiesByCategory;
 		context.gear = gear;
+		context.gearByCategory = gearByCategory;
 	}
 
 	/* -------------------------------------------- */

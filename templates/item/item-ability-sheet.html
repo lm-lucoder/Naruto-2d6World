@@ -1,11 +1,17 @@
-<form class="{{cssClass}}" autocomplete="off">
+<form class="{{cssClass}} item-ability-sheet" autocomplete="off">
     <header class="sheet-header">
       <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
       <div class="header-fields">
         <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
-        <div>
-          <span>Level: </span>
-          <input class="level-input" name="system.level" value="{{system.level}}">
+        <div class="grid grid-2col">
+          <div class="resource">
+            <label for="system.level">Level: </label>
+            <input class="level-input" name="system.level" value="{{system.level}}">
+          </div>
+          <div class="resource">
+            <label for="system.level">Category: </label>
+            <input class="level-input" name="system.category" value="{{system.category}}">
+          </div>
         </div>
       </div>
     </header>

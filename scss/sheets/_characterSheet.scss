@@ -226,36 +226,42 @@
 			}
 		}
 	}
-    .abilities-container{
+    .right-section{
         flex-grow: 1;
 		padding-left: 10px;
 		border-left: 1px solid $c-beige;
-        .abilities-list{
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            .ability-card{
-				border-bottom: 1px solid $c-beige;
-				padding: 5px 0;
-				.content{
-					display: flex ;
-					justify-content: space-between;
-					align-items: center;
-					.info{
-						display: flex;
+		.abilities-container{
+			.category-title{
+				margin: 0.7rem 0;
+				font-weight: bold;
+			}
+			.abilities-list{
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				.ability-card{
+					border-bottom: 1px solid $c-beige;
+					padding: 5px 0;
+					.content{
+						display: flex ;
+						justify-content: space-between;
 						align-items: center;
-						gap: 5px;
-						img{
-							width: 30px;
-							border: none;
-						}
-						.level{
-							font-size: 0.8em;
+						.info{
+							display: flex;
+							align-items: center;
+							gap: 5px;
+							img{
+								width: 30px;
+								border: none;
+							}
+							.level{
+								font-size: 0.8em;
+							}
 						}
 					}
 				}
-            }
-        }
+			}
+		}
     }
 
 }

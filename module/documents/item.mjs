@@ -13,6 +13,9 @@ export class BoilerplateItem extends Item {
     if (this.type === 'skill') {
       this._rankSkill()
     }
+    if (this.type === 'ability') {
+      this._rankAbility()
+    }
   }
 
   /**
@@ -182,6 +185,19 @@ export class BoilerplateItem extends Item {
         break;
     }
     this.system.rank.name = name
+  }
+  _rankAbility() {
+    const level = this.system.level;
+    const rankMap = [
+      { level: 9, rank: 'Kage' },
+      { level: 7, rank: 'Jounin' },
+      { level: 5, rank: 'Jounin Especial' },
+      { level: 3, rank: 'Chunin' },
+      { level: 0, rank: 'Genin' }
+    ];
+  
+    const { rank } = rankMap.find(entry => level > entry.level) || rankMap[rankMap.length - 1];
+    this.system.rank = rank;
   }
 
   _getMoveLabelRollTemplate({move, mode, attribute}){
