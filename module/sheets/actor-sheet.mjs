@@ -49,7 +49,6 @@ export class BoilerplateActorSheet extends ActorSheet {
 		if (actorData.type == "character") {
 			this._prepareItems(context);
 			await this._prepareCharacterData(context);
-			
 		}
 
 		if (actorData.type == "npc") {
@@ -74,14 +73,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 	 */
 	async _prepareCharacterData(context) {
 		context.effects = prepareActiveEffectCategories(this.actor.effects);
-		context.usedSpace = this._getItemsTotalSlot(context.gear);
-		context.isAboveSpace = this._getIsAboveSpaceCondition(context.usedSpace)
+		context.space = {};
+		context.space.usedSpace = this._getUsedSpace(context.gear);
+		context.space.maxSpace = this._getMaxSpace(context.gear);
+		context.space.isAboveSpace = this._getIsAboveSpaceCondition(
+			context.space
+		);
 
 		for (const item of context.gear) {
-			await this._prepareDescriptionData(item)
+			await this._prepareDescriptionData(item);
 		}
 		for (const move of context.moves) {
-			await this._prepareDescriptionData(move)
+			await this._prepareDescriptionData(move);
 		}
 	}
 
@@ -126,7 +129,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 					};
 				}
 				abilities.push(item);
-			}else if (item.type === "item") {
+			} else if (item.type === "item") {
 				gear.push(item);
 				if (gearByCategory[item.system.category]) {
 					gearByCategory[item.system.category].items.push(item);
@@ -201,8 +204,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		});
 
 		html.find(".show-description-window-btn").click((event) => {
-			this._toggleDescriptionWindow(event)
-		})
+			this._toggleDescriptionWindow(event);
+		});
 
 		// Drag events for macros.
 		if (this.actor.isOwner) {
@@ -326,15 +329,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 			buttons: {
 				button1: {
 					label: "Vantagem",
-					callback: (_, e) => dialogCallback(e, 'advantage'),
+					callback: (_, e) => dialogCallback(e, "advantage"),
 				},
 				button2: {
 					label: "Normal",
-					callback: (_, e) => dialogCallback(e, 'normal'),
+					callback: (_, e) => dialogCallback(e, "normal"),
 				},
 				button3: {
 					label: "Desvantagem",
-					callback: (_, e) => dialogCallback(e, 'disadvantage'),
+					callback: (_, e) => dialogCallback(e, "disadvantage"),
 				},
 			},
 		}).render(true);
@@ -359,27 +362,44 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 	}
 
-	_toggleDescriptionWindow(event){
+	_toggleDescriptionWindow(event) {
 		const itemId = event.target.closest("li").getAttribute("data-item-id");
-		const windowElement =  event.target.closest("li").querySelector(".description-window")
-		const item = this.actor.items.get(itemId)
-		if (windowElement.innerHTML.trim() === '') {
+		const windowElement = event.target
+			.closest("li")
+			.querySelector(".description-window");
+		const item = this.actor.items.get(itemId);
+		if (windowElement.innerHTML.trim() === "") {
 			windowElement.innerHTML = item.system.description;
 		} else {
-			windowElement.innerHTML = ''
+			windowElement.innerHTML = "";
 		}
 	}
 
-	_getItemsTotalSlot(items){
-		const total = items.reduce(((total, item) => total + (item.system.slots * item.system.quantity)), 0)
-		return total
+	_getUsedSpace(items) {
+		const total = items.reduce(
+			(total, item) => total + item.system.slots * item.system.quantity,
+			0
+		);
+		const roundedTotal = Math.round(total * 100) / 100; //Somente 2 casas decimais
+		return roundedTotal;
 	}
 
-	_getIsAboveSpaceCondition(usedSpace){
-		return usedSpace > this.object.system.params.space
+	_getMaxSpace(items) {
+		let total = items.reduce(
+			(total, item) =>
+				total + item.system.slots_bonus * item.system.quantity,
+			0
+		);
+		total += this.object.system.params.space;
+		return total;
 	}
 
-	async _prepareDescriptionData(item){
+	_getIsAboveSpaceCondition({ usedSpace, maxSpace }) {
+		console.log(usedSpace, maxSpace);
+		return usedSpace > maxSpace;
+	}
+
+	async _prepareDescriptionData(item) {
 		item.description = await TextEditor.enrichHTML(
 			item.system.description,
 			{

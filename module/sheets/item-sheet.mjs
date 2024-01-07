@@ -117,7 +117,6 @@ export class BoilerplateItemSheet extends ItemSheet {
     const id = ev.target.closest('.condition-moves-config-card').getAttribute('data-id');
     const movesConfigsObj = this.object.system.movesConfigs
     delete movesConfigsObj[id]
-    console.log(movesConfigsObj)
     this.object.update({system: { movesConfigs: false}})
     this.object.update({system: { movesConfigs: {...movesConfigsObj}}})
   }

@@ -1,3 +1,8 @@
-2024/01/06-12:55:45.963 bbc Recovering log #65
-2024/01/06-12:55:45.965 bbc Delete type=0 #65
-2024/01/06-12:55:45.965 bbc Delete type=3 #63
+2024/01/06-17:34:04.290 90c Recovering log #68
+2024/01/06-17:34:04.292 90c Delete type=0 #68
+2024/01/06-17:34:04.292 90c Delete type=3 #67
+2024/01/06-19:18:33.190 41f0 Level-0 table #72: started
+2024/01/06-19:18:33.190 41f0 Level-0 table #72: 0 bytes OK
+2024/01/06-19:18:33.192 41f0 Delete type=0 #70
+2024/01/06-19:18:33.192 41f0 Manual compaction at level-0 from '!folders!GB7pnvUfl0XYWzqV' @ 72057594037927935 : 1 .. '!items!sKV59B6ugnroGUQy' @ 0 : 0; will stop at (end)
+2024/01/06-19:18:33.198 41f0 Manual compaction at level-1 from '!folders!GB7pnvUfl0XYWzqV' @ 72057594037927935 : 1 .. '!items!sKV59B6ugnroGUQy' @ 0 : 0; will stop at (end)

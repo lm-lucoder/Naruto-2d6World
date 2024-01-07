@@ -63,6 +63,14 @@ Handlebars.registerHelper('concat', function() {
   return outStr;
 });
 
+Handlebars.registerHelper('multiply', function(a, b) {
+  return a * b
+});
+Handlebars.registerHelper('multiplyWithTwoDecimalsMax', function(a, b) {
+  const result = a * b
+  const roundedResult = Math.round(result * 100) / 100;
+  return roundedResult
+});
 Handlebars.registerHelper('toLowerCase', function(str) {
   return str.toLowerCase();
 });

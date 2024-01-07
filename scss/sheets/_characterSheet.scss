@@ -269,49 +269,55 @@
 .iventory-section{
 	.iventory-attributes{
 		margin-top: 10px;
-		.above-space{
-			color: red;
-			font-weight: bold;
-		}
 	}
 	h3{
 		padding: 8px 0;
 		border-bottom: 1px solid $c-beige;
 		margin: 0;
+		.above-space{
+			color: red;
+			font-weight: bold;
+		}
 	}
 	.section-buttons{
 		width: 100%;
 		border-bottom: 1px solid #b5b3a4;
 		padding: 10px 0;
 	}
-	.iventory-list{
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		.item-card{
-			border-bottom: 1px solid $c-beige;
-			padding: 5px 0;
-			.content{
-				display: flex ;
-				justify-content: space-between;
-				align-items: center;
-				.info{
-					display: flex;
+	.iventory-container{
+		.category-title{
+			margin: 0.7rem 0;
+			font-weight: bold;
+		}
+		.iventory-list{
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			.item-card{
+				border-bottom: 1px solid $c-beige;
+				padding: 5px 0;
+				.content{
+					display: flex ;
+					justify-content: space-between;
 					align-items: center;
-					img{
-						width: 30px;
-						border: none;
-						margin-right: 10px;
-					}
-					.item-attributes{
+					.info{
 						display: flex;
-						gap: 5px;
-						margin-left: 10px;
-						font-size: 0.8em;
+						align-items: center;
+						img{
+							width: 30px;
+							border: none;
+							margin-right: 10px;
+						}
+						.item-attributes{
+							display: flex;
+							gap: 5px;
+							margin-left: 10px;
+							font-size: 0.8em;
+						}
 					}
 				}
+				
 			}
-			
 		}
 	}
     

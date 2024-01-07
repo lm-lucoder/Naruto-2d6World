@@ -17,6 +17,11 @@
     </header>
   
     {{!-- Sheet Tab Navigation --}}
+    {{#if item.isOwned}}
+      <div class="resource">
+        <span><b>Rank:</b> {{system.rank}}</span>
+      </div>  
+    {{/if}}
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>
       <!-- <a class="item" data-tab="attributes">Attributes</a> -->

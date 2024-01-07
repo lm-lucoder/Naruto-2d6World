@@ -147,7 +147,7 @@ export class BoilerplateItem extends Item {
     const speaker = ChatMessage.getSpeaker({ actor: this.actor });
     const rollMode = game.settings.get('core', 'rollMode');
     const label = this._getMoveLabelRollTemplate({move: this});
-    console.log(label)
+    
 
     ChatMessage.create({
       speaker: speaker,
@@ -177,9 +177,6 @@ export class BoilerplateItem extends Item {
       case 5:
         name = "Kage"
         break;
-      case 6:
-        name = "Sennin"
-        break;
       default:
         name = "Não definido"
         break;
@@ -196,7 +193,7 @@ export class BoilerplateItem extends Item {
       { level: 0, rank: 'Genin' }
     ];
   
-    const { rank } = rankMap.find(entry => level > entry.level) || rankMap[rankMap.length - 1];
+    const { rank } = rankMap.find(entry => level >= entry.level);
     this.system.rank = rank;
   }
 
@@ -242,7 +239,7 @@ export class BoilerplateItem extends Item {
         break
     }
     const hasImg = move.img != "icons/svg/item-bag.svg"
-    console.log(move)
+    
     const label = `
     <div class="moveRollChatTemplate">
       <div class="info">

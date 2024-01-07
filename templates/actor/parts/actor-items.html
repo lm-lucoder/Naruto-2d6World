@@ -10,35 +10,42 @@
                 <input type="number" name="system.params.space" value="{{system.params.space}}" >
             </div>
         </div>
-        <div class="info {{#if isAboveSpace}}above-space{{/if}}">
-            <span>Total/Capacidade: {{usedSpace}} | {{system.params.space}}</span>
-        </div>
     </div>
-    <h3>Iventário:</h3>
+    <h3>Iventário: <span class="{{#if space.isAboveSpace}}above-space{{/if}}">{{space.usedSpace}} | {{space.maxSpace}}</span></h3>
     <div class="section-buttons">
         <a class="add-item-btn item-create" data-type="item"><i class="fa-solid fa-plus"></i> Adicionar novo item</a>
     </div>
-    <ol class="iventory-list item-list">
-        {{#each gear as |item id|}}
-            <li class="item-card item" data-item-id="{{item._id}}">
-                    <div class="content">
-                        <div class="info">
-                            <img class="img" src="{{item.img}}"> 
-                            <span class="title"><a class="show-description-window-btn">{{item.name}}</a></span>
-                            <div class="item-attributes">
-                                <span class="quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
-                                <span class="quantity"><i class="fa-solid fa-weight-hanging"></i> ({{item.system.slots}})</span>
+    <div class="iventory-container">
+        {{#each gearByCategory as |category|}}
+            <h4 class="category-title">{{category.name}}</h4>
+            <ol class="iventory-list item-list">
+                {{#each category.items as |item id|}}
+                    <li class="item-card item" data-item-id="{{item._id}}">
+                            <div class="content">
+                                <div class="info">
+                                    <img class="img" src="{{item.img}}"> 
+                                    <span class="title"><a class="show-description-window-btn">{{item.name}}</a></span>
+                                    <div class="item-attributes">
+                                        <span class="quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
+                                        {{#if item.system.slots}}
+                                            <span class="slots"><i class="fa-solid fa-weight-hanging"></i> ({{multiplyWithTwoDecimalsMax item.system.slots item.system.quantity}})</span>
+                                        {{/if}}
+                                        {{#if item.system.slots_bonus}}
+                                            <span class="slots_bonus"><i class="fa-solid fa-square-plus"></i> ({{multiplyWithTwoDecimalsMax item.system.slots_bonus item.system.quantity}})</span>
+                                        {{/if}}
+                                    </div>
+                                </div>
+                                <div class="item-card-buttons">
+                                    <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>
+                                    <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
+                                    <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
+                                </div>
                             </div>
+                        <div class="description-window display_none">
                         </div>
-                        <div class="item-card-buttons">
-                            <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>
-                            <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
-                            <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
-                        </div>
-                    </div>
-                <div class="description-window display_none">
-                </div>
-            </li>
+                    </li>
+                {{/each}}
+            </ol>
         {{/each}}
-    </ol>
+    </div>
 </div>

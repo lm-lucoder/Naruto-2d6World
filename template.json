@@ -143,7 +143,8 @@
 			"category": "Normal",
 			"cost": 0,
 			"quantity": 0,
-			"slots": 0
+			"slots": 0,
+			"slots_bonus": 0
 		}
 	}
 }

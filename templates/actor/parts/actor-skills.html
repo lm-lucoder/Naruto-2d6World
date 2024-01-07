@@ -25,7 +25,6 @@
         <div class="section-buttons">
             <a class="add-ability-btn item-create" data-type="ability"><i class="fa-solid fa-plus"></i> Adicionar nova habilidade</a>
         </div>
-        {{console abilitiesByCategory}}
         {{#each abilitiesByCategory as |category|}}
             <div class="abilities-container">
                 <h4 class="category-title">{{#if category.name}}{{category.name}}{{else}}Sem Categoria{{/if}}</h4>
