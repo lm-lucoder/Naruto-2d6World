@@ -52,6 +52,10 @@
           <label class="resource-label">Quantidade</label>
           <input type="text" name="system.quantity" value="{{system.quantity}}" data-dtype="Number"/>
         </div>
+        <div class="resource">
+          <label class="resource-label">Considerar Slots Consumidos:</label>
+          <input type="checkbox" name="system.considerSlots" {{checked system.considerSlots}}>
+        </div>
       </div>
     </div>
     {{/unless}}

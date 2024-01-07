@@ -24,7 +24,12 @@
                             <div class="content">
                                 <div class="info">
                                     <img class="img" src="{{item.img}}"> 
-                                    <span class="title"><a class="show-description-window-btn">{{item.name}}</a></span>
+                                    <span class="title"><a class="show-description-window-btn">
+                                        {{#if item.system.onHand}}
+                                            <i class="fa-solid fa-hand"></i>
+                                        {{/if}}
+                                        {{item.name}}
+                                    </a></span>
                                     <div class="item-attributes">
                                         <span class="quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
                                         {{#if item.system.slots}}
@@ -36,6 +41,13 @@
                                     </div>
                                 </div>
                                 <div class="item-card-buttons">
+                                    <span class="item-on-hand-btn"><a>
+                                        {{#if item.system.onHand}}
+                                        <i class="fa-solid fa-hand"></i>
+                                        {{else}}
+                                        <i class="fa-regular fa-hand"></i>
+                                        {{/if}}
+                                    </a></span>
                                     <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>
                                     <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
                                     <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>

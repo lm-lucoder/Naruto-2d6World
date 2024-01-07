@@ -207,6 +207,16 @@ export class BoilerplateActorSheet extends ActorSheet {
 			this._toggleDescriptionWindow(event);
 		});
 
+		html.find(".item-on-hand-btn").click((event) => {
+			const itemId = event.target.closest("li").getAttribute("data-item-id");
+			const item = this.object.items.get(itemId)
+			if (item.system.onHand) {
+				this.object.items.get(itemId).update({system: {onHand: false}})
+			} else {
+				this.object.items.get(itemId).update({system: {onHand: true}})
+			}
+		})
+
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);
@@ -377,7 +387,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 	_getUsedSpace(items) {
 		const total = items.reduce(
-			(total, item) => total + item.system.slots * item.system.quantity,
+			(total, item) =>{
+				if (item.system.considerSlots && !item.system.onHand) {
+					return total + item.system.slots * item.system.quantity
+				} else {
+					return 0
+				}
+			},
 			0
 		);
 		const roundedTotal = Math.round(total * 100) / 100; //Somente 2 casas decimais
