@@ -98,7 +98,7 @@
 		"skill": {
 			"templates": ["base"],
 			"rank": {
-				"value": 0
+				"value": "0"
 			}
 		},
 

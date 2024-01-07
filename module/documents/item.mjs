@@ -159,22 +159,22 @@ export class BoilerplateItem extends Item {
   _rankSkill(){
     let name = ""
     switch (this.system.rank.value) {
-      case 0:
+      case "0":
         name = "Academia"
         break;
-      case 1:
+      case "1":
         name = "Genin"
         break;
-      case 2:
+      case "2":
         name = "Chunin"
         break;
-      case 3:
+      case "3":
         name = "Jounin Especial"
         break;
-      case 4:
+      case "4":
         name = "Jounin"
         break;
-      case 5:
+      case "5":
         name = "Kage"
         break;
       default:

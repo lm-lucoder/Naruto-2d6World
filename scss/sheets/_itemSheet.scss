@@ -113,3 +113,10 @@ header {
 .item-ability-sheet{
 
 }
+.item-skill-sheet{
+	.rank-controller{
+		display: flex;
+		gap: 5px;
+		align-items: center;
+	}
+}
