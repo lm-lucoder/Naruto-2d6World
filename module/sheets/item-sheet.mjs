@@ -47,20 +47,9 @@ export class BoilerplateItemSheet extends ItemSheet {
 			context.rollData = actor.getRollData();
 		}
 
-		// if (itemData.type === "move") {
-		// 	context.attributeChoice = {
-		// 		groupName: "attributeChoice",
-		// 		choices: {
-		// 			str: "str",
-		// 			dex: "dex",
-		// 			con: "con",
-		// 			int: "int",
-		// 			per: "per",
-		// 			car: "car",
-		// 		},
-		// 		chosen: itemData.system.attribute,
-		// 	};
-		// }
+		if (itemData.type === "move") {
+			
+		}
 		if (itemData.type === "skill") {
 			// const rankChoices = [
 			// 	{ name: "Academia", value: 0 },
@@ -90,11 +79,6 @@ export class BoilerplateItemSheet extends ItemSheet {
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
-
-		html.find("[name='attributeChoice']").change(async (ev) => {
-			const choice = ev.target.value;
-			await this.item.update({ system: { attribute: choice } });
-		});
 
 		html.find(".add-condition-move-config").click(async (ev) => {
 			this._addNewCondition_MoveConfig();

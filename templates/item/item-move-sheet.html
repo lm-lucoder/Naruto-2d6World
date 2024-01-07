@@ -9,7 +9,7 @@
     {{!-- Sheet Tab Navigation --}}
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>
-      <a class="item" data-tab="attributes">Attributes</a>
+      {{#unless limited}}<a class="item" data-tab="attributes">Attributes</a>{{/unless}}
     </nav>
   
     {{!-- Sheet Body --}}
@@ -22,6 +22,7 @@
       </div>
   
       {{!-- Attributes Tab --}}
+      {{#unless limited}}
       <div class="tab attributes" data-group="primary" data-tab="attributes">
         {{!-- As you add new fields, add them in here! --}}
         <div class="resource">
@@ -29,7 +30,6 @@
                 <label class="resource-label">Atributo:</label>
                 <i>Atributo que será escolhido na rolagem.</i>
             </div>
-            <!-- {{radioBoxes attributeChoice.groupName attributeChoice.choices checked=attributeChoice.chosen}} -->
             <div class="move-attributes-list">
               {{#each system.attributes as |attribute|}}
                 <div class="resource move-attributes-card">
@@ -44,6 +44,7 @@
           <input type="text" name="system.category" value="{{system.category}}" data-dtype="String"/>
         </div>
       </div>
+      {{/unless}}
     </section>
   </form>
   

@@ -1,3 +1,4 @@
+{{#unless limited}}
 <div class="grid grid-2col">
     <div class="resource-content flexrow flex-center">
         <label for="system.params.village">Aldeia:</label>
@@ -16,3 +17,4 @@
 </div>
 <h3>Biografia</h3>
 {{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}
+{{/unless}}

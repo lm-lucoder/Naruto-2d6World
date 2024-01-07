@@ -5,6 +5,7 @@
     <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
     <div class="header-fields">
       <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+      {{#unless limited}}
       <div class="grid grid-2col">
         <div class="resource-content flexrow flex-center">
           <label for="system.params.village">Aldeia:</label>
@@ -25,6 +26,7 @@
             <input type="text" name="system.params.rank" value="{{system.params.rank}}" >
         </div>
       </div>
+      {{/unless}}
     </div>
   </header>
 
@@ -37,6 +39,7 @@
   <section class="sheet-body">
 
     {{!-- Biography Tab --}}
+    {{#unless limited}}
     <div class="tab biography" data-group="primary" data-tab="description">
     <!-- <div class="biography"> -->
       {{!-- If you want TinyMCE editors to output inline rolls when rendered, you need to pass the actor's roll data to the rollData property. --}}
@@ -45,7 +48,7 @@
        <h3>Biografia</h3>
         {{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}
     </div>
-
+    {{/unless}}
   </section>
 </form>
 

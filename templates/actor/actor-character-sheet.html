@@ -5,6 +5,7 @@
     <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
     <div class="header-fields">
       <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+      {{#unless limited}}
       <div class="resource grid grid-2col">
         <div class="resource-card resource-rank-card">
           <label for="system.health.value" class="resource-label">Rank</label>
@@ -35,7 +36,7 @@
           </div>
         </div>
         </div>
-
+      {{/unless}}
       </div>
     </div>
   </header>
@@ -44,10 +45,12 @@
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="description">Descrição</a>
-    <a class="item" data-tab="moves">Movimentos</a>
-    <a class="item" data-tab="skills">Perícias e Habilidades</a>
-    <a class="item" data-tab="iventory">Iventário</a>
-    <a class="item" data-tab="effects">Efeitos</a>
+    {{#unless limited}}
+      <a class="item" data-tab="moves">Movimentos</a>
+      <a class="item" data-tab="skills">Perícias e Habilidades</a>
+      <a class="item" data-tab="iventory">Iventário</a>
+      <a class="item" data-tab="effects">Efeitos</a>
+    {{/unless}}
   </nav>
 
   {{!-- Sheet Body --}}
@@ -58,25 +61,25 @@
       {{!-- If you want TinyMCE editors to output inline rolls when rendered, you need to pass the actor's roll data to the rollData property. --}}
       {{> "systems/naruto2d6world/templates/actor/parts/actor-description.html"}}
     </div>
+    {{#unless limited}}
+      {{!-- Owned moves Tab --}}
+      <div class="tab moves" data-group="primary" data-tab="moves">
+        {{> "systems/naruto2d6world/templates/actor/parts/actor-moves.html"}}
+      </div>
 
-    {{!-- Owned moves Tab --}}
-    <div class="tab moves" data-group="primary" data-tab="moves">
-       {{> "systems/naruto2d6world/templates/actor/parts/actor-moves.html"}}
-    </div>
+      {{!-- Owned skills Tab --}}
+      <div class="tab skills" data-group="primary" data-tab="skills">
+        {{> "systems/naruto2d6world/templates/actor/parts/actor-skills.html"}}
+      </div>
 
-    {{!-- Owned skills Tab --}}
-    <div class="tab skills" data-group="primary" data-tab="skills">
-      {{> "systems/naruto2d6world/templates/actor/parts/actor-skills.html"}}
-    </div>
+      <div class="tab effects" data-group="primary" data-tab="iventory">
+        {{> "systems/naruto2d6world/templates/actor/parts/actor-items.html"}}
+      </div>
 
-    <div class="tab effects" data-group="primary" data-tab="iventory">
-      {{> "systems/naruto2d6world/templates/actor/parts/actor-items.html"}}
-    </div>
-
-    <div class="tab effects" data-group="primary" data-tab="effects">
-      {{> "systems/naruto2d6world/templates/actor/parts/actor-effects.html"}}
-    </div>
-
+      <div class="tab effects" data-group="primary" data-tab="effects">
+        {{> "systems/naruto2d6world/templates/actor/parts/actor-effects.html"}}
+      </div>
+    {{/unless}}
   </section>
 </form>
 
