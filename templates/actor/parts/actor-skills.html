@@ -36,7 +36,7 @@
                                     <img src="{{ability.img}}" name="{{ability.name}}"> 
                                     <span class="name"><a class="show-description-window-btn">{{ability.name}}</a></span>
                                     <span class="level">(Nível: {{ability.system.level}})</span>
-                                    <span class="level">(Rank: {{ability.system.rank}})</span>
+                                    {{#if ability.system.isRankable}}<span class="level">(Rank: {{ability.system.rank}})</span>{{/if}}
                                 </div>
                                 <div class="control">
                                     <span class="ability-send-log-btn rollable" data-roll-type="ability"><a><i class="fa-solid fa-comment"></i></a></span>

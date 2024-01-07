@@ -3,24 +3,32 @@
       <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
       <div class="header-fields">
         <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
-        <div class="grid grid-2col">
+        {{#unless limited}}
+        <div class="grid grid-3col">
           <div class="resource">
-            <label for="system.level">Level: </label>
-            <input class="level-input" name="system.level" value="{{system.level}}">
+            <label for="system.level">Nível: </label>
+            <input type="number" class="level-input" name="system.level" value="{{system.level}}">
           </div>
           <div class="resource">
-            <label for="system.level">Category: </label>
-            <input class="level-input" name="system.category" value="{{system.category}}">
+            <label for="system.level">Categoria: </label>
+            <input type="text" class="category-input" name="system.category" value="{{system.category}}">
+          </div>
+          <div class="resource">
+            <label for="system.level">Pode ter Rank: </label>
+            <input type="checkbox" class="rank-input" name="system.isRankable" {{checked system.isRankable}}>
           </div>
         </div>
+        {{/unless}}
       </div>
     </header>
   
     {{!-- Sheet Tab Navigation --}}
-    {{#if item.isOwned}}
-      <div class="resource">
-        <span><b>Rank:</b> {{system.rank}}</span>
-      </div>  
+    {{#if system.isRankable}}
+      {{#if item.isOwned}}
+        <div class="resource">
+          <span><b>Rank:</b> {{system.rank}}</span>
+        </div>  
+      {{/if}}
     {{/if}}
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>

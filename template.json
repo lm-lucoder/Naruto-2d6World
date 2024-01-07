@@ -136,7 +136,8 @@
 		"ability": {
 			"templates": ["base"],
 			"category": "Normal",
-			"level": 1
+			"level": 1,
+			"isRankable": false
 		},
 		"item": {
 			"templates": ["base"],
