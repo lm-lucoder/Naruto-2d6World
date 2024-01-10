@@ -126,6 +126,9 @@ export class BoilerplateItem extends Item {
     const rollData = this.getRollData();
 
     let roll
+    if (mode  === "+advantage") {
+      roll = new Roll(`4d6kh2 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
+    }
     if (mode  === "advantage") {
       roll = new Roll(`3d6kh2 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
     }
@@ -134,6 +137,9 @@ export class BoilerplateItem extends Item {
     }
     if (mode  === "disadvantage") {
       roll = new Roll(`3d6kl2 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
+    }
+    if (mode  === "+disadvantage") {
+      roll = new Roll(`4d6kl2 + @${attribute}${modifier ? ('+' + modifier) : ''}`, rollData);
     }
     roll.toMessage({
       speaker: speaker,

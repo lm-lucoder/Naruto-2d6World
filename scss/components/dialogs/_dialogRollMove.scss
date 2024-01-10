@@ -1,5 +1,10 @@
 .dialog-roll-move-content{
     margin-bottom: 10px;
+    .modifier-content{
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid $c-beige ;
+    }
     h3{
         border-bottom: 1px solid $c-beige;
     }

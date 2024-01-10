@@ -1,3 +1,4 @@
+import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
 import {
 	onManageActiveEffect,
 	prepareActiveEffectCategories,
@@ -314,62 +315,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 			return item.moveRollJustSend();
 		}
 
-		const validAttributes = Object.values(item.system.attributes).filter(
-			(attribute) => attribute.on === true
-		);
-		const options = validAttributes.map(
-			(attribute, i) => `
-        <label>
-          <input type="radio" name="option" value="${attribute.name}">
-          ${attribute.name[0].toUpperCase() + attribute.name.slice(1)}
-        </label>
-        `
-		);
-
-		new Dialog({
-			title: `Rolando movimento: ${item.name}`,
-			content: `
-          <div class="dialog-roll-move-content">
-            <h3>Escolha o atributo</h3>
-            <div class="options-container">
-              ${options.join("")}
-            </div>
-          </div>
-          `,
-			buttons: {
-				button1: {
-					label: "Vantagem",
-					callback: (_, e) => dialogCallback(e, "advantage"),
-				},
-				button2: {
-					label: "Normal",
-					callback: (_, e) => dialogCallback(e, "normal"),
-				},
-				button3: {
-					label: "Desvantagem",
-					callback: (_, e) => dialogCallback(e, "disadvantage"),
-				},
-			},
-		}).render(true);
-
-		function dialogCallback(e, mode) {
-			const options = e.target
-				.closest(".window-content")
-				.querySelector(".options-container")
-				.querySelectorAll('[name="option"]');
-			const checkedOption = [...options].find((option) => option.checked);
-			if (!checkedOption) {
-				ui.notifications.info(
-					"Escolha um atributo para rolar com o movimento!"
-				);
-				return;
-			}
-			const chosenAttribute = checkedOption.value;
-			item.moveRoll({
-				mode,
-				attribute: chosenAttribute,
-			});
-		}
+		RollMoveDialog.create(item)
 	}
 
 	_toggleDescriptionWindow(event) {
