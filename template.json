@@ -137,7 +137,9 @@
 			"templates": ["base"],
 			"category": "Normal",
 			"level": 1,
-			"isRankable": false
+			"maxLevel": 0,
+			"isRankable": false,
+			"levelDescriptions": []
 		},
 		"item": {
 			"templates": ["base"],

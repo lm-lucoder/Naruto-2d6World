@@ -15,6 +15,8 @@ export class BoilerplateItem extends Item {
     }
     if (this.type === 'ability') {
       this._rankAbility()
+      const levelDescription = this.system.levelDescriptions.find(element => element.level == this.system.level);
+      if (levelDescription?.description) {this.system.levelDescription = levelDescription.description} ;
     }
   }
 

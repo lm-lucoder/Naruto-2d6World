@@ -90,6 +90,26 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const value = parseInt(ev.target.value);
 			this.object.update({ system: { rank: { value } } });
 		});
+		html.find(".add-level-description-btn").click(async (ev) => {
+			const levelDescriptions = this.object.system.levelDescriptions
+			levelDescriptions.push({level: 0, description: "", id: randomID(7)})
+			this.object.update({system: {levelDescriptions: levelDescriptions} });
+		})
+		html.find(".level-description-input").blur(async (ev) => {
+			const inputObjective = ev.target.getAttribute("data-input-objective")
+			const levelDescriptionId = ev.target.closest("li").getAttribute("data-item-id")
+			const levelDescriptions = this.object.system.levelDescriptions
+			const levelDescription = levelDescriptions.find(element => element.id === levelDescriptionId)
+			levelDescription[inputObjective] = ev.target.value
+			this.object.update({system: {levelDescriptions: [...levelDescriptions]} });
+		})
+		html.find(".level-description-remove-btn").click(async (ev) => {
+			const levelDescriptionId = ev.target.closest("li").getAttribute("data-item-id")
+			const levelDescriptions = this.object.system.levelDescriptions
+			const toRemoveIndex = levelDescriptions.findIndex(element => element.id === levelDescriptionId)
+			levelDescriptions.splice(toRemoveIndex, 1)
+			this.object.update({system: {levelDescriptions: [...levelDescriptions]} });
+		})
 
 		// Everything below here is only needed if the sheet is editable
 		if (!this.isEditable) return;

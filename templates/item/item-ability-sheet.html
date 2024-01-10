@@ -4,18 +4,18 @@
       <div class="header-fields">
         <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
         {{#unless limited}}
-        <div class="grid grid-3col">
+        <div class="grid grid-4col">
           <div class="resource">
             <label for="system.level">Nível: </label>
             <input type="number" class="level-input" name="system.level" value="{{system.level}}">
           </div>
           <div class="resource">
-            <label for="system.level">Categoria: </label>
-            <input type="text" class="category-input" name="system.category" value="{{system.category}}">
+            <label for="system.level">Nível Máximo: </label>
+            <input type="number" class="level-input" name="system.maxLevel" value="{{system.maxLevel}}">
           </div>
           <div class="resource">
-            <label for="system.level">Pode ter Rank: </label>
-            <input type="checkbox" class="rank-input" name="system.isRankable" {{checked system.isRankable}}>
+            <label for="system.level">Categoria: </label>
+            <input type="text" class="category-input" name="system.category" value="{{system.category}}">
           </div>
         </div>
         {{/unless}}
@@ -32,7 +32,7 @@
     {{/if}}
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>
-      <!-- <a class="item" data-tab="attributes">Attributes</a> -->
+      <a class="item" data-tab="attributes">Attributes</a>
     </nav>
   
     {{!-- Sheet Body --}}
@@ -45,13 +45,37 @@
       </div>
   
       {{!-- Attributes Tab --}}
-      <!-- <div class="tab attributes" data-group="primary" data-tab="attributes">
+      <div class="tab attributes" data-group="primary" data-tab="attributes">
         {{!-- As you add new fields, add them in here! --}}
         <div class="resource">
-          <label class="resource-label">Roll Formula</label>
-          <input type="text" name="system.formula" value="{{system.formula}}" data-dtype="String"/>
+          <label for="system.level">Pode ter Rank: </label>
+          <input type="checkbox" class="rank-input" name="system.isRankable" {{checked system.isRankable}}>
         </div>
-      </div> -->
+        <div class="level-descriptions-container">
+          <div class="section-button">
+            <a class="add-level-description-btn"><i class="fa-solid fa-plus"></i> Add Level Description</a>
+          </div>
+          <ul class="level-descriptions-list">
+            {{#each system.levelDescriptions as |levelDescription|}}
+              <li class="level-descriptions-card" data-item-id="{{levelDescription.id}}">
+                <div class="data">
+                  <div>
+                    <span>Level:</span>
+                    <input class="level-description-input" type="text" value="{{levelDescription.level}}" data-input-objective="level">
+                  </div>
+                  <div>
+                    <span>Description:</span>
+                    <input class="level-description-input" type="text" value="{{levelDescription.description}}" data-input-objective="description">
+                  </div>
+                </div>
+                <div class="controls">
+                  <a class="level-description-remove-btn"><i class="fa-solid fa-trash"></i></a>
+                </div>
+              </li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
     </section>
   </form>
   

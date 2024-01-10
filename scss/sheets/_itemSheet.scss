@@ -1,3 +1,4 @@
+/* GLOBAL */
 header {
 	.header-fields {
 		input {
@@ -8,7 +9,12 @@ header {
 		}
 	}
 }
-
+.section-button{
+	width: 100%;
+	border-bottom: 1px solid #b5b3a4;
+	padding: 10px 0;
+}
+/*  */
 .item-move-sheet{
 	.move-attributes-list {
 		display: flex;
@@ -111,7 +117,38 @@ header {
 	}
 }
 .item-ability-sheet{
-
+	.level-descriptions-list{
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		margin-top: 10px;
+		.level-descriptions-card{
+			display: flex;
+			justify-content: space-between;
+			border-bottom: 1px solid $c-beige;
+			padding-bottom: 10px;
+			.data{
+				display: flex;
+				gap: 5px;
+				div{
+					display: flex;
+					align-items: center;
+					gap: 5px;
+					[data-input-objective="level"]{
+						width: 3em;
+						text-align: center;
+					}
+				}
+			}
+			.controls{
+				display: flex;
+				align-items: center;
+			}
+		}
+	}
 }
 .item-skill-sheet{
 	.rank-controller{

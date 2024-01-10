@@ -35,8 +35,9 @@
                                 <div class="info">
                                     <img src="{{ability.img}}" name="{{ability.name}}"> 
                                     <span class="name"><a class="show-description-window-btn">{{ability.name}}</a></span>
-                                    <span class="level">(Nível: {{ability.system.level}})</span>
-                                    {{#if ability.system.isRankable}}<span class="level">(Rank: {{ability.system.rank}})</span>{{/if}}
+                                    <span class="level">(Nível: {{ability.system.level}}{{#if ability.system.maxLevel}}/{{ability.system.maxLevel}}{{/if}})</span>
+                                    <!-- {{#if ability.system.isRankable}}<span class="level">(Rank: {{ability.system.rank}})</span>{{/if}} -->
+                                    {{#if ability.system.levelDescription}}<span class="levelDescription">{{ability.system.levelDescription}}</span>{{/if}}
                                 </div>
                                 <div class="control">
                                     <span class="ability-send-log-btn rollable" data-roll-type="ability"><a><i class="fa-solid fa-comment"></i></a></span>
