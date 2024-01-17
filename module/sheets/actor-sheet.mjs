@@ -48,12 +48,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.flags = actorData.flags;
 
 		if (actorData.type == "character") {
-			this._prepareItems(context);
+			this._prepareCharacterItems(context);
 			await this._prepareCharacterData(context);
 		}
 
 		if (actorData.type == "npc") {
 			// this._prepareItems(context);
+			this._prepareNPCItems(context)
 		}
 
 		// Add roll data for TinyMCE editors.
@@ -89,7 +90,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 	}
 
-	_prepareItems(context) {
+	_prepareCharacterItems(context) {
 		// Initialize containers.
 		const moves = [];
 		const movesByCategory = {};
@@ -151,6 +152,16 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.abilitiesByCategory = abilitiesByCategory;
 		context.gear = gear;
 		context.gearByCategory = gearByCategory;
+	}
+	_prepareNPCItems(context) {
+		const conditions = [];
+		for (let item of context.items) {
+			item.img = item.img || DEFAULT_TOKEN;
+			 if (item.type === "condition") {
+				conditions.push(item);
+			} 
+		}
+		context.conditions = conditions;
 	}
 
 	/* -------------------------------------------- */
@@ -265,7 +276,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		event.preventDefault();
 		const element = event.currentTarget;
 		const dataset = element.dataset;
-
+		console.log("chegou")
 		// Handle item rolls.
 		if (dataset.rollType) {
 			if (dataset.rollType == "item") {

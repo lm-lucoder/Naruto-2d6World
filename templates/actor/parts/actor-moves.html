@@ -85,6 +85,7 @@
                         <li class="condition-card item" data-item-id="{{condition._id}}">
                             <span class="title">{{condition.name}}</span>
                             <div class="controls">
+                                <a class="item-edit rollable" data-roll-type="item"><i class="fa-solid fa-comment"></i></a>
                                 <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
                                 <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
                                 <input class="checkbox condition-card-checkbox" type="checkbox" {{checked condition.system.isActive}} />

@@ -18,48 +18,49 @@ class RollMoveDialog extends Dialog {
 			const options = validAttributes.map(
 				(attribute, i) => `
 				<label>
-				<input type="radio" name="option" value="${attribute.name}">
-				${attribute.name[0].toUpperCase() + attribute.name.slice(1)}
+					<input type="radio" name="option" value="${attribute.name}">
+					${attribute.name[0].toUpperCase() + attribute.name.slice(1)}
 				</label>
 			`
 			);
+			const content = `
+				<div class="dialog-roll-move-content">
+					<div class="modifier-content">
+						<label>Modificador:</label>
+						<input class="modifier-input" type="text" name="modifier" placeholder="Ex: +1, +2, -1, -2">
+					</div>
+					<h3>Escolha o atributo</h3>
+					<div class="options-container">
+					${options.join("")}
+					</div>
+				</div>
+			`
 
 			new this({
 				title: `Rolando movimento: ${item.name}`,
-				content: `
-                <div class="dialog-roll-move-content">
-					<div class="modifier-content">
-						<label>Modificador:</label>
-						<input type="text" name="modifier" placeholder="Ex: +1, +2, -1, -2">
-					</div>
-                    <h3>Escolha o atributo</h3>
-                    <div class="options-container">
-                    ${options.join("")}
-                    </div>
-                </div>
-                `,
+				content,
 				buttons: {
 					button1: {
-						label: "+Vantagem",
+						label: "Grande Vantagem",
 						callback: (_, e) =>
-							this.dialogCallback({item, resolve, e, mode: "+advantage"}),
+							this.dialogCallback({item,content, resolve, e, mode: "+advantage"}),
 					},
 					button2: {
 						label: "Vantagem",
-						callback: (_, e) => this.dialogCallback({item, resolve, e, mode: "advantage"}),
+						callback: (_, e) => this.dialogCallback({item,content, resolve, e, mode: "advantage"}),
 					},
 					button3: {
 						label: "Normal",
-						callback: (_, e) => this.dialogCallback({item, resolve, e, mode: "normal"}),
+						callback: (_, e) => this.dialogCallback({item,content, resolve, e, mode: "normal"}),
 					},
 					button4: {
 						label: "Desvantagem",
-						callback: (_, e) => this.dialogCallback({item, resolve, e, mode: "disadvantage"}),
+						callback: (_, e) => this.dialogCallback({item,content, resolve, e, mode: "disadvantage"}),
 					},
 					button5: {
-						label: "+Desvantagem",
+						label: "Grande Desvantagem",
 						callback: (_, e) =>
-							this.dialogCallback({item, resolve, e, mode: "+disadvantage"}),
+							this.dialogCallback({item,content, resolve, e, mode: "+disadvantage"}),
 					},
 				},
                 close: () => { resolve(false) }
@@ -67,23 +68,29 @@ class RollMoveDialog extends Dialog {
 		});
 	}
 
-    static dialogCallback({item, resolve, e, mode}){
+    static dialogCallback({item, content ,resolve, e, mode}){
+		console.log(content)
         const options = e.target
 				.closest(".window-content")
 				.querySelector(".options-container")
 				.querySelectorAll('[name="option"]');
-			const checkedOption = [...options].find((option) => option.checked);
-			if (!checkedOption) {
-				ui.notifications.info(
-					"Escolha um atributo para rolar com o movimento!"
-				);
-				return;
-			}
-			const chosenAttribute = checkedOption.value;
-			item.moveRoll({
-				mode,
-				attribute: chosenAttribute,
-			});
+		const checkedOption = [...options].find((option) => option.checked);
+		if (!checkedOption) {
+			ui.notifications.info(
+				"Escolha um atributo para rolar com o movimento!"
+			);
+			return;
+		}
+		const chosenAttribute = checkedOption.value;
+		const rollModifier = e.target
+				.closest(".window-content")
+				.querySelector('.modifier-input')
+				.value
+		item.moveRoll({
+			mode,
+			attribute: chosenAttribute,
+			rollModifier
+		});
         resolve(true)
     }
 }

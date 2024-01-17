@@ -50,11 +50,11 @@
 			}
 		},
 		"npc": {
+			"templates": ["base"],
 			"rank": "",
 			"village": "",
 			"age": "",
-			"clan": "",
-			"biography": ""
+			"clan": ""
 		}
 	},
 	"Item": {
