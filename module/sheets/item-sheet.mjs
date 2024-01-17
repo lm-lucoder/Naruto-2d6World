@@ -111,6 +111,27 @@ export class BoilerplateItemSheet extends ItemSheet {
 			this.object.update({system: {levelDescriptions: [...levelDescriptions]} });
 		})
 
+		html.find(".add-item-attribute").click(async (ev) => {
+			const attributes = this.object.system.attributes
+			attributes.push({name: "New Attribute", value: 0, maxValue: 0, id: randomID(7)})
+			this.object.update({system: {attributes} });
+		})
+		html.find(".item-attribute-remove-btn").click(async (ev) => {
+			const id = ev.target.closest("li").getAttribute("data-item-id")
+			const attributes = this.object.system.attributes
+			const toRemoveIndex = attributes.findIndex(element => element.id === id)
+			attributes.splice(toRemoveIndex, 1)
+			this.object.update({system: {attributes: [...attributes]} });
+		})
+		html.find(".item-attribute-input").blur(async (ev) => {
+			const inputObjective = ev.target.getAttribute("data-input-objective")
+			const id = ev.target.closest("li").getAttribute("data-item-id")
+			const attributes = this.object.system.attributes
+			const attribute = attributes.find(element => element.id === id)
+			attribute[inputObjective] = ev.target.value
+			this.object.update({system: {attributes: [...attributes]} });
+		})
+
 		// Everything below here is only needed if the sheet is editable
 		if (!this.isEditable) return;
 

@@ -149,7 +149,8 @@
 			"slots": 0,
 			"slots_bonus": 0,
 			"considerSlots": true,
-			"onHand": false
+			"onHand": false,
+			"attributes" : []
 		}
 	}
 }
