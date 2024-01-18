@@ -215,8 +215,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 			});
 		});
 
-		html.find(".show-description-window-btn").click((event) => {
-			this._toggleDescriptionWindow(event);
+		html.find(".show-item-description-window-btn").click((event) => {
+			this._toggleItemDescriptionWindow(event);
+		});
+		html.find(".show-ability-description-window-btn").click((event) => {
+			this._toggleAbilityDescriptionWindow(event);
 		});
 
 		html.find(".item-on-hand-btn").click((event) => {
@@ -262,6 +265,32 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.chakraPoints -= 1) }}})
 			}
+		})
+
+		html.find('.ability-resource-tag').mousedown((e) => {
+			const abilityId = e.target.closest(".item").getAttribute('data-item-id')
+			const ability = this.object.items.get(abilityId)
+			const resourceId = e.target.closest(".ability-resource-tag").getAttribute("data-resource-id")
+			const resource = ability.system.resources.find(resource => resource.id == resourceId)
+			
+			if (e.shiftKey) {
+				resource.value = parseInt(resource.maxValue)
+				return ability.update({system: {resources: [... ability.system.resources]}})
+			}
+			if (e.button === 0) {
+				if (resource.value == resource.maxValue) {
+					return ui.notifications.info("Os pontos deste recurso já estão no máximo");
+				}
+				resource.value = parseInt(resource.value) + 1
+				return ability.update({system: {resources: [... ability.system.resources]}})
+			} else if (e.button === 2) {
+				if (resource.value == 0) {
+					return ui.notifications.info("Os pontos deste recurso já estão no mínimo");
+				}
+				resource.value = parseInt(resource.value) - 1
+				return ability.update({system: {resources: [... ability.system.resources]}})
+			}
+			
 		})
 
 		// Drag events for macros.
@@ -364,7 +393,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		RollMoveDialog.create(item)
 	}
 
-	_toggleDescriptionWindow(event) {
+	_toggleItemDescriptionWindow(event) {
 		const itemId = event.target.closest("li").getAttribute("data-item-id");
 		const windowElement = event.target
 			.closest("li")
@@ -382,17 +411,39 @@ export class BoilerplateActorSheet extends ActorSheet {
 							<span>${attribute.value} / ${attribute.maxValue}</span>
 						</li>
 						`
-						/* return `
-						<li class="item-attribute-card" data-item-attribute-id="${attribute.id}">
-							<span><b>${attribute.name}:</b></span>
-							<input class="item-attribute-card-input" value="${attribute.value}" data-objective="value"/>
-							<input class="item-attribute-card-input" value="${attribute.maxValue}" data-objective="maxValue"/>
-						</li>
-						` */
 					}).join('')}
 				</ul>
 				<div class="item-description">
 					${item.system.description}
+				</div>
+			`
+			;
+		} else {
+			windowElement.innerHTML = "";
+		}
+	}
+	_toggleAbilityDescriptionWindow(event) {
+		const itemId = event.target.closest("li").getAttribute("data-item-id");
+		const windowElement = event.target
+			.closest("li")
+			.querySelector(".description-window");
+		const ability = this.actor.items.get(itemId);
+		const abilityResources = ability.system.resources;
+		if (windowElement.innerHTML.trim() === "") {
+			windowElement.innerHTML = `
+				<ul class="ability-resources-description-list">
+					${abilityResources.map(resource => {
+						console.log("attribute", resource)
+						return `
+							<li class="ability-resource-description-card" data-item-attribute-id="${resource.id}">
+								<span><b>${resource.name}:</b></span>
+								<span>${resource.value} / ${resource.maxValue}</span>
+							</li>
+						`
+					}).join('')}
+				</ul>
+				<div class="item-description">
+					${ability.system.description}
 				</div>
 			`
 			;

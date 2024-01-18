@@ -134,7 +134,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 
 		html.find(".add-ability-resource").click(async (ev) => {
 			const resources = this.object.system.resources
-			resources.push({name: "New Resource", value: 0, maxValue: 0, id: randomID(7)})
+			resources.push({name: "New Resource", value: 0, maxValue: 0, show: false, id: randomID(7)})
 			this.object.update({system: {resources} });
 		})
 		html.find(".ability-resource-remove-btn").click(async (ev) => {
@@ -150,6 +150,17 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const resources = this.object.system.resources
 			const resource = resources.find(element => element.id === id)
 			resource[inputObjective] = ev.target.value
+			this.object.update({system: {resources: [...resources]} });
+		})
+		html.find(".ability-resource-card-checkbox").change(async (e) => {
+			const id = e.target.closest("li").getAttribute("data-item-id")
+			const resources = this.object.system.resources
+			const resource = resources.find(element => element.id === id)
+			if(e.target.checked){
+				resource.show = true
+			} else {
+				resource.show = false
+			}
 			this.object.update({system: {resources: [...resources]} });
 		})
 

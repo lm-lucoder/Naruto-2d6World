@@ -1,5 +1,5 @@
 <div class="skills-section">
-    <div class="skills-container left-section">
+    <!-- <div class="skills-container left-section">
         <h3>Perícias:</h3>
         <div class="section-buttons">
             <a class="add-skill-btn item-create" data-type="skill"><i class="fa-solid fa-plus"></i> Adicionar nova perícia</a>
@@ -19,7 +19,7 @@
                 </li>
             {{/each}}
         </ol>
-    </div>
+    </div> -->
     <div class="right-section">
         <h3>Habilidades:</h3>
         <div class="section-buttons">
@@ -34,9 +34,19 @@
                             <div class="content">
                                 <div class="info">
                                     <img src="{{ability.img}}" name="{{ability.name}}"> 
-                                    <span class="name"><a class="show-description-window-btn">{{ability.name}}</a></span>
+                                    <span class="name"><a class="show-ability-description-window-btn">{{ability.name}}</a></span>
                                     <span class="level">(Nível: {{ability.system.level}}{{#if ability.system.maxLevel}}/{{ability.system.maxLevel}}{{/if}})</span>
                                     {{#if ability.system.levelDescription}}<span class="levelDescription">{{ability.system.levelDescription}}</span>{{/if}}
+                                    <div class="ability-resources-tag-container">
+                                        {{#each ability.system.resources as |resource|}}
+                                            {{#if resource.show}}
+                                                <div class="ability-resource-tag" data-resource-id="{{resource.id}}">
+                                                    <span class="name">{{resource.name}}</span>
+                                                    <span class="data">{{resource.value}} / {{resource.maxValue}}</span>
+                                                </div>
+                                            {{/if}}
+                                        {{/each}}
+                                    </div>
                                 </div>
                                 <div class="control">
                                     {{#if ability.system.chakra.useChakraPoints}}
@@ -50,7 +60,7 @@
                                     <span class="ability-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
                                 </div>
                             </div>
-                            <div class="description-window display_none">
+                            <div class="description-window">
                             </div>
                         </li>
                     {{/each}}

@@ -138,7 +138,7 @@ header {
 				.data{
 					display: flex;
 					align-items: center;
-					gap: 20px;
+					gap: 5px;
 					div{
 						display: flex;
 						align-items: center;
@@ -151,6 +151,9 @@ header {
 							flex-grow: 1;
 						}
 					}
+				}
+				.control{
+					margin-left: 5px;
 				}
 			}
 		}

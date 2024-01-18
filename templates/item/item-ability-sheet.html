@@ -83,6 +83,10 @@
               <li class="ability-resources-card" data-item-id="{{resource.id}}">
                 <div class="data">
                   <div>
+                    <span>Show:</span>
+                    <input class="ability-resource-card-checkbox" type="checkbox" {{checked resource.show}} />
+                  </div>
+                  <div>
                     <span>Name:</span>
                     <input class="ability-resource-input" type="text" value="{{resource.name}}" data-input-objective="name">
                   </div>
@@ -95,7 +99,7 @@
                     <input class="ability-resource-input" type="text" value="{{resource.maxValue}}" data-input-objective="maxValue">
                   </div>
                 </div>
-                <div class="controls">
+                <div class="control">
                   <a class="ability-resource-remove-btn"><i class="fa-solid fa-trash"></i></a>
                 </div>
               </li>
