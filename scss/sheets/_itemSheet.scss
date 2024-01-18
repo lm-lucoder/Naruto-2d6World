@@ -123,6 +123,38 @@ header {
 			align-items: center;
 		}
 	}
+	.ability-resources-container{
+		.ability-resources-list{
+			padding: 0;
+			margin: 0;
+			list-style: none;
+			.ability-resources-card{
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin: 5px 0;
+				padding: 5px 0;
+				border-bottom: 1px solid $c-beige;
+				.data{
+					display: flex;
+					align-items: center;
+					gap: 20px;
+					div{
+						display: flex;
+						align-items: center;
+						gap: 5px;
+						input{
+							max-width: 3em;
+						}
+						[data-input-objective="name"]{
+							max-width: none;
+							flex-grow: 1;
+						}
+					}
+				}
+			}
+		}
+	}
 	.level-descriptions-list{
 		list-style: none;
 		padding: 0;

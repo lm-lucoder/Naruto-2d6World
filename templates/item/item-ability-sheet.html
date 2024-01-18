@@ -23,13 +23,13 @@
     </header>
   
     {{!-- Sheet Tab Navigation --}}
-    {{#if system.isRankable}}
+    <!-- {{#if system.isRankable}}
       {{#if item.isOwned}}
         <div class="resource">
           <span><b>Rank:</b> {{system.rank}}</span>
         </div>  
       {{/if}}
-    {{/if}}
+    {{/if}} -->
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>
       <a class="item" data-tab="attributes">Attributes</a>
@@ -70,9 +70,37 @@
             {{/if}}
           </div>
         </div>
-        <div class="resource">
+        <!-- <div class="resource">
           <label for="system.level">Pode ter Rank: </label>
           <input type="checkbox" class="rank-input" name="system.isRankable" {{checked system.isRankable}}>
+        </div> -->
+        <div class="ability-resources-container">
+          <div class="section-button">
+            <a class="add-ability-resource"><i class="fa-solid fa-plus"></i> Add Resource</a>
+          </div>
+          <ul class="ability-resources-list">
+            {{#each system.resources as |resource|}}
+              <li class="ability-resources-card" data-item-id="{{resource.id}}">
+                <div class="data">
+                  <div>
+                    <span>Name:</span>
+                    <input class="ability-resource-input" type="text" value="{{resource.name}}" data-input-objective="name">
+                  </div>
+                  <div>
+                    <span>Value:</span>
+                    <input class="ability-resource-input" type="text" value="{{resource.value}}" data-input-objective="value">
+                  </div>
+                  <div>
+                    <span>Max value:</span>
+                    <input class="ability-resource-input" type="text" value="{{resource.maxValue}}" data-input-objective="maxValue">
+                  </div>
+                </div>
+                <div class="controls">
+                  <a class="ability-resource-remove-btn"><i class="fa-solid fa-trash"></i></a>
+                </div>
+              </li>
+            {{/each}}
+          </ul>
         </div>
         <div class="level-descriptions-container">
           <div class="section-button">

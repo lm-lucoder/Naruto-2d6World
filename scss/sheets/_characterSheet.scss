@@ -275,15 +275,12 @@
 							align-items: center;
 							gap: 5px;
 							.chakra-tag{
-								border: 1px solid $c-chakra-line;
-								background-color: $c-chakra-bg-transparent;
-								border-radius: 6px;
-								padding: 3px 6px;
 								display: flex;
 								align-items: center;
 								color: $c-chakra-line;
 								font-weight: bold;
 								cursor: pointer;
+								margin-right: 10px;
 								.name{
 									img{
 										width: 20px;

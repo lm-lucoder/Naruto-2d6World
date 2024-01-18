@@ -138,14 +138,14 @@
 			"category": "Normal",
 			"level": 1,
 			"maxLevel": 0,
-			"isRankable": false,
 			"chakra":{
 				"useChakraPoints": true,
 				"chakraPoints": 0,
 				"chakraPointsPerLevel": 1,
 				"defaultChakraPoints": 0
 			},
-			"levelDescriptions": []
+			"levelDescriptions": [],
+			"resources": []
 		},
 		"item": {
 			"templates": ["base"],
