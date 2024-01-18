@@ -138,6 +138,7 @@
 			"category": "Normal",
 			"level": 1,
 			"maxLevel": 0,
+			"showMaxLevel" : true,
 			"chakra":{
 				"useChakraPoints": true,
 				"chakraPoints": 0,
