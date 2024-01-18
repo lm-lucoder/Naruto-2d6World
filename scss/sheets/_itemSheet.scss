@@ -117,6 +117,12 @@ header {
 	}
 }
 .item-ability-sheet{
+	.chakra-points-container{
+		.data{
+			display: flex;
+			align-items: center;
+		}
+	}
 	.level-descriptions-list{
 		list-style: none;
 		padding: 0;

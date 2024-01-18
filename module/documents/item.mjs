@@ -21,6 +21,9 @@ export class BoilerplateItem extends Item {
 			if (levelDescription?.description) {
 				this.system.levelDescription = levelDescription.description;
 			}
+			if (this.system.chakra.useChakraPoints) {
+				this.system.chakra.maxChakraPoints = +this.system.level * +this.system.chakra.chakraPointsPerLevel + +this.system.chakra.defaultChakraPoints
+			}
 		}
 	}
 

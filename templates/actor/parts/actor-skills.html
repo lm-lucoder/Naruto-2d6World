@@ -36,10 +36,15 @@
                                     <img src="{{ability.img}}" name="{{ability.name}}"> 
                                     <span class="name"><a class="show-description-window-btn">{{ability.name}}</a></span>
                                     <span class="level">(Nível: {{ability.system.level}}{{#if ability.system.maxLevel}}/{{ability.system.maxLevel}}{{/if}})</span>
-                                    <!-- {{#if ability.system.isRankable}}<span class="level">(Rank: {{ability.system.rank}})</span>{{/if}} -->
                                     {{#if ability.system.levelDescription}}<span class="levelDescription">{{ability.system.levelDescription}}</span>{{/if}}
                                 </div>
                                 <div class="control">
+                                    {{#if ability.system.chakra.useChakraPoints}}
+                                        <div class="chakra-tag">
+                                            <span class="name"><img src="systems/naruto2d6world/assets/icons/chakraIcon.png" name="CP"></span>
+                                            <span class="data">{{ability.system.chakra.chakraPoints}} / {{ability.system.chakra.maxChakraPoints}}</span>
+                                        </div>
+                                    {{/if}}
                                     <span class="ability-send-log-btn rollable" data-roll-type="ability"><a><i class="fa-solid fa-comment"></i></a></span>
                                     <span class="ability-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
                                     <span class="ability-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>

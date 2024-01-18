@@ -245,6 +245,25 @@ export class BoilerplateActorSheet extends ActorSheet {
 			item.update({system: {attributes : [... item.system.attributes]}})
 		})
 
+		html.find('.chakra-tag').mousedown((e) => {
+			const itemId = e.target.closest(".item").getAttribute('data-item-id')
+			const item = this.object.items.get(itemId)
+			if (e.shiftKey) {
+				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.maxChakraPoints) }}})
+			}
+			if (e.button === 0) {
+				if (item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints) {
+					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
+				}
+				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.chakraPoints += 1) }}})
+			} else if (e.button === 2) {
+				if (item.system.chakra.chakraPoints == 0) {
+					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no mínimo");
+				}
+				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.chakraPoints -= 1) }}})
+			}
+		})
+
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);

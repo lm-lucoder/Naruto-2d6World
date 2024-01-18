@@ -47,6 +47,29 @@
       {{!-- Attributes Tab --}}
       <div class="tab attributes" data-group="primary" data-tab="attributes">
         {{!-- As you add new fields, add them in here! --}}
+        <div class="chakra-points-container">
+          <h3>Chakra points</h3>
+          <div class="grid grid-4col data">
+            <div class="resource">
+              <label for="system.level">Usa chakra:</label>
+              <input type="checkbox" name="system.chakra.useChakraPoints" {{checked system.chakra.useChakraPoints}}>
+            </div>
+            {{#if system.chakra.useChakraPoints}}
+              <div class="resource">
+                <label for="system.level">Chakra Points ({{system.chakra.chakraPoints}} / {{system.chakra.maxChakraPoints}}):</label>
+                <input type="text" name="system.chakra.chakraPoints" value="{{system.chakra.chakraPoints}}">
+              </div>
+              <div class="resource">
+                <label for="system.level">Por nível:</label>
+                <input type="text" name="system.chakra.chakraPointsPerLevel" value="{{system.chakra.chakraPointsPerLevel}}">
+              </div>
+              <div class="resource">
+                <label for="system.level">Padrão:</label>
+                <input type="text" name="system.chakra.defaultChakraPoints" value="{{system.chakra.defaultChakraPoints}}">
+              </div>
+            {{/if}}
+          </div>
+        </div>
         <div class="resource">
           <label for="system.level">Pode ter Rank: </label>
           <input type="checkbox" class="rank-input" name="system.isRankable" {{checked system.isRankable}}>
