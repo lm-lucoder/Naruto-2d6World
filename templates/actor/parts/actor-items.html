@@ -31,13 +31,19 @@
                                         {{item.name}}
                                     </a></span>
                                     <div class="item-attributes">
-                                        <span class="quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
+                                            <span class="quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
                                         {{#if item.system.slots}}
                                             <span class="slots"><i class="fa-solid fa-weight-hanging"></i> ({{multiplyWithTwoDecimalsMax item.system.slots item.system.quantity}})</span>
                                         {{/if}}
                                         {{#if item.system.slots_bonus}}
                                             <span class="slots_bonus"><i class="fa-solid fa-square-plus"></i> ({{multiplyWithTwoDecimalsMax item.system.slots_bonus item.system.quantity}})</span>
                                         {{/if}}
+                                        {{#each item.system.attributes as |attribute|}}
+                                            <div class="item-card-attribute-tag" data-attribute-id="{{attribute.id}}">
+                                                <span class="name">{{attribute.name}}</span>
+                                                <span class="data">{{attribute.value}} / {{attribute.maxValue}}</span>
+                                            </div>
+                                        {{/each}}
                                     </div>
                                 </div>
                                 <div class="item-card-buttons">

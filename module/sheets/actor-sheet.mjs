@@ -228,19 +228,22 @@ export class BoilerplateActorSheet extends ActorSheet {
 				this.object.items.get(itemId).update({system: {onHand: true}})
 			}
 		})
-		/* html.find(".item-attribute-card-input").blur((event)=>{
-			console.log("chegou")
-			const objective = e.target.getAttribute("data-objective")
-			const attributeId = event.target.closest(".item-attribute-card").getAttribute('item-attribute-card');
-			const itemId = event.target.closest(".item-card").getAttribute('data-item-id');
+		html.find(".item-card-attribute-tag").mousedown((e) => {
+			const itemId = e.target.closest(".item-card").getAttribute('data-item-id')
+			const itemAttributeId = e.target.closest('.item-card-attribute-tag').getAttribute("data-attribute-id")
 			const item = this.object.items.get(itemId)
-			const itemAttributes = item.system.attributes
-			const attribute = itemAttributes.find(attribute => attribute.id = attributeId)
-			// const attributeIndex = itemAttributes.findIndex(attribute => attribute.id = attributeId)
-			attribute[objective] = e.target.value
-			// itemAttributes.splice(attributeIndex, 1, )
-			item.update({system: {attributes: [...itemAttributes]}})
-		}) */
+			const attribute = item.system.attributes.find(attribute => attribute.id == itemAttributeId)
+			if (e.shiftKey) {
+				attribute.value = attribute.maxValue
+				return item.update({system: {attributes : [... item.system.attributes]}})
+			}
+			if (e.button === 0) {
+				attribute.value = parseInt(attribute.value) + 1
+			} else if (e.button === 2) {
+				attribute.value = parseInt(attribute.value) - 1
+			}
+			item.update({system: {attributes : [... item.system.attributes]}})
+		})
 
 		// Drag events for macros.
 		if (this.actor.isOwner) {
@@ -351,45 +354,28 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const itemAttributes = item.system.attributes;
 		if (windowElement.innerHTML.trim() === "") {
 			windowElement.innerHTML = `
-			<ul class="item-attributes-list">
-				${itemAttributes.map(attribute => {
-					console.log("attribute", attribute)
-					return `
-					<li class="item-attribute-card" data-item-attribute-id="${attribute.id}">
-						<span><b>${attribute.name}:</b></span>
-						<span>${attribute.value} / ${attribute.maxValue}</span>
-					</li>
-					`
-					/* return `
-					<li class="item-attribute-card" data-item-attribute-id="${attribute.id}">
-						<span><b>${attribute.name}:</b></span>
-						<input class="item-attribute-card-input" value="${attribute.value}" data-objective="value"/>
-						<input class="item-attribute-card-input" value="${attribute.maxValue}" data-objective="maxValue"/>
-					</li>
-					` */
-				}).join('')}
-			</ul>
-			<div class="item-description">
-				${item.system.description}
-			</div>
+				<ul class="item-attributes-list">
+					${itemAttributes.map(attribute => {
+						console.log("attribute", attribute)
+						return `
+						<li class="item-attribute-card" data-item-attribute-id="${attribute.id}">
+							<span><b>${attribute.name}:</b></span>
+							<span>${attribute.value} / ${attribute.maxValue}</span>
+						</li>
+						`
+						/* return `
+						<li class="item-attribute-card" data-item-attribute-id="${attribute.id}">
+							<span><b>${attribute.name}:</b></span>
+							<input class="item-attribute-card-input" value="${attribute.value}" data-objective="value"/>
+							<input class="item-attribute-card-input" value="${attribute.maxValue}" data-objective="maxValue"/>
+						</li>
+						` */
+					}).join('')}
+				</ul>
+				<div class="item-description">
+					${item.system.description}
+				</div>
 			`
-			// const attributeInputs = windowElement.querySelectorAll('.item-attribute-card-input')
-			// for (const attribute of attributeInputs) {
-			// 	attribute.addEventListener('blur', (e)=>{
-			// 		console.log("chegou")
-			// 		// debugger
-			// 		const objective = e.target.getAttribute("data-objective")
-			// 		const attributeId = e.target.closest(".item-attribute-card").getAttribute('data-item-attribute-id');
-			// 		const itemId = e.target.closest(".item-card").getAttribute('data-item-id');
-			// 		const item = this.object.items.get(itemId)
-			// 		const itemAttributes = item.system.attributes
-			// 		const attribute = itemAttributes.find(attribute => attribute.id = attributeId)
-			// 		// const attributeIndex = itemAttributes.findIndex(attribute => attribute.id = attributeId)
-			// 		attribute[objective] = e.target.value
-			// 		// itemAttributes.splice(attributeIndex, 1, )
-			// 		item.update({system: {attributes: [...itemAttributes]}})
-			// 	})
-			// }
 			;
 		} else {
 			windowElement.innerHTML = "";

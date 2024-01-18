@@ -132,6 +132,8 @@ export class BoilerplateItemSheet extends ItemSheet {
 			this.object.update({system: {attributes: [...attributes]} });
 		})
 
+		
+
 		// Everything below here is only needed if the sheet is editable
 		if (!this.isEditable) return;
 
