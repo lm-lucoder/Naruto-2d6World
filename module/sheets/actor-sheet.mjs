@@ -155,13 +155,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 	}
 	_prepareNPCItems(context) {
 		const conditions = [];
+		const moves = [];
 		for (let item of context.items) {
 			item.img = item.img || DEFAULT_TOKEN;
 			 if (item.type === "condition") {
 				conditions.push(item);
 			} 
+			 if (item.type === "move") {
+				moves.push(item);
+			} 
 		}
 		context.conditions = conditions;
+		context.moves = moves;
 	}
 
 	/* -------------------------------------------- */
@@ -361,7 +366,6 @@ export class BoilerplateActorSheet extends ActorSheet {
 		event.preventDefault();
 		const element = event.currentTarget;
 		const dataset = element.dataset;
-		console.log("chegou")
 		// Handle item rolls.
 		if (dataset.rollType) {
 			if (dataset.rollType == "item") {

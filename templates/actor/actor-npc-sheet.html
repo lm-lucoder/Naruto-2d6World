@@ -81,6 +81,24 @@
             {{/each}}
         </ul>
       </div>
+      <div class="moves-container" >
+        <h3 class="conditions-title">Movimentos</h3>
+        <div class="section-buttons">
+            <a class="item-create" data-type="move"><i class="fa-solid fa-plus"></i>Adicionar movimento</a>
+        </div>
+        <ul class="moves-list">
+          {{#each moves as |move|}}
+              <li class="move-card item" data-item-id="{{move._id}}">
+                  <span class="title">{{move.name}}</span>
+                  <div class="controls">
+                      <a class="item-send rollable"  data-roll-type="item"><i class="fa-solid fa-comment"></i></a>
+                      <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
+                      <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+                  </div>
+              </li>
+          {{/each}}
+      </ul>
+      </div>
        <h3>Biografia</h3>
         {{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}
     </div>
