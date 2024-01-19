@@ -24,6 +24,14 @@ export class BoilerplateItem extends Item {
 			if (this.system.chakra.useChakraPoints) {
 				this.system.chakra.maxChakraPoints = +this.system.level * +this.system.chakra.chakraPointsPerLevel + +this.system.chakra.defaultChakraPoints
 			}
+			this.refillChakraPoints = function refillChakraPoints(){
+				this.update({system: {chakra : {chakraPoints : (this.system.chakra.maxChakraPoints) }}})
+			}
+			this.refillChakraPointsFromActor = function refillChakraPoints(actorId){
+				const actor = Actor.get(actorId);
+				actor.update({system: {chakra: {value: parseInt(actor.system.chakra.value) - 1}}})
+				this.refillChakraPoints()
+			}
 		}
 	}
 
@@ -341,4 +349,6 @@ export class BoilerplateItem extends Item {
     `;
 		return label;
 	}
+
+
 }

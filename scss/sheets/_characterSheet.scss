@@ -1,3 +1,22 @@
+@keyframes slideUpDown {
+    0% {
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(-1.5px);
+    }
+	50%{
+		transform: translateY(0);
+	}
+    75% {
+      transform: translateY(1.5px);
+    }
+	100% {
+		transform: translateY(0);
+	}
+  }
+  
+  
  .sheet-header {
  	.header-fields{
  		/* .charname{
@@ -267,7 +286,7 @@
 								width: 30px;
 								border: none;
 							}
-							.level, .levelDescription, .chakra-tag{
+							.level, .levelDescription{
 								font-size: 0.8em;
 							}
 							.level{
@@ -289,6 +308,7 @@
 									display: flex;
 									align-items: center;
 									cursor: pointer;
+									transition: .1s;
 									span{
 										font-size: 0.8em;
 										white-space: nowrap;
@@ -298,6 +318,10 @@
 										margin-left: 3px;
 										border-left: 1px solid $c-beige;
 									}
+									
+								}
+								.ability-resource-tag:hover{
+									filter: brightness(1.5);
 								}
 							}
 							
@@ -316,13 +340,18 @@
 								span{
 									white-space: nowrap;
 								}
-								.name{
-									img{
-										width: 20px;
-										min-width: 20px;
-										border: none;
-									}
+								img{
+									width: 20px;
+									min-width: 20px;
+									border: none;
+									overflow: visible;
+									position: relative;
+									transition: .1s;
 									
+								}
+								img:hover{
+									animation: slideUpDown 1s infinite linear;
+									filter: brightness(1.5);
 								}
 								.data{
 									padding-left: 3px;
@@ -399,6 +428,9 @@
 									margin-left: 3px;
 									border-left: 1px solid $c-beige;
 								}
+							}
+							.item-card-attribute-tag:hover{
+								filter: brightness(1.5);
 							}
 						}
 					}

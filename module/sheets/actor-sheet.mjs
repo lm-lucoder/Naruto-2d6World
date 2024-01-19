@@ -251,6 +251,27 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find('.chakra-tag').mousedown((e) => {
 			const itemId = e.target.closest(".item").getAttribute('data-item-id')
 			const item = this.object.items.get(itemId)
+			if (e.target.classList.contains("image")) {
+				const actorChakraValue = parseInt(this.object.system.chakra.value)
+				const actorMaxChakraValue = parseInt(this.object.system.chakra.maxValue)
+				console.log(item)
+				if(actorChakraValue == 0){
+					return ui.notifications.info("Você não possui pontos de chakra para isso");
+				}
+				if(item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints){
+					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
+				}
+				item.refillChakraPointsFromActor(this.object.id)
+				const speaker = ChatMessage.getSpeaker({ actor: this.object });
+				ChatMessage.create({
+					speaker: speaker,
+					flavor: `${this.object.name} CP: ${this.object.system.chakra.value}/${this.object.system.chakra.max}`,
+					content: `${this.object.name} consumiu 1 ponto de chakra e recarregou a habilidade: ${item.name}`
+				});
+				// item.update({system: {chakra : {chakraPoints : (item.system.chakra.maxChakraPoints) }}})
+				// this.object.update({system: {chakra: {value : actorChakraValue - 1}}})
+				return
+			}
 			if (e.shiftKey) {
 				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.maxChakraPoints) }}})
 			}

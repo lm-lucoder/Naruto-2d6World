@@ -17,7 +17,7 @@
 		"character": {
 			"templates": ["base"],
 			"params": {
-				"rank": "",
+				"rank": "0",
 				"village": "",
 				"age": "",
 				"clan": "",
