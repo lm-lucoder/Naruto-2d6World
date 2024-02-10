@@ -103,7 +103,6 @@ export class BoilerplateActor extends Actor {
     }
     // debugger
     for(let [key, value] of Object.entries(attributes)){
-      console.log(value, conditionMods[key])
       value.actual = value.max + conditionMods[key]
     }
   }

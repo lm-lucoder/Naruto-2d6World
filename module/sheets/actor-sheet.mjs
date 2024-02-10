@@ -35,7 +35,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 	get template() {
 		return `systems/naruto2d6world/templates/actor/actor-${this.actor.type}-sheet.html`;
 	}
-
+	_onDropItem(e, data){
+		if (data.type === "Item" && !e.ctrlKey) {
+			const itemId = data.uuid.split(".")[1]
+			const itemName = Item.get(itemId).name
+			const actorItem = this.object.items.find(item => item.name == itemName)
+			if (actorItem) {
+				return actorItem.updateQuantity(1)
+			} 
+		}
+		
+		super._onDropItem(e, data)
+	}
 	/* -------------------------------------------- */
 
 	/** @override */
@@ -236,18 +247,73 @@ export class BoilerplateActorSheet extends ActorSheet {
 				this.object.items.get(itemId).update({system: {onHand: true}})
 			}
 		})
+		html.find(".item-attribute-quantity").mousedown((e) => {
+			const itemId = e.target.closest(".item-card").getAttribute('data-item-id')
+			const item = this.object.items.get(itemId)
+			console.log(item.system.quantity)
+			if (e.button === 0) {
+				if (e.shiftKey) {
+					item.system.quantity += 5
+					return item.update({system: {quantity : item.system.quantity}})
+				}
+				item.system.quantity += 1
+				return item.update({system: {quantity : item.system.quantity}})
+			}
+			if (e.button === 2) {
+				if (item.system.quantity == 0) {
+					return ui.notifications.info(`${item.name} já está no mínimo!`);
+				}
+				if (e.shiftKey) {
+					item.system.quantity -= 5
+					if (item.system.quantity < 0) {
+						item.system.quantity = 0
+					}
+					return item.update({system: {quantity : item.system.quantity}})
+				}
+				if (e.ctrlKey) {
+					return item.update({system: {quantity : 0}})
+				}
+				item.system.quantity -= 1
+				return item.update({system: {quantity : item.system.quantity}})
+			}
+		})
 		html.find(".item-card-attribute-tag").mousedown((e) => {
 			const itemId = e.target.closest(".item-card").getAttribute('data-item-id')
 			const itemAttributeId = e.target.closest('.item-card-attribute-tag').getAttribute("data-attribute-id")
 			const item = this.object.items.get(itemId)
 			const attribute = item.system.attributes.find(attribute => attribute.id == itemAttributeId)
-			if (e.shiftKey) {
-				attribute.value = attribute.maxValue
-				return item.update({system: {attributes : [... item.system.attributes]}})
-			}
 			if (e.button === 0) {
+				if (attribute.value == attribute.maxValue) {
+					return ui.notifications.info(`${attribute.name} já está no máximo!`);
+				}
+				if (e.ctrlKey) {
+					attribute.value = attribute.maxValue
+					return item.update({system: {attributes : [... item.system.attributes]}})
+				}
+				if (e.shiftKey) {
+					attribute.value = parseInt(attribute.value) + 5
+					if (attribute.value > attribute.maxValue) {
+						attribute.value = attribute.maxValue
+					}
+					return item.update({system: {attributes : [... item.system.attributes]}})
+				}
 				attribute.value = parseInt(attribute.value) + 1
-			} else if (e.button === 2) {
+			} 
+			if (e.button === 2) {
+				if (attribute.value == 0) {
+					return ui.notifications.info(`${attribute.name} já está no mínimo!`);
+				}
+				if (e.ctrlKey) {
+					attribute.value = 0
+					return item.update({system: {attributes : [... item.system.attributes]}})
+				}
+				if (e.shiftKey) {
+					attribute.value = parseInt(attribute.value) - 5
+					if (attribute.value < 0) {
+						attribute.value = 0
+					}
+					return item.update({system: {attributes : [... item.system.attributes]}})
+				}
 				attribute.value = parseInt(attribute.value) - 1
 			}
 			item.update({system: {attributes : [... item.system.attributes]}})
@@ -256,10 +322,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find('.chakra-tag').mousedown((e) => {
 			const itemId = e.target.closest(".item").getAttribute('data-item-id')
 			const item = this.object.items.get(itemId)
+			item.system.chakra.chakraPoints = parseInt(item.system.chakra.chakraPoints)
 			if (e.target.classList.contains("image")) {
 				const actorChakraValue = parseInt(this.object.system.chakra.value)
 				const actorMaxChakraValue = parseInt(this.object.system.chakra.maxValue)
-				console.log(item)
 				if(actorChakraValue == 0){
 					return ui.notifications.info("Você não possui pontos de chakra para isso");
 				}
@@ -277,19 +343,41 @@ export class BoilerplateActorSheet extends ActorSheet {
 				// this.object.update({system: {chakra: {value : actorChakraValue - 1}}})
 				return
 			}
-			if (e.shiftKey) {
-				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.maxChakraPoints) }}})
-			}
 			if (e.button === 0) {
 				if (item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
 				}
-				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.chakraPoints += 1) }}})
-			} else if (e.button === 2) {
+				if (e.shiftKey) {
+					item.system.chakra.chakraPoints = item.system.chakra.chakraPoints += 5
+					if (item.system.chakra.chakraPoints > item.system.chakra.maxChakraPoints) {
+						item.system.chakra.chakraPoints = item.system.chakra.maxChakraPoints
+					}
+					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+				}
+				if (e.ctrlKey) {
+					item.system.chakra.chakraPoints = item.system.chakra.maxChakraPoints
+					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+				}
+				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints += 1
+				return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+			} 
+			if (e.button === 2) {
 				if (item.system.chakra.chakraPoints == 0) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no mínimo");
 				}
-				return item.update({system: {chakra : {chakraPoints : (item.system.chakra.chakraPoints -= 1) }}})
+				if (e.shiftKey) {
+					item.system.chakra.chakraPoints = item.system.chakra.chakraPoints -= 5
+					if (item.system.chakra.chakraPoints < 0) {
+						item.system.chakra.chakraPoints = 0
+					}
+					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+				}
+				if (e.ctrlKey) {
+					item.system.chakra.chakraPoints = 0
+					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+				}
+				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints -= 1
+				return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
 			}
 		})
 
@@ -299,19 +387,38 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const resourceId = e.target.closest(".ability-resource-tag").getAttribute("data-resource-id")
 			const resource = ability.system.resources.find(resource => resource.id == resourceId)
 			
-			if (e.shiftKey) {
-				resource.value = parseInt(resource.maxValue)
-				return ability.update({system: {resources: [... ability.system.resources]}})
-			}
 			if (e.button === 0) {
 				if (resource.value == resource.maxValue) {
 					return ui.notifications.info("Os pontos deste recurso já estão no máximo");
 				}
+				if (e.shiftKey) {
+					resource.value = parseInt(resource.value) + 5
+					if (resource.value > resource.maxValue) {
+						resource.value = resource.maxValue
+					}
+					return ability.update({system: {resources: [... ability.system.resources]}})
+				}
+				if (e.ctrlKey) {
+					resource.value = resource.maxValue
+					return ability.update({system: {resources: [... ability.system.resources]}})
+				}
 				resource.value = parseInt(resource.value) + 1
 				return ability.update({system: {resources: [... ability.system.resources]}})
-			} else if (e.button === 2) {
+			} 
+			if (e.button === 2) {
 				if (resource.value == 0) {
 					return ui.notifications.info("Os pontos deste recurso já estão no mínimo");
+				}
+				if (e.shiftKey) {
+					resource.value = parseInt(resource.value) - 5
+					if (resource.value < 0) {
+						resource.value = 0
+					}
+					return ability.update({system: {resources: [... ability.system.resources]}})
+				}
+				if (e.ctrlKey) {
+					resource.value = 0
+					return ability.update({system: {resources: [... ability.system.resources]}})
 				}
 				resource.value = parseInt(resource.value) - 1
 				return ability.update({system: {resources: [... ability.system.resources]}})

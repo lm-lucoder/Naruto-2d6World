@@ -33,6 +33,14 @@ export class BoilerplateItem extends Item {
 				this.refillChakraPoints()
 			}
 		}
+		if (this.type === "item") {
+			this.updateQuantity = function updateQuantity(qtValue){
+				console.log("UPDATEEEEE")
+				console.log(this)
+				const newQt = this.system.quantity + qtValue
+				this.update({system: {quantity: newQt}})
+			}
+		}
 	}
 
 	/**

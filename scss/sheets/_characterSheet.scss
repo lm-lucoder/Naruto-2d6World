@@ -416,6 +416,12 @@
 							gap: 5px;
 							margin-left: 10px;
 							font-size: 0.8em;
+							.quantity{
+								cursor: pointer;
+							}
+							.quantity:hover{
+								filter: brightness(1.5);
+							}
 							.item-card-attribute-tag{
 								border: 1px solid $c-beige;
 								border-radius: 6px;

@@ -170,6 +170,10 @@ export class BoilerplateItemSheet extends ItemSheet {
 		// Roll handlers, click handlers, etc. would go here.
 	}
 
+	_onDropItem(e){
+		console.log(e)
+	}
+
 	_addNewCondition_MoveConfig() {
 		const itemCondition = this.object;
 		const newMoveConfig = {
