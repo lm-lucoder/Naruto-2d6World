@@ -425,7 +425,35 @@ export class BoilerplateActorSheet extends ActorSheet {
 			}
 			
 		})
-
+		html.find('.item-scroll-unseal-btn').click(e=>{
+			const itemId = e.target.closest(".item-card").getAttribute('data-item-id')
+			const scroll = this.object.items.get(itemId)
+			const scrollItems = scroll.system.scroll.scrollItemsComplete.map(item => {
+				const newItem = item.data.toObject()
+				newItem.system.quantity = item.quantity
+				return newItem
+			})
+			for (let i = 0; i < scrollItems.length; i++) {
+				const scrollItem = scrollItems[i];
+				const parent = this.object
+				const itemExists = parent.items.find(item => item.name == scrollItem.name)
+				if (itemExists) {
+					const newQt = itemExists.system.quantity + scrollItem.system.quantity
+					itemExists.update({system: {quantity: newQt}})
+				} else {
+					Item.create(scrollItem, {parent})
+				}
+			}
+			const speaker = ChatMessage.getSpeaker({ actor: this.object });
+			ChatMessage.create({
+				speaker: speaker,
+				flavor: `${this.object.name} removeu os itens selados de dentro do pergaminho: "${scroll.name}"`,
+				content: `<span>Ele conseguiu os seguintes itens:</span> 
+				${scrollItems.map(item => `<p style="display:flex; align-items:center"><img src="${item.img}" style="max-width: 35px; border: none"> ${item.name} (${item.system.quantity})</p>`).join("")} 
+				`
+			});
+			scroll.update({system: {scroll: {scrollItems: []}}})
+		})
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);
@@ -532,7 +560,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 			.querySelector(".description-window");
 		const item = this.actor.items.get(itemId);
 		const itemAttributes = item.system.attributes;
+		const itemIsScroll = item.system.scroll.isScroll
+		//if (windowElement.innerHTML.trim() === "") {
 		if (windowElement.innerHTML.trim() === "") {
+			windowElement.classList.add("description-window-opened");
 			windowElement.innerHTML = `
 				<ul class="item-attributes-list">
 					${itemAttributes.map(attribute => {
@@ -545,12 +576,47 @@ export class BoilerplateActorSheet extends ActorSheet {
 						`
 					}).join('')}
 				</ul>
+				
+				`
+			windowElement.innerHTML += `
 				<div class="item-description">
 					${item.system.description}
 				</div>
 			`
+			if(itemIsScroll){
+				windowElement.innerHTML += `
+				<div class="item-scroll-items">
+					<h3>Itens Selados:</h3>
+					<ul class="item-scroll-items-list">
+						${item.system.scroll.scrollItemsComplete.map(item => {
+							return `
+							<li class="scroll-item-card" data-item-id="{{item.data.id}}">
+								<div class="info">
+									<img src="${item.data.img}">
+									<span>${item.data.name}</span>
+									<div class="scroll-item-attributes">
+										<i class="fa-solid fa-sack"></i> (${item.quantity})
+										<span class="slots">
+											<i class="fa-solid fa-weight-hanging"></i> (${
+												(()=>{
+													const result = item.data.system.slots * item.quantity
+													const roundedResult = Math.round(result * 100) / 100;
+													return roundedResult
+												})()
+											})
+										</span>
+									</div>
+								</div>
+							</li>
+							`
+						}).join("")}
+					</ul>
+				</div>
+				`
+			}
 			;
 		} else {
+			windowElement.classList.remove("description-window-opened");
 			windowElement.innerHTML = "";
 		}
 	}

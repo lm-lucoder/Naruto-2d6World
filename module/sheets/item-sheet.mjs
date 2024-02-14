@@ -16,6 +16,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 					initial: "description",
 				},
 			],
+			dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}],
 		});
 	}
 
@@ -32,6 +33,8 @@ export class BoilerplateItemSheet extends ItemSheet {
 
 	/* -------------------------------------------- */
 
+
+
 	/** @override */
 	getData() {
 		// Retrieve base data structure.
@@ -46,19 +49,16 @@ export class BoilerplateItemSheet extends ItemSheet {
 		if (actor) {
 			context.rollData = actor.getRollData();
 		}
+		if (itemData.type === "item") {
+			if (itemData.system.scroll.isScroll) {
+				context.scrollItems = itemData.system.scroll.scrollItemsComplete
+			}
+		}
 
 		if (itemData.type === "move") {
 			
 		}
 		if (itemData.type === "skill") {
-			// const rankChoices = [
-			// 	{ name: "Academia", value: 0 },
-			// 	{ name: "Genin", value: 1 },
-			// 	{ name: "Chunin", value: 2 },
-			// 	{ name: "Jounin Especial", value: 3 },
-			// 	{ name: "Jounin", value: 4 },
-			// 	{ name: "Kage", value: 5 },
-			// ];
 			const rankChoices = {
 				"0": "Academia",
 				"1": "Genin",
@@ -73,7 +73,6 @@ export class BoilerplateItemSheet extends ItemSheet {
 		console.log(context);
 		return context;
 	}
-
 	/* -------------------------------------------- */
 
 	/** @override */
@@ -163,15 +162,34 @@ export class BoilerplateItemSheet extends ItemSheet {
 			}
 			this.object.update({system: {resources: [...resources]} });
 		})
+		html.find(".scroll-item-quantity").mousedown(async (e) => {
+			const scroll = this.object
+			const itemId = e.target.closest(".scroll-item-card").dataset.itemId
+			if (e.button === 0) {
+				if (e.shiftKey) {
+					this.ScrollAPI.changeItemQt(scroll, itemId, 5)
+					return
+				}
+				this.ScrollAPI.changeItemQt(scroll, itemId, 1)
+			}
+			if (e.button === 2) {
+				if (e.shiftKey) {
+					this.ScrollAPI.changeItemQt(scroll, itemId, -5)
+					return
+				}
+				this.ScrollAPI.changeItemQt(scroll, itemId, -1)
+			}
+		})
+		html.find(".scroll-item-delete").mousedown(async (e) => {
+			const scroll = this.object
+			const itemId = e.target.closest(".scroll-item-card").dataset.itemId
+			this.ScrollAPI.deleteItem(scroll, itemId)
+		})
 
 		// Everything below here is only needed if the sheet is editable
 		if (!this.isEditable) return;
 
 		// Roll handlers, click handlers, etc. would go here.
-	}
-
-	_onDropItem(e){
-		console.log(e)
 	}
 
 	_addNewCondition_MoveConfig() {
@@ -206,5 +224,68 @@ export class BoilerplateItemSheet extends ItemSheet {
 		this.object.update({
 			system: { movesConfigs: { ...movesConfigsObj } },
 		});
+	}
+	_onDrop(e){
+		const data = TextEditor.getDragEventData(e);
+		if (data.type == "Item") {
+			const item = Item.get(data.uuid.split('.')[1])
+
+			if (item.type === "item") {
+				if (e.target.closest(".scroll-items-list")) {
+					this.ScrollAPI.add(item, this.object)
+				}
+			}
+			//console.log(e, data, item)
+		}
+	}
+	ScrollAPI = ScrollAPI
+}
+
+class ScrollAPI {
+	static add(item, scroll){
+		console.log(scroll)
+		const scrollItems = scroll.system.scroll.scrollItems
+		const itemSlotsWeight = item.system.slots;
+		const canAdd = (scroll.system.scroll.scrollUsedSlots + itemSlotsWeight) <= scroll.system.scroll.scrollMaxSlots
+		if (!canAdd) return ui.notifications.info(`Não é possível adicionar! Isso iria extrapolar o limite de espaço do pergaminho`);
+		const itemAlreadyExists = scrollItems.find(scrollItem => scrollItem.id == item.id)
+		if(itemAlreadyExists){
+			itemAlreadyExists.quantity += 1
+		} else {
+			scrollItems.push({
+				quantity: 1,
+				id: item.id
+			})
+		}
+		scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+	}
+	static changeItemQt(scroll, itemId, sum){
+		console.log(scroll)
+		const scrollUsedSlots = scroll.system.scroll.scrollUsedSlots
+		const scrollCapacity = scroll.system.scroll.scrollMaxSlots
+		const scrollItems = scroll.system.scroll.scrollItems
+		const item = scrollItems.find(item => item.id === itemId)
+		const itemQuantity = item.quantity
+		const result = itemQuantity + sum 
+		if(sum > 0){
+			console.log(itemQuantity)
+			console.log(result)
+			console.log(scrollCapacity)
+			if (scrollUsedSlots >= scrollCapacity) {
+				return ui.notifications.info(`Não é possível alterar a quantidade! Isso iria extrapolar o limite de espaço do pergaminho`);
+			}
+		}
+		if (result < 0) {
+			item.quantity = 0
+			return scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+		}
+		item.quantity = parseInt(item.quantity) + sum
+		scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+	}
+	static deleteItem(scroll, itemId){
+		const scrollItems = scroll.system.scroll.scrollItems
+		const itemIndex = scrollItems.findIndex(item => item.id === itemId)
+		scrollItems.splice(itemIndex, 1)
+		scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
 	}
 }

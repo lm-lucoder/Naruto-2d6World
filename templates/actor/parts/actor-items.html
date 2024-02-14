@@ -47,6 +47,11 @@
                                     </div>
                                 </div>
                                 <div class="item-card-buttons">
+                                    {{#if item.system.scroll.isScroll}}
+                                        <span class="item-scroll-unseal-btn">
+                                            <a>Unseal</a>
+                                        </span>
+                                    {{/if}}
                                     <span class="item-on-hand-btn"><a>
                                         {{#if item.system.onHand}}
                                         <i class="fa-solid fa-hand"></i>
@@ -59,7 +64,7 @@
                                     <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
                                 </div>
                             </div>
-                        <div class="description-window display_none">
+                        <div class="description-window">
                         </div>
                     </li>
                 {{/each}}

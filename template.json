@@ -149,6 +149,12 @@
 			"resources": []
 		},
 		"item": {
+			"scroll": {
+				"isScroll": false,
+				"scrollUsedSlots": 0,
+				"scrollMaxSlots": 0,
+				"scrollItems": []
+			},
 			"templates": ["base"],
 			"category": "Normal",
 			"cost": 0,

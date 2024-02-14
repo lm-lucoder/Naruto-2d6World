@@ -9,6 +9,7 @@
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="description">Description</a>
+    {{#if system.scroll.isScroll}}<a class="item" data-tab="scroll">Pergaminho</a>{{/if}}
     {{#unless limited}}<a class="item" data-tab="attributes">Attributes</a>{{/unless}}
   </nav>
 
@@ -57,6 +58,12 @@
           <input type="checkbox" name="system.considerSlots" {{checked system.considerSlots}}>
         </div>
       </div>
+      <div class="grid grid-2scol">
+        <div class="resource">
+          <label class="resource-label">Is Scroll</label>
+          <input type="checkbox" name="system.scroll.isScroll" {{checked system.scroll.isScroll}}>
+        </div>
+      </div>
       <div class="item-attribute-container">
         <div class="section-button">
           <a class="add-item-attribute"><i class="fa-solid fa-plus"></i> Add Attribute</a>
@@ -92,6 +99,42 @@
               </div>
             </li>
           {{/each}}
+        </ul>
+      </div>
+    </div>
+
+    <div  class="tab scrolls" data-group="primary" data-tab="scroll">
+      <div class="grid grid-2col">
+        <div class="resource">
+          <label class="resource-label">Limite de tamanho do Pergaminho</label>
+          <input type="text" name="system.scroll.scrollMaxSlots" value="{{system.scroll.scrollMaxSlots}}" data-dtype="Number"/>
+        </div>
+        <div class="resource">
+          <label class="resource-label">Slots usados: {{system.scroll.scrollUsedSlots}} / {{system.scroll.scrollMaxSlots}}</label>
+        </div>
+      </div>
+      <div class="scroll-items-container">
+        <h3>Itens selados</h3>
+        <ul class="scroll-items-list">
+            {{#each scrollItems as |item|}}
+              <li class="scroll-item-card" data-item-id="{{item.data.id}}">
+                <div class="info">
+                  <img src="{{item.data.img}}">
+                  <span>{{item.data.name}}</span>
+                  <div class="scroll-item-attributes">
+                    <a class="quantity scroll-item-quantity">
+                      <i class="fa-solid fa-sack"></i> ({{item.quantity}})
+                    </a>
+                    <span class="slots">
+                      <i class="fa-solid fa-weight-hanging"></i> ({{multiplyWithTwoDecimalsMax item.data.system.slots item.quantity}})
+                    </span>
+                  </div>
+                </div>
+                <div class="control">
+                  <a class="scroll-item-delete"><i class="fa-solid fa-trash"></i></a>
+                </div>
+              </li>
+            {{/each}}
         </ul>
       </div>
     </div>

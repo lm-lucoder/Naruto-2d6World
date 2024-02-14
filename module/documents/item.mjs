@@ -35,10 +35,12 @@ export class BoilerplateItem extends Item {
 		}
 		if (this.type === "item") {
 			this.updateQuantity = function updateQuantity(qtValue){
-				console.log("UPDATEEEEE")
-				console.log(this)
 				const newQt = this.system.quantity + qtValue
 				this.update({system: {quantity: newQt}})
+			}
+			if (this.system.scroll.isScroll) {
+				this.system.scroll.scrollItemsComplete = this.ScrollAPI.getAll(this)
+				this.system.scroll.scrollUsedSlots = this.ScrollAPI.getSlotsStatus(this)
 			}
 		}
 	}
@@ -359,5 +361,27 @@ export class BoilerplateItem extends Item {
 		return label;
 	}
 
+	ScrollAPI = ScrollAPI
+}
 
+class ScrollAPI {
+	static getAll(scroll){
+		const scrollItemsRaw = scroll.system.scroll.scrollItems
+		const scrollItems = scrollItemsRaw.map((item) => {
+			return {
+				data: Item.get(item.id),
+				quantity: item.quantity
+			}
+		})
+		return scrollItems
+	}
+	static getSlotsStatus(scroll){
+		const scrollItems = scroll.system.scroll.scrollItemsComplete
+		let totalSlots = 0
+		scrollItems.forEach(item => {
+			const itemQt = item.quantity
+			totalSlots += (itemQt * item.data.system.slots)
+		})
+		return totalSlots
+	}	
 }

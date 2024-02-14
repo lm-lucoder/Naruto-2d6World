@@ -234,4 +234,56 @@ header {
 			}
 		}
 	}
+	.scrolls{
+		.scroll-items-container{
+			margin-top: 5px;
+			padding-top: 5px;
+			border-top: 1px solid $c-beige;
+			h3{
+				border-bottom: none;
+				text-align: center;
+			}
+			.scroll-items-list{
+				list-style: none;
+				padding: 5px;
+				border: 1px solid $c-beige;
+				border-radius: 5px;
+				margin: 5px;
+				min-height: 100px;
+				.scroll-item-card{
+					padding: 3px 5px;
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					border-bottom: 1px solid $c-beige;
+					.info{
+						display: flex;
+						align-items: center;
+						img{
+							width: 25px;
+							border: none;
+						}
+						.scroll-item-attributes{
+							display: flex;
+							align-items: center;
+							gap: 5px;
+							margin-left: 10px;
+							font-size: 0.8em;
+							.quantity{
+								cursor: pointer;
+							}
+							.quantity:hover{
+								filter: brightness(1.5);
+							}
+						}
+					}
+					.control{
+						display: flex;
+						gap: 5px;
+						align-items: center;
+					}
+				}
+			}
+		}
+	}
 }
