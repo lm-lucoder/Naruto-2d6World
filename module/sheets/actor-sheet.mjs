@@ -92,6 +92,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.space.isAboveSpace = this._getIsAboveSpaceCondition(
 			context.space
 		);
+		context.advantageLevel = this.object.system.advantageLevel
+		context.advantageLevel.range = this.getAdvantageLevelRange(context.advantageLevel)
 
 		for (const item of context.gear) {
 			await this._prepareDescriptionData(item);
@@ -454,6 +456,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 			});
 			scroll.update({system: {scroll: {scrollItems: []}}})
 		})
+		html.find('.range-option-icon').click(e => {
+			const newAdvantageLevel = parseInt(e.target.querySelector('.value').innerText)
+			this.object.update({system:{advantageLevel:{actual: newAdvantageLevel}}})
+			console.log(newAdvantageLevel)
+		})
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);
@@ -679,6 +686,17 @@ export class BoilerplateActorSheet extends ActorSheet {
 		console.log(usedSpace, maxSpace);
 		return usedSpace > maxSpace;
 	}
+	
+	getAdvantageLevelRange(advantageLevel){
+		const range = []
+		for (let i = advantageLevel.min; i <= advantageLevel.max ; i++) {
+			range.push({
+				actual: advantageLevel.actual == i,
+				value: i
+			})
+		}
+		return range
+	}
 
 	async _prepareDescriptionData(item) {
 		item.description = await TextEditor.enrichHTML(
@@ -690,4 +708,6 @@ export class BoilerplateActorSheet extends ActorSheet {
 			}
 		);
 	}
+
+	
 }

@@ -2,54 +2,54 @@
 <form class="{{cssClass}} {{actor.type}} flexcol actor-sheet" autocomplete="off">
   {{!-- Sheet Header --}}
   <header class="sheet-header">
-    <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
-    <div class="header-fields">
-      <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
-      {{#unless limited}}
-      <div class="resource grid grid-2col">
-        <div class="resource-card resource-rank-card">
-          <label for="system.health.value" class="resource-label">Rank</label>
-          <select class="rank-select" name="system.params.rank">
-            {{#select system.params.rank}}
-              <option value="0">Academia</option>
-              <option value="1">Genin</option>
-              <option value="2">Chunin</option>
-              <option value="3">Tokubetsu Jounin</option>
-              <option value="4">Jounin</option>
-              <option value="5">Jo-nin</option>
-              <option value="6">Kage</option>
-            {{/select}}
-          </select>
-          <!-- <input class="rank-input" type="text" name="system.params.rank" value="{{system.params.rank}}"/> -->
-        </div>
-        <div class="resource-card">
-          <label class="resource-label">XP</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.params.xp.actual" value="{{system.params.xp.actual}}" data-dtype="Number"/>
+      <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+      <div class="header-fields">
+        <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+        {{#unless limited}}
+        <div class="resource grid grid-2col">
+          <div class="resource-card resource-rank-card">
+            <label for="system.health.value" class="resource-label">Rank</label>
+            <select class="rank-select" name="system.params.rank">
+              {{#select system.params.rank}}
+                <option value="0">Academia</option>
+                <option value="1">Genin</option>
+                <option value="2">Chunin</option>
+                <option value="3">Tokubetsu Jounin</option>
+                <option value="4">Jounin</option>
+                <option value="5">Jo-nin</option>
+                <option value="6">Kage</option>
+              {{/select}}
+            </select>
+            <!-- <input class="rank-input" type="text" name="system.params.rank" value="{{system.params.rank}}"/> -->
           </div>
+          <div class="resource-card">
+            <label class="resource-label">XP</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.params.xp.actual" value="{{system.params.xp.actual}}" data-dtype="Number"/>
+            </div>
+          </div>
+        </div>
+        <div class="resources grid grid-2col">
+          <div class="resource-card">
+            <label for="system.health.value" class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/woundIcon.png" name="Ferimentos"> Ferimentos</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.wounds.max" value="{{system.wounds.max}}" data-dtype="Number"/>
+            </div>
+          </div>
+          <div class="resource-card">
+            <label for="system.health.value" class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/chakraIcon.png" name="Chakra"> Chakra</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number"/>
+            </div>
+          </div>
+          </div>
+        {{/unless}}
         </div>
       </div>
-      <div class="resources grid grid-2col">
-        <div class="resource-card">
-          <label for="system.health.value" class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/woundIcon.png" name="Ferimentos"> Ferimentos</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number"/>
-            <span>/</span>
-            <input type="text" name="system.wounds.max" value="{{system.wounds.max}}" data-dtype="Number"/>
-          </div>
-        </div>
-        <div class="resource-card">
-          <label for="system.health.value" class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/chakraIcon.png" name="Chakra"> Chakra</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number"/>
-            <span>/</span>
-            <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number"/>
-          </div>
-        </div>
-        </div>
-      {{/unless}}
-      </div>
-    </div>
   </header>
   <!-- <img src="/systems/naruto2d6world/assets/1235px-Mudra-Naruto-Chevre.svg.png"> -->
 

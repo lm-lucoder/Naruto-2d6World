@@ -78,6 +78,15 @@ Handlebars.registerHelper('toLowerCase', function(str) {
 Handlebars.registerHelper('console', function(thing) {
   console.log(thing);
 })
+Handlebars.registerHelper('lowerThan', function(a, b) {
+  return a < b
+})
+Handlebars.registerHelper('greaterThan', function(a, b) {
+  return a > b
+})
+Handlebars.registerHelper('equals', function(a, b) {
+  return a == b
+})
 
 /* -------------------------------------------- */
 /*  Ready Hook                                  */

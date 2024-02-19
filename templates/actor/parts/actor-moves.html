@@ -1,3 +1,17 @@
+<div class="advantage-level-section">
+    {{#each advantageLevel.range as |rangeOption|}}
+      <span class="
+      range-option-icon {{#if rangeOption.actual}}active{{/if}}
+      {{#if (lowerThan rangeOption.value -2)}}real-bad{{/if}}
+      {{#if (lowerThan rangeOption.value 0)}}bad{{/if}}
+      {{#if (equals rangeOption.value 0)}}neutral{{/if}}
+      {{#if (greaterThan rangeOption.value 0)}}good{{/if}}
+      {{#if (greaterThan rangeOption.value 2)}}really-good{{/if}}
+      ">
+        <span class="value">{{rangeOption.value}}</span>
+      </span>
+    {{/each}}
+  </div>
 <div class="moves-section">
 	<div class="left-section">
         <nav class="att-cond-tabs tabs" data-group="secondary">
