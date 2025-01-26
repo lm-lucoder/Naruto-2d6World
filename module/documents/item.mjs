@@ -24,19 +24,19 @@ export class BoilerplateItem extends Item {
 			if (this.system.chakra.useChakraPoints) {
 				this.system.chakra.maxChakraPoints = +this.system.level * +this.system.chakra.chakraPointsPerLevel + +this.system.chakra.defaultChakraPoints
 			}
-			this.refillChakraPoints = function refillChakraPoints(){
-				this.update({system: {chakra : {chakraPoints : (this.system.chakra.maxChakraPoints) }}})
+			this.refillChakraPoints = function refillChakraPoints() {
+				this.update({ system: { chakra: { chakraPoints: (this.system.chakra.maxChakraPoints) } } })
 			}
-			this.refillChakraPointsFromActor = function refillChakraPoints(actorId){
+			this.refillChakraPointsFromActor = function refillChakraPoints(actorId) {
 				const actor = Actor.get(actorId);
-				actor.update({system: {chakra: {value: parseInt(actor.system.chakra.value) - 1}}})
+				actor.update({ system: { chakra: { value: parseInt(actor.system.chakra.value) - 1 } } })
 				this.refillChakraPoints()
 			}
 		}
 		if (this.type === "item") {
-			this.updateQuantity = function updateQuantity(qtValue){
+			this.updateQuantity = function updateQuantity(qtValue) {
 				const newQt = this.system.quantity + qtValue
-				this.update({system: {quantity: newQt}})
+				this.update({ system: { quantity: newQt } })
 			}
 			if (this.system.scroll.isScroll) {
 				this.system.scroll.scrollItemsComplete = this.ScrollAPI.getAll(this)
@@ -165,7 +165,7 @@ export class BoilerplateItem extends Item {
 				`4d6kh2 + @${attribute} 
         ${attributeModifier ? "+" + attributeModifier : ""}
         ${rollModifier ? "+" + rollModifier : ""}
-        `,
+        `.trim(),
 				rollData
 			);
 		}
@@ -174,7 +174,7 @@ export class BoilerplateItem extends Item {
 				`3d6kh2 + @${attribute} 
         ${attributeModifier ? "+" + attributeModifier : ""}
         ${rollModifier ? "+" + rollModifier : ""}
-        `,
+        `.trim(),
 				rollData
 			);
 		}
@@ -183,7 +183,7 @@ export class BoilerplateItem extends Item {
 				`2d6 + @${attribute} 
         ${attributeModifier ? "+" + attributeModifier : ""}
         ${rollModifier ? "+" + rollModifier : ""}
-        `,
+        `.trim(),
 				rollData
 			);
 		}
@@ -192,7 +192,7 @@ export class BoilerplateItem extends Item {
 				`3d6kl2 + @${attribute} 
         ${attributeModifier ? "+" + attributeModifier : ""}
         ${rollModifier ? "+" + rollModifier : ""}
-        `,
+        `.trim(),
 				rollData
 			);
 		}
@@ -201,7 +201,7 @@ export class BoilerplateItem extends Item {
 				`4d6kl2 + @${attribute} 
         ${attributeModifier ? "+" + attributeModifier : ""}
         ${rollModifier ? "+" + rollModifier : ""}
-        `,
+        `.trim(),
 				rollData
 			);
 		}
@@ -211,7 +211,7 @@ export class BoilerplateItem extends Item {
 			flavor: label,
 		});
 	}
-	
+
 	async moveRollJustSend() {
 		const item = this;
 
@@ -365,7 +365,7 @@ export class BoilerplateItem extends Item {
 }
 
 class ScrollAPI {
-	static getAll(scroll){
+	static getAll(scroll) {
 		const scrollItemsRaw = scroll.system.scroll.scrollItems
 		const scrollItems = scrollItemsRaw.map((item) => {
 			return {
@@ -375,7 +375,7 @@ class ScrollAPI {
 		})
 		return scrollItems
 	}
-	static getSlotsStatus(scroll){
+	static getSlotsStatus(scroll) {
 		const scrollItems = scroll.system.scroll.scrollItemsComplete
 		let totalSlots = 0
 		scrollItems.forEach(item => {
@@ -383,5 +383,5 @@ class ScrollAPI {
 			totalSlots += (itemQt * item.data.system.slots)
 		})
 		return totalSlots
-	}	
+	}
 }

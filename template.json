@@ -11,6 +11,14 @@
 					"value": 5,
 					"max": 5
 				},
+				"armor": {
+					"value": 0,
+					"max": 0
+				},
+				"fireWill": {
+					"value": 1,
+					"max": 1
+				},
 				"biography": ""
 			}
 		},
@@ -18,8 +26,8 @@
 			"templates": ["base"],
 			"advantageLevel": {
 				"actual": 0,
-				"min": -6,
-				"max": 6
+				"min": -4,
+				"max": 4
 			},
 			"params": {
 				"rank": "0",

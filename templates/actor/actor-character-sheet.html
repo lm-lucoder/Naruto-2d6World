@@ -31,7 +31,7 @@
         </div>
         <div class="resources grid grid-2col">
           <div class="resource-card">
-            <label for="system.health.value" class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/woundIcon.png" name="Ferimentos"> Ferimentos</label>
+            <label class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/woundIcon.png" name="Ferimentos">Ferimentos</label>
             <div class="resource-content flexrow flex-center flex-between">
               <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number"/>
               <span>/</span>
@@ -39,14 +39,33 @@
             </div>
           </div>
           <div class="resource-card">
-            <label for="system.health.value" class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/chakraIcon.png" name="Chakra"> Chakra</label>
+            <label class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/chakraIcon.png" name="Chakra">Chakra</label>
             <div class="resource-content flexrow flex-center flex-between">
               <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number"/>
               <span>/</span>
               <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number"/>
             </div>
           </div>
+        </div>
+        <div class="resources grid grid-2col">
+          <div class="resource-card">
+            <label class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/shieldIcon.png" name="Chakra">Armadura</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.armor.value" value="{{system.armor.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.armor.max" value="{{system.armor.max}}" data-dtype="Number"/>
+            </div>
           </div>
+          <div class="resource-card">
+            <label class="resource-label"><img class="header-icon" src="systems/naruto2d6world/assets/icons/fireWillIcon.png" name="Chakra">Vontade do fogo</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.fireWill.value" value="{{system.fireWill.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.fireWill.max" value="{{system.fireWill.max}}" data-dtype="Number"/>
+            </div>
+          </div>
+
+        </div>
         {{/unless}}
         </div>
       </div>
