@@ -43,6 +43,29 @@
           <label class="resource-label">Category</label>
           <input type="text" name="system.category" value="{{system.category}}" data-dtype="String"/>
         </div>
+        <hr>
+        <div class="npc-move-config">
+          <div>
+            <label class="resource-label">Is NPC Move</label>
+            <input type="checkbox" name="system.isNpcMove" {{checked system.isNpcMove}}>
+          </div>
+          {{#if system.isNpcMove}}
+          <div>
+            <label class="resource-label">Move uses</label>
+            <div style="display: flex; gap: 15px;">
+              <input type="checkbox" name="system.npcUses.on" {{checked system.npcUses.on}}>
+              <input type="number" name="system.npcUses.min" value="{{system.npcUses.min}}" data-dtype="String"/> | <input type="number" name="system.npcUses.max" value="{{system.npcUses.max}}" data-dtype="String"/>
+            </div>
+          </div>
+          <div>
+            <label class="resource-label">Move level</label>
+            <div>
+              <input type="checkbox" name="system.npcMoveLevel.on" {{checked system.npcMoveLevel.on}}>
+              <input type="number" name="system.npcMoveLevel.value" value="{{system.npcMoveLevel.value}}" data-dtype="String"/>
+            </div>
+          </div>
+          {{/if}}
+        </div>
       </div>
       {{/unless}}
     </section>
