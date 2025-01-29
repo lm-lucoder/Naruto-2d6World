@@ -1,0 +1,48 @@
+.rollCard{
+    .moveDetailsArea{
+        display: flex;
+        flex-direction: column;
+    }
+    .rolls{
+        display: flex;
+        .actionDiceDisplayPart{
+            border-right: 1px solid $c-chat-card-border;
+        }
+        .rollDisplayPart{
+            display: flex;
+            width: 100%;
+            .rollDisplay{
+                border-radius: 3px;
+                padding: 6px 12px;
+                width: 100%;
+                text-align: center;
+                font-weight: bold;
+                padding: 2px 4px;
+                margin: 2px 4px;
+            }
+            .actionDiceDisplay{
+                background-color: $c-beige;
+            }
+            .challengeDiceDisplay{
+                background-color: $c-faint;
+            }
+        }
+    }
+    .resultDisplay{
+        font-weight: bold;
+        text-align: center;
+        font-size: 16px;
+        width: 100%;
+        display: block;
+        margin-top: 6px;
+    }
+    .resultDisplay.result-0{
+        background-color: $c-red-fail;
+    }
+    .resultDisplay.result-1{
+        background-color: $c-blue-partial-success;
+    }
+    .resultDisplay.result-2{
+        background-color: $c-green-success;
+    }
+}

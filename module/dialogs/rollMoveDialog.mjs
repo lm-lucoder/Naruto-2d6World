@@ -43,37 +43,37 @@ class RollMoveDialog extends Dialog {
 					button1: {
 						label: "Grande Vantagem",
 						callback: (_, e) =>
-							this.dialogCallback({item,content, resolve, e, mode: "+advantage"}),
+							this.dialogCallback({ item, content, resolve, e, mode: "+advantage" }),
 					},
 					button2: {
 						label: "Vantagem",
-						callback: (_, e) => this.dialogCallback({item,content, resolve, e, mode: "advantage"}),
+						callback: (_, e) => this.dialogCallback({ item, content, resolve, e, mode: "advantage" }),
 					},
 					button3: {
 						label: "Normal",
-						callback: (_, e) => this.dialogCallback({item,content, resolve, e, mode: "normal"}),
+						callback: (_, e) => this.dialogCallback({ item, content, resolve, e, mode: "normal" }),
 					},
 					button4: {
 						label: "Desvantagem",
-						callback: (_, e) => this.dialogCallback({item,content, resolve, e, mode: "disadvantage"}),
+						callback: (_, e) => this.dialogCallback({ item, content, resolve, e, mode: "disadvantage" }),
 					},
 					button5: {
 						label: "Grande Desvantagem",
 						callback: (_, e) =>
-							this.dialogCallback({item,content, resolve, e, mode: "+disadvantage"}),
+							this.dialogCallback({ item, content, resolve, e, mode: "+disadvantage" }),
 					},
 				},
-                close: () => { resolve(false) }
+				close: () => { resolve(false) }
 			}).render(true);
 		});
 	}
 
-    static dialogCallback({item, content ,resolve, e, mode}){
+	static dialogCallback({ item, content, resolve, e, mode }) {
 		console.log(content)
-        const options = e.target
-				.closest(".window-content")
-				.querySelector(".options-container")
-				.querySelectorAll('[name="option"]');
+		const options = e.target
+			.closest(".window-content")
+			.querySelector(".options-container")
+			.querySelectorAll('[name="option"]');
 		const checkedOption = [...options].find((option) => option.checked);
 		if (!checkedOption) {
 			ui.notifications.info(
@@ -83,16 +83,16 @@ class RollMoveDialog extends Dialog {
 		}
 		const chosenAttribute = checkedOption.value;
 		const rollModifier = e.target
-				.closest(".window-content")
-				.querySelector('.modifier-input')
-				.value
+			.closest(".window-content")
+			.querySelector('.modifier-input')
+			.value
 		item.moveRoll({
 			mode,
 			attribute: chosenAttribute,
 			rollModifier
 		});
-        resolve(true)
-    }
+		resolve(true)
+	}
 }
 
 export default RollMoveDialog
