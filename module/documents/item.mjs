@@ -149,119 +149,44 @@ export class BoilerplateItem extends Item {
 			}
 		}
 
-		const speaker = ChatMessage.getSpeaker({ actor: this.actor });
-		const rollMode = game.settings.get("core", "rollMode");
-		/* const label = this._getMoveLabelRollTemplate({
-			move: this,
-			mode,
-			attribute,
-		}); */
+		// const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+		// const rollMode = game.settings.get("core", "rollMode");
 
 		const rollData = this.getRollData();
 
-		// let roll;
-		/* if (mode === "+advantage") {
-			roll = new Roll(
-				`4d6kh2 + @${attribute} 
-		${attributeModifier ? "+" + attributeModifier : ""}
-		${rollModifier ? "+" + rollModifier : ""}
-		`.trim(),
-				rollData
-			);
-		}
-		if (mode === "advantage") {
-			roll = new Roll(
-				`3d6kh2 + @${attribute} 
-		${attributeModifier ? "+" + attributeModifier : ""}
-		${rollModifier ? "+" + rollModifier : ""}
-		`.trim(),
-				rollData
-			);
-		}
-		if (mode === "normal") {
-			roll = new Roll(
-				`2d6 + @${attribute} 
-		${attributeModifier ? "+" + attributeModifier : ""}
-		${rollModifier ? "+" + rollModifier : ""}
-		`.trim(),
-				rollData
-			);
-		}
-		if (mode === "disadvantage") {
-			roll = new Roll(
-				`3d6kl2 + @${attribute} 
-		${attributeModifier ? "+" + attributeModifier : ""}
-		${rollModifier ? "+" + rollModifier : ""}
-		`.trim(),
-				rollData
-			);
-		}
-		if (mode === "+disadvantage") {
-			roll = new Roll(
-				`4d6kl2 + @${attribute} 
-		${attributeModifier ? "+" + attributeModifier : ""}
-		${rollModifier ? "+" + rollModifier : ""}
-		`.trim(),
-				rollData
-			);
-		}
-		roll.toMessage({
-			speaker: speaker,
-			rollMode: rollMode,
-			flavor: label,
-		}); */
-		let actionDiceRoll
+		const actionDiceRoll = new Roll(
+			`1d6 + @${attribute} ${attributeModifier ? "+" + attributeModifier : ""} ${rollModifier ? "+" + rollModifier : ""}`
+				.trim().replaceAll("\n", ""),
+			rollData
+		);
 
-		const challengeDiceOneRoll = new Roll("1d10")
-		const challengeDiceTwoRoll = new Roll("1d10")
-		await challengeDiceOneRoll.evaluate({ async: true })
-		await challengeDiceTwoRoll.evaluate({ async: true })
+		let challengeDiceOneRoll
+		let challengeDiceTwoRoll
 		if (mode === "+advantage") {
-			actionDiceRoll = new Roll(
-				`3d6kh1 + @${attribute} 
-        ${attributeModifier ? "+" + attributeModifier : ""}
-        ${rollModifier ? "+" + rollModifier : ""}
-        `.trim().replaceAll("\n", ""),
-				rollData
-			);
+			challengeDiceOneRoll = new Roll("3d10kl1")
+			challengeDiceTwoRoll = new Roll("3d10kl1")
 		}
 		if (mode === "advantage") {
-			actionDiceRoll = new Roll(
-				`2d6kh1 + @${attribute} 
-        ${attributeModifier ? "+" + attributeModifier : ""}
-        ${rollModifier ? "+" + rollModifier : ""}
-        `.trim().replaceAll("\n", ""),
-				rollData
-			);
+			challengeDiceOneRoll = new Roll("2d10kl1")
+			challengeDiceTwoRoll = new Roll("2d10kl1")
 		}
 		if (mode === "normal") {
-			actionDiceRoll = new Roll(
-				`1d6 + @${attribute} 
-        ${attributeModifier ? "+" + attributeModifier : ""}
-        ${rollModifier ? "+" + rollModifier : ""}
-        `.trim().replaceAll("\n", ""),
-				rollData
-			);
+			challengeDiceOneRoll = new Roll("1d10")
+			challengeDiceTwoRoll = new Roll("1d10")
+
 		}
 		if (mode === "disadvantage") {
-			actionDiceRoll = new Roll(
-				`2d6kl1 + @${attribute} 
-        ${attributeModifier ? "+" + attributeModifier : ""}
-        ${rollModifier ? "+" + rollModifier : ""}
-        `.trim().replaceAll("\n", ""),
-				rollData
-			);
+			challengeDiceOneRoll = new Roll("2d10kh1")
+			challengeDiceTwoRoll = new Roll("2d10kh1")
+
 		}
 		if (mode === "+disadvantage") {
-			actionDiceRoll = new Roll(
-				`3d6kl1 + @${attribute} 
-        ${attributeModifier ? "+" + attributeModifier : ""}
-        ${rollModifier ? "+" + rollModifier : ""}
-        `.trim().replaceAll("\n", ""),
-				rollData
-			);
+			challengeDiceOneRoll = new Roll("3d10kh1")
+			challengeDiceTwoRoll = new Roll("3d10kh1")
 		}
 		await actionDiceRoll.evaluate({ async: true })
+		await challengeDiceOneRoll.evaluate({ async: true })
+		await challengeDiceTwoRoll.evaluate({ async: true })
 
 		const label = this._getMoveLabelRollTemplate({
 			move: this,
@@ -276,6 +201,7 @@ export class BoilerplateItem extends Item {
 		// Criar conteúdo do card
 		// Criar uma lista de rolagens para manter interatividade
 		const rolls = [actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll];
+		const renderedRolls = await Promise.all(rolls.map(roll => roll.render()));
 
 		// Criar a mensagem no chat com rolagens interativas
 		await ChatMessage.create({
@@ -284,7 +210,12 @@ export class BoilerplateItem extends Item {
 			flavor: label,
 			rolls: rolls,
 			type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-			content: `<div style="display:none;">${rolls.map(roll => roll.formula).join(' ')}</div>`
+			content: `
+				<details>
+					<summary style="font-size: 12px;color: #807f7b;text-align: center;margin-top: 5px;"><i>Detalhes da Rolagem</i></summary>
+					<blockquote>${renderedRolls.join('')}</blockquote>
+				</details>
+			`
 		});
 	}
 
@@ -345,12 +276,18 @@ export class BoilerplateItem extends Item {
 
 	_getMoveLabelRollTemplate({ move, mode, attribute, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll }) {
 		let successCount = 0
+		let match = false
 
 		if (actionDiceRoll.total > challengeDiceOneRoll.total) successCount++;
 		if (actionDiceRoll.total > challengeDiceTwoRoll.total) successCount++;
+		if (challengeDiceOneRoll.total == challengeDiceTwoRoll.total) match == true
 
 		let message = "";
-		if (successCount === 2) {
+		if (successCount === 2 && match) {
+			message = "Sucesso Crítico!!!"
+		} else if (successCount === 0 && match) {
+			message = "Falha Crítica!!!"
+		} else if (successCount === 2) {
 			message = "Sucesso Total!";
 		} else if (successCount === 1) {
 			message = "Sucesso Parcial!";
@@ -360,6 +297,12 @@ export class BoilerplateItem extends Item {
 
 		let modeText;
 		switch (mode) {
+			case "+advantage":
+				modeText = "Rolagem com Grande vantagem!";
+				break;
+			case "+disadvantage":
+				modeText = "Rolagem com grande desvantagem!";
+				break;
 			case "advantage":
 				modeText = "Rolagem com vantagem";
 				break;
@@ -432,69 +375,6 @@ export class BoilerplateItem extends Item {
 
 		return label
 	}
-
-	/* _getMoveLabelRollTemplate({ move, mode, attribute }) {
-		let modeText;
-		switch (mode) {
-			case "advantage":
-				modeText = "Rolagem com vantagem";
-				break;
-			case "disadvantage":
-				modeText = "Rolagem com desvantagem";
-				break;
-			case "normal":
-				modeText = "Rolagem normal";
-				break;
-
-			default:
-				modeText = undefined;
-				break;
-		}
-		let attributeText;
-		switch (attribute) {
-			case "str":
-				attributeText = "Força";
-				break;
-			case "dex":
-				attributeText = "Destreza";
-				break;
-			case "con":
-				attributeText = "Constituição";
-				break;
-			case "int":
-				attributeText = "Inteligência";
-				break;
-			case "per":
-				attributeText = "Percepção";
-				break;
-			case "cha":
-				attributeText = "Carisma";
-				break;
-			default:
-				attributeText = undefined;
-				break;
-		}
-		const hasImg = move.img != "icons/svg/item-bag.svg";
-
-		const label = `
-	<div class="moveRollChatTemplate">
-	  <div class="info">
-		${hasImg ? `<img src="${move.img}" name="${move.name}">` : ""}
-		<div class="title">
-		  <h3>Movimento: ${move.name}</h3>
-		  ${modeText ? `<i>${modeText}</i>` : ""}
-		  ${attributeText ? `<i>Atributo escolhido: ${attributeText}</i>` : ""}
-		</div>
-	  </div>
-	  <div class="description">
-		<span class="description-text">
-		  ${move.system.description}
-		</span>
-	  </div>
-	</div>
-	`;
-		return label;
-	} */
 	_getSkillLabelRollTemplate(skill) {
 		let rank = "";
 		if (skill.parent) {
