@@ -55,6 +55,9 @@
             justify-content: center;
             align-items: center;
             padding: 5px;
+            img{
+                pointer-events: none;
+            }
             .burn-momentum-icon{
                 width: 45px;
             }

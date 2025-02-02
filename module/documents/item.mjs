@@ -428,7 +428,14 @@ export class BoilerplateItem extends Item {
 
 		const actor = move.actor
 		const freeRerollIcon = `<button class="reroll-dice" data-reroll-mode="free"><img class="icon-image" src="systems/naruto2d6world/assets/icons/reRollIcon.png" name="reRollImage"></button>`
-		const isMomentumPossible = (actor.system.momentum.actual >= challengeDiceOneRoll.total || actor.system.momentum.actual >= challengeDiceTwoRoll.total)
+		const isMomentumPossible = (
+			(
+				actor.system.momentum.actual >= challengeDiceOneRoll.total ||
+				actor.system.momentum.actual >= challengeDiceTwoRoll.total
+			) && (
+				challengeDiceOneRoll.total > 0 || challengeDiceTwoRoll.total > 0
+			)
+		)
 		const momentumButton = `<button class="reroll-dice" data-reroll-mode="momentum" data-message-id="{{messageId}}"><img class="icon-image burn-momentum-icon" src="systems/naruto2d6world/assets/icons/burnMomentum.png" name="MomentumImage"></button>`
 		const isFireWillPossible = (actor.system.fireWill.value > 0)
 		const fireWillButton = `<button class="reroll-dice" data-reroll-mode="fireWill" data-message-id="{{messageId}}"><img class="icon-image" src="systems/naruto2d6world/assets/icons/fireWillIcon.png" name="FireWillImage"></button>`

@@ -110,6 +110,9 @@ Hooks.once("ready", async function () {
       const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText
       const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText
       const move = await fromUuid(`Actor.${actor}.Item.${item}`)
+      if (rerollMode == "free" && !game.user.isGM) {
+        return ui.warn("Somente o Mestre pode realizar uma rolagem livre")
+      }
       move.moveRoll({
         attribute, mode, rollModifier, isUpdate: true, rerollMode, oldMessage, oldMessageRolls: {
           challengeDiceOneResult,
