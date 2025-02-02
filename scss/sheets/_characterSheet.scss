@@ -90,6 +90,11 @@
 		border-bottom: 1px solid $c-beige;
 		padding-bottom: 2px;
 		margin-bottom: 2px;
+		.sheet-block-title{
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
 		h3{
 			border: 0;
 			margin: 0;

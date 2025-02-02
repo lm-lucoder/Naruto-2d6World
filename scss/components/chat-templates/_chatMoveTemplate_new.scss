@@ -6,7 +6,7 @@
     .rolls{
         display: flex;
         .actionDiceDisplayPart{
-            border-right: 1px solid $c-chat-card-border;
+            border-right: 1px solid $c-beige;
         }
         .rollDisplayPart{
             display: flex;
@@ -44,6 +44,26 @@
     }
     .resultDisplay.result-2{
         background-color: $c-green-success;
+    }
+    .reroll-buttons{
+        display: flex;
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 1px solid $c-beige;
+        .reroll-dice{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            .burn-momentum-icon{
+                width: 45px;
+            }
+            /* img{
+                width: 20px;
+                height: 20px;
+                border: none;
+            } */
+        }
     }
 }
 .move-card-roll-details{

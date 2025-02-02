@@ -12,7 +12,7 @@ import { BOILERPLATE } from "./helpers/config.mjs";
 /*  Init Hook                                   */
 /* -------------------------------------------- */
 
-Hooks.once('init', async function() {
+Hooks.once('init', async function () {
 
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
@@ -53,7 +53,7 @@ Hooks.once('init', async function() {
 /* -------------------------------------------- */
 
 // If you need to add Handlebars helpers, here are a few useful examples:
-Handlebars.registerHelper('concat', function() {
+Handlebars.registerHelper('concat', function () {
   var outStr = '';
   for (var arg in arguments) {
     if (typeof arguments[arg] != 'object') {
@@ -63,28 +63,28 @@ Handlebars.registerHelper('concat', function() {
   return outStr;
 });
 
-Handlebars.registerHelper('multiply', function(a, b) {
+Handlebars.registerHelper('multiply', function (a, b) {
   return a * b
 });
-Handlebars.registerHelper('multiplyWithTwoDecimalsMax', function(a, b) {
+Handlebars.registerHelper('multiplyWithTwoDecimalsMax', function (a, b) {
   const result = a * b
   const roundedResult = Math.round(result * 100) / 100;
   return roundedResult
 });
-Handlebars.registerHelper('toLowerCase', function(str) {
+Handlebars.registerHelper('toLowerCase', function (str) {
   return str.toLowerCase();
 });
 
-Handlebars.registerHelper('console', function(thing) {
+Handlebars.registerHelper('console', function (thing) {
   console.log(thing);
 })
-Handlebars.registerHelper('lowerThan', function(a, b) {
+Handlebars.registerHelper('lowerThan', function (a, b) {
   return a < b
 })
-Handlebars.registerHelper('greaterThan', function(a, b) {
+Handlebars.registerHelper('greaterThan', function (a, b) {
   return a > b
 })
-Handlebars.registerHelper('equals', function(a, b) {
+Handlebars.registerHelper('equals', function (a, b) {
   return a == b
 })
 
@@ -92,10 +92,69 @@ Handlebars.registerHelper('equals', function(a, b) {
 /*  Ready Hook                                  */
 /* -------------------------------------------- */
 
-Hooks.once("ready", async function() {
+Hooks.once("ready", async function () {
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on("hotbarDrop", (bar, data, slot) => createItemMacro(data, slot));
+
+  window.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("reroll-dice")) {
+      const button = event.target
+      const chatMessageCard = button.closest(".chat-message")
+      const messageId = chatMessageCard.dataset.messageId
+      const oldMessage = game.messages.get(messageId)
+      if (!oldMessage) return console.error(`Message: ${messageId} not found`);
+      const rollCard = chatMessageCard.querySelector(".rollCard")
+      const { attribute, mode, rollModifier, actor, item } = rollCard.dataset
+      const { rerollMode } = button.dataset
+      const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText
+      const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText
+      const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText
+      const move = await fromUuid(`Actor.${actor}.Item.${item}`)
+      move.moveRoll({
+        attribute, mode, rollModifier, isUpdate: true, rerollMode, oldMessage, oldMessageRolls: {
+          challengeDiceOneResult,
+          challengeDiceTwoResult,
+          actionDiceResult
+        }
+      })
+    }
+  })
+
+  /* Hooks.on("renderChatMessage", (message, html) => {
+    const button = html.find(".reroll-dice")
+    if (!button) return
+    button.on("click", async function () {
+      const card = html.find(".rollCard");
+      const actorId = card.dataset.actor
+      const actor = game.actors.get(actorId)
+
+      let messageId = this.dataset.messageId;
+      let oldMessage = game.messages.get(messageId);
+
+      if (!oldMessage) return;
+
+      // Pegar os dados da rolagem anterior
+      let oldRolls = oldMessage.rolls.map(r => r.formula);
+
+      // Fazer uma nova rolagem com os mesmos dados
+      let newRolls = await Promise.all(oldRolls.map(r => new Roll(r).roll()));
+
+      // Criar novo conteúdo da mensagem com os novos resultados
+      let newContent = oldMessage.content.replace(
+        /<blockquote class="roll-results">.*?<\/blockquote>/s,
+        `<blockquote class="roll-results">${newRolls.map(r => r.total).join(', ')}</blockquote>`
+      );
+
+      // Atualizar a mensagem original com os novos resultados
+      await oldMessage.update({
+        rolls: newRolls,
+        content: newContent
+      });
+    });
+  }); */
 });
+
+
 
 /* -------------------------------------------- */
 /*  Hotbar Macros                               */

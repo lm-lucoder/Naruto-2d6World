@@ -107,5 +107,8 @@ export class BoilerplateActor extends Actor {
     }
   }
 
+  resetMomentum() {
+    this.update({ "system.momentum.actual": 0 })
+  }
 
 }
