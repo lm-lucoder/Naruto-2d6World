@@ -1,17 +1,35 @@
-<div class="advantage-level-section">
-    {{#each advantageLevel.range as |rangeOption|}}
-      <span class="
-      range-option-icon {{#if rangeOption.actual}}active{{/if}}
-      {{#if (lowerThan rangeOption.value -2)}}real-bad{{/if}}
-      {{#if (lowerThan rangeOption.value 0)}}bad{{/if}}
-      {{#if (equals rangeOption.value 0)}}neutral{{/if}}
-      {{#if (greaterThan rangeOption.value 0)}}good{{/if}}
-      {{#if (greaterThan rangeOption.value 2)}}really-good{{/if}}
-      ">
-        <span class="value">{{rangeOption.value}}</span>
-      </span>
-    {{/each}}
-  </div>
+<div class="advantage-level-block sheet-block">
+    <h3 class="sheet-block-title">Nível de Vantagem</h3>
+    <div class="block-range-part">
+        {{#each advantageLevel.range as |rangeOption|}}
+            <span class="
+            range-option-icon-advantage-level {{#if rangeOption.actual}}active{{/if}}
+            {{#if (lowerThan rangeOption.value -2)}}real-bad{{/if}}
+            {{#if (lowerThan rangeOption.value 0)}}bad{{/if}}
+            {{#if (equals rangeOption.value 0)}}neutral{{/if}}
+            {{#if (greaterThan rangeOption.value 0)}}good{{/if}}
+            {{#if (greaterThan rangeOption.value 2)}}really-good{{/if}}
+            ">
+                <span class="value">{{rangeOption.value}}</span>
+            </span>
+        {{/each}}
+    </div>
+</div>
+<div class="momentum-block sheet-block">
+    <h3 class="sheet-block-title">Momentum</h3>
+    <div class="block-range-part">
+        {{#each momentum.range as |rangeOption|}}
+            <span class="
+            range-option-icon-momentum {{#if rangeOption.actual}}active{{/if}}
+            {{#if (lowerThan rangeOption.value 0)}}bad{{/if}}
+            {{#if (equals rangeOption.value 0)}}neutral{{/if}}
+            {{#if (greaterThan rangeOption.value 0)}}good{{/if}}
+            ">
+                <span class="value">{{rangeOption.value}}</span>
+            </span>
+        {{/each}}
+    </div>
+</div>
 <div class="moves-section">
 	<div class="left-section">
         <nav class="att-cond-tabs tabs" data-group="secondary">
@@ -22,69 +40,58 @@
             <div class="tab" data-group="secondary" data-tab="attributes">
                 <div class="attributes-container" >
                     <div class="attribute-card" >
-                        <label class="attribute-title">Força</label>
+                        <label class="attribute-title">Físico</label>
                         <div class="attribute-values">
                             <input
                                 type="number"
                                 class="attribute-value"
-                                name="system.attributes.str.max"
-                                value="{{system.attributes.str.max}}" />
-                            <span>Atual: {{system.attributes.str.actual}}</span>
+                                name="system.attributes.bod.max"
+                                value="{{system.attributes.bod.max}}" />
+                            <span>Atual: {{system.attributes.bod.actual}}</span>
                         </div>
                     </div>
                     <div class="attribute-card" >
-                        <label class="attribute-title">Destreza</label>
+                        <label class="attribute-title">Agilidade</label>
                         <div class="attribute-values">
                             <input
                                 type="number"
                                 class="attribute-value"
-                                name="system.attributes.dex.max"
-                                value="{{system.attributes.dex.max}}" />
-                            <span>Atual: {{system.attributes.dex.actual}}</span>
+                                name="system.attributes.agl.max"
+                                value="{{system.attributes.agl.max}}" />
+                            <span>Atual: {{system.attributes.agl.actual}}</span>
                         </div>
                     </div>
                     <div class="attribute-card" >
-                        <label class="attribute-title">Percepção</label>
+                        <label class="attribute-title">Coração</label>
                         <div class="attribute-values">
                             <input
                                 type="number"
                                 class="attribute-value"
-                                name="system.attributes.per.max"
-                                value="{{system.attributes.per.max}}" />
-                            <span>Atual: {{system.attributes.per.actual}}</span>
+                                name="system.attributes.hrt.max"
+                                value="{{system.attributes.hrt.max}}" />
+                            <span>Atual: {{system.attributes.hrt.actual}}</span>
                         </div>
                     </div>
                     <div class="attribute-card" >
-                        <label class="attribute-title">Inteligência</label>
+                        <label class="attribute-title">Astúcia</label>
                         <div class="attribute-values">
                             <input
                                 type="number"
                                 class="attribute-value"
-                                name="system.attributes.int.max"
-                                value="{{system.attributes.int.max}}" />
-                            <span>Atual: {{system.attributes.int.actual}}</span>
+                                name="system.attributes.cun.max"
+                                value="{{system.attributes.cun.max}}" />
+                            <span>Atual: {{system.attributes.cun.actual}}</span>
                         </div>
                     </div>
                     <div class="attribute-card" >
-                        <label class="attribute-title">Constituição</label>
+                        <label class="attribute-title">Sombra</label>
                         <div class="attribute-values">
                             <input
                                 type="number"
                                 class="attribute-value"
-                                name="system.attributes.con.max"
-                                value="{{system.attributes.con.max}}" />
-                            <span>Atual: {{system.attributes.con.actual}}</span>
-                        </div>
-                    </div>
-                    <div class="attribute-card" >
-                        <label class="attribute-title">Carisma</label>
-                        <div class="attribute-values">
-                            <input
-                                type="number"
-                                class="attribute-value"
-                                name="system.attributes.cha.max"
-                                value="{{system.attributes.cha.max}}" />
-                            <span>Atual: {{system.attributes.cha.actual}}</span>
+                                name="system.attributes.shd.max"
+                                value="{{system.attributes.shd.max}}" />
+                            <span>Atual: {{system.attributes.shd.actual}}</span>
                         </div>
                     </div>
                 </div>

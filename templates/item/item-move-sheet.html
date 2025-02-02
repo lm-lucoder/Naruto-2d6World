@@ -33,8 +33,8 @@
             <div class="move-attributes-list">
               {{#each system.attributes as |attribute|}}
                 <div class="resource move-attributes-card">
-                    <label for="system.attributes.{{attribute.name}}.on">{{attribute.name}}</label>
-                    <input type="checkbox" name="system.attributes.{{attribute.name}}.on" {{checked attribute.on}}>
+                    <label for="system.attributes.{{attribute.ref}}.on">{{attribute.name}}</label>
+                    <input type="checkbox" name="system.attributes.{{attribute.ref}}.on" {{checked attribute.on}}>
                 </div>
               {{/each}}
             </div>

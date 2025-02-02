@@ -29,6 +29,11 @@
 				"min": -4,
 				"max": 4
 			},
+			"momentum": {
+				"actual": 1,
+				"min": -6,
+				"max": 10
+			},
 			"params": {
 				"rank": "0",
 				"village": "",
@@ -42,23 +47,25 @@
 				"space": 5
 			},
 			"attributes": {
-				"str": {
-					"max": 0
+				"bod": {
+					"max": 0,
+					"ref": "bod"
 				},
-				"dex": {
-					"max": 0
+				"agl": {
+					"max": 0,
+					"ref": "agl"
 				},
-				"con": {
-					"max": 0
+				"hrt": {
+					"max": 0,
+					"ref": "hrt"
 				},
-				"int": {
-					"max": 0
+				"shd": {
+					"max": 0,
+					"ref": "shd"
 				},
-				"per": {
-					"max": 0
-				},
-				"cha": {
-					"max": 0
+				"cun": {
+					"max": 0,
+					"ref": "cun"
 				}
 			}
 		},
@@ -82,29 +89,30 @@
 			"templates": ["base"],
 			"category": "Normal",
 			"attributes": {
-				"str": {
+				"bod": {
 					"on": false,
-					"name": "str"
+					"name": "Físico",
+					"ref": "bod"
 				},
-				"dex": {
+				"agl": {
 					"on": false,
-					"name": "dex"
+					"name": "Agilidade",
+					"ref": "agl"
 				},
-				"con": {
+				"hrt": {
 					"on": false,
-					"name": "con"
+					"name": "Coração",
+					"ref": "hrt"
 				},
-				"per": {
+				"shd": {
 					"on": false,
-					"name": "per"
+					"name": "Sombra",
+					"ref": "shd"
 				},
-				"int": {
+				"cun": {
 					"on": false,
-					"name": "int"
-				},
-				"cha": {
-					"on": false,
-					"name": "cha"
+					"name": "Astúcia",
+					"ref": "cun"
 				}
 			},
 			"isNpcMove" : false,
@@ -133,29 +141,30 @@
 			"templates": ["base"],
 			"isActive": false,
 			"attributes": {
-				"str": {
+				"bod": {
 					"mod": 0,
-					"name": "str"
+					"name": "Físico",
+					"ref": "bod"
 				},
-				"dex": {
+				"agl": {
 					"mod": 0,
-					"name": "dex"
+					"name": "Agilidade",
+					"ref": "agl"
 				},
-				"con": {
+				"hrt": {
 					"mod": 0,
-					"name": "con"
+					"name": "Coração",
+					"ref": "hrt"
 				},
-				"per": {
+				"shd": {
 					"mod": 0,
-					"name": "per"
+					"name": "Sombra",
+					"ref": "shd"
 				},
-				"int": {
+				"cun": {
 					"mod": 0,
-					"name": "int"
-				},
-				"cha": {
-					"mod": 0,
-					"name": "cha"
+					"name": "Astúcia",
+					"ref": "cun"
 				}
 			}
 		},

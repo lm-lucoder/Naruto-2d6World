@@ -29,7 +29,7 @@
             {{#each system.attributes as |attribute|}}
                 <li class="resource conditions-attributes-card">
                     <label class="resource-label">{{attribute.name}}</label>
-                    <input type="number" name="system.attributes.{{attribute.name}}.mod" value="{{attribute.mod}}" data-dtype="String"/>
+                    <input type="number" name="system.attributes.{{attribute.ref}}.mod" value="{{attribute.mod}}" data-dtype="String"/>
                 </li>
             {{/each}}
         </ul>
@@ -51,7 +51,7 @@
                       <li class="attributes-configs-card">
                           <div class="info">
                             <label>{{attributeConfig.name}}</label>
-                            <input type="number" name="system.movesConfigs.{{moveConfig.id}}.attributes.{{attributeConfig.name}}.value" value="{{attributeConfig.value}}">
+                            <input type="number" name="system.movesConfigs.{{moveConfig.id}}.attributes.{{attributeConfig.ref}}.value" value="{{attributeConfig.value}}">
                           </div>
                       </li>
                     {{/each}}

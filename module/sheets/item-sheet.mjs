@@ -16,7 +16,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 					initial: "description",
 				},
 			],
-			dragDrop: [{dragSelector: ".item-list .item", dropSelector: null}],
+			dragDrop: [{ dragSelector: ".item-list .item", dropSelector: null }],
 		});
 	}
 
@@ -56,7 +56,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 		}
 
 		if (itemData.type === "move") {
-			
+
 		}
 		if (itemData.type === "skill") {
 			const rankChoices = {
@@ -91,8 +91,8 @@ export class BoilerplateItemSheet extends ItemSheet {
 		});
 		html.find(".add-level-description-btn").click(async (ev) => {
 			const levelDescriptions = this.object.system.levelDescriptions
-			levelDescriptions.push({level: 0, description: "", id: randomID(7)})
-			this.object.update({system: {levelDescriptions: levelDescriptions} });
+			levelDescriptions.push({ level: 0, description: "", id: randomID(7) })
+			this.object.update({ system: { levelDescriptions: levelDescriptions } });
 		})
 		html.find(".level-description-input").blur(async (ev) => {
 			const inputObjective = ev.target.getAttribute("data-input-objective")
@@ -100,27 +100,27 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const levelDescriptions = this.object.system.levelDescriptions
 			const levelDescription = levelDescriptions.find(element => element.id === levelDescriptionId)
 			levelDescription[inputObjective] = ev.target.value
-			this.object.update({system: {levelDescriptions: [...levelDescriptions]} });
+			this.object.update({ system: { levelDescriptions: [...levelDescriptions] } });
 		})
 		html.find(".level-description-remove-btn").click(async (ev) => {
 			const levelDescriptionId = ev.target.closest("li").getAttribute("data-item-id")
 			const levelDescriptions = this.object.system.levelDescriptions
 			const toRemoveIndex = levelDescriptions.findIndex(element => element.id === levelDescriptionId)
 			levelDescriptions.splice(toRemoveIndex, 1)
-			this.object.update({system: {levelDescriptions: [...levelDescriptions]} });
+			this.object.update({ system: { levelDescriptions: [...levelDescriptions] } });
 		})
 
 		html.find(".add-item-attribute").click(async (ev) => {
 			const attributes = this.object.system.attributes
-			attributes.push({name: "New Attribute", value: 0, maxValue: 0, id: randomID(7)})
-			this.object.update({system: {attributes} });
+			attributes.push({ name: "New Attribute", value: 0, maxValue: 0, id: randomID(7) })
+			this.object.update({ system: { attributes } });
 		})
 		html.find(".item-attribute-remove-btn").click(async (ev) => {
 			const id = ev.target.closest("li").getAttribute("data-item-id")
 			const attributes = this.object.system.attributes
 			const toRemoveIndex = attributes.findIndex(element => element.id === id)
 			attributes.splice(toRemoveIndex, 1)
-			this.object.update({system: {attributes: [...attributes]} });
+			this.object.update({ system: { attributes: [...attributes] } });
 		})
 		html.find(".item-attribute-input").blur(async (ev) => {
 			const inputObjective = ev.target.getAttribute("data-input-objective")
@@ -128,20 +128,20 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const attributes = this.object.system.attributes
 			const attribute = attributes.find(element => element.id === id)
 			attribute[inputObjective] = ev.target.value
-			this.object.update({system: {attributes: [...attributes]} });
+			this.object.update({ system: { attributes: [...attributes] } });
 		})
 
 		html.find(".add-ability-resource").click(async (ev) => {
 			const resources = this.object.system.resources
-			resources.push({name: "New Resource", value: 0, maxValue: 0, show: false, id: randomID(7)})
-			this.object.update({system: {resources} });
+			resources.push({ name: "New Resource", value: 0, maxValue: 0, show: false, id: randomID(7) })
+			this.object.update({ system: { resources } });
 		})
 		html.find(".ability-resource-remove-btn").click(async (ev) => {
 			const id = ev.target.closest("li").getAttribute("data-item-id")
 			const resources = this.object.system.resources
 			const toRemoveIndex = resources.findIndex(element => element.id === id)
 			resources.splice(toRemoveIndex, 1)
-			this.object.update({system: {resources: [...resources]} });
+			this.object.update({ system: { resources: [...resources] } });
 		})
 		html.find(".ability-resource-input").blur(async (ev) => {
 			const inputObjective = ev.target.getAttribute("data-input-objective")
@@ -149,18 +149,18 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const resources = this.object.system.resources
 			const resource = resources.find(element => element.id === id)
 			resource[inputObjective] = ev.target.value
-			this.object.update({system: {resources: [...resources]} });
+			this.object.update({ system: { resources: [...resources] } });
 		})
 		html.find(".ability-resource-card-checkbox").change(async (e) => {
 			const id = e.target.closest("li").getAttribute("data-item-id")
 			const resources = this.object.system.resources
 			const resource = resources.find(element => element.id === id)
-			if(e.target.checked){
+			if (e.target.checked) {
 				resource.show = true
 			} else {
 				resource.show = false
 			}
-			this.object.update({system: {resources: [...resources]} });
+			this.object.update({ system: { resources: [...resources] } });
 		})
 		html.find(".scroll-item-quantity").mousedown(async (e) => {
 			const scroll = this.object
@@ -198,12 +198,11 @@ export class BoilerplateItemSheet extends ItemSheet {
 			id: randomID(7),
 			moveName: "",
 			attributes: {
-				str: { value: 0, name: "str" },
-				dex: { value: 0, name: "dex" },
-				con: { value: 0, name: "con" },
-				int: { value: 0, name: "int" },
-				per: { value: 0, name: "per" },
-				car: { value: 0, name: "car" },
+				bod: { value: 0, ref: "bod", name: "Físico" },
+				agl: { value: 0, ref: "agl", name: "Agilidade" },
+				hrt: { value: 0, ref: "hrt", name: "Coração" },
+				shd: { value: 0, ref: "shd", name: "Sombra" },
+				cun: { value: 0, ref: "cun", name: "Astúcia" }
 			},
 		};
 		// if(itemCondition.system?.movesConfigs){
@@ -225,7 +224,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 			system: { movesConfigs: { ...movesConfigsObj } },
 		});
 	}
-	_onDrop(e){
+	_onDrop(e) {
 		const data = TextEditor.getDragEventData(e);
 		if (data.type == "Item") {
 			const item = Item.get(data.uuid.split('.')[1])
@@ -242,14 +241,14 @@ export class BoilerplateItemSheet extends ItemSheet {
 }
 
 class ScrollAPI {
-	static add(item, scroll){
+	static add(item, scroll) {
 		console.log(scroll)
 		const scrollItems = scroll.system.scroll.scrollItems
 		const itemSlotsWeight = item.system.slots;
 		const canAdd = (scroll.system.scroll.scrollUsedSlots + itemSlotsWeight) <= scroll.system.scroll.scrollMaxSlots
 		if (!canAdd) return ui.notifications.info(`Não é possível adicionar! Isso iria extrapolar o limite de espaço do pergaminho`);
 		const itemAlreadyExists = scrollItems.find(scrollItem => scrollItem.id == item.id)
-		if(itemAlreadyExists){
+		if (itemAlreadyExists) {
 			itemAlreadyExists.quantity += 1
 		} else {
 			scrollItems.push({
@@ -257,17 +256,17 @@ class ScrollAPI {
 				id: item.id
 			})
 		}
-		scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+		scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } })
 	}
-	static changeItemQt(scroll, itemId, sum){
+	static changeItemQt(scroll, itemId, sum) {
 		console.log(scroll)
 		const scrollUsedSlots = scroll.system.scroll.scrollUsedSlots
 		const scrollCapacity = scroll.system.scroll.scrollMaxSlots
 		const scrollItems = scroll.system.scroll.scrollItems
 		const item = scrollItems.find(item => item.id === itemId)
 		const itemQuantity = item.quantity
-		const result = itemQuantity + sum 
-		if(sum > 0){
+		const result = itemQuantity + sum
+		if (sum > 0) {
 			console.log(itemQuantity)
 			console.log(result)
 			console.log(scrollCapacity)
@@ -277,15 +276,15 @@ class ScrollAPI {
 		}
 		if (result < 0) {
 			item.quantity = 0
-			return scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+			return scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } })
 		}
 		item.quantity = parseInt(item.quantity) + sum
-		scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+		scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } })
 	}
-	static deleteItem(scroll, itemId){
+	static deleteItem(scroll, itemId) {
 		const scrollItems = scroll.system.scroll.scrollItems
 		const itemIndex = scrollItems.findIndex(item => item.id === itemId)
 		scrollItems.splice(itemIndex, 1)
-		scroll.update({system: {scroll: {scrollItems: [...scrollItems]}}})
+		scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } })
 	}
 }

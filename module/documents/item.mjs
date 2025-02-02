@@ -211,7 +211,7 @@ export class BoilerplateItem extends Item {
 			rolls: rolls,
 			type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 			content: `
-				<details>
+				<details class="move-card-roll-details">
 					<summary style="font-size: 12px;color: #807f7b;text-align: center;margin-top: 5px;"><i>Detalhes da Rolagem</i></summary>
 					<blockquote>${renderedRolls.join('')}</blockquote>
 				</details>
@@ -220,11 +220,15 @@ export class BoilerplateItem extends Item {
 	}
 
 	async moveRollJustSend() {
-		const item = this;
+		const move = this;
 
 		const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 		const rollMode = game.settings.get("core", "rollMode");
-		const label = this._getMoveLabelRollTemplate({ move: this });
+		const label = `<div class="rollCard">
+		<i>Utilizado por: ${this.actor.name}</i>
+		<h3>Movimento: ${move.name}</h3>
+		${move.system.description}
+    </div>`.trim()
 
 		ChatMessage.create({
 			speaker: speaker,
@@ -283,9 +287,9 @@ export class BoilerplateItem extends Item {
 		if (challengeDiceOneRoll.total == challengeDiceTwoRoll.total) match == true
 
 		let message = "";
-		if (successCount === 2 && match) {
+		if (match && actionDiceRoll.total > challengeDiceOneRoll.total) {
 			message = "Sucesso Crítico!!!"
-		} else if (successCount === 0 && match) {
+		} else if (match && actionDiceRoll.total <= challengeDiceOneRoll.total) {
 			message = "Falha Crítica!!!"
 		} else if (successCount === 2) {
 			message = "Sucesso Total!";
@@ -320,23 +324,20 @@ export class BoilerplateItem extends Item {
 
 		let attributeText
 		switch (attribute) {
-			case "str":
-				attributeText = "Força";
+			case "bod":
+				attributeText = "Físico";
 				break;
-			case "dex":
-				attributeText = "Destreza";
+			case "agl":
+				attributeText = "Agilidade";
 				break;
-			case "con":
-				attributeText = "Constituição";
+			case "hrt":
+				attributeText = "Coração";
 				break;
-			case "int":
-				attributeText = "Inteligência";
+			case "shd":
+				attributeText = "Sombra";
 				break;
-			case "per":
-				attributeText = "Percepção";
-				break;
-			case "cha":
-				attributeText = "Carisma";
+			case "cun":
+				attributeText = "Astúcia";
 				break;
 			default:
 				attributeText = undefined;
@@ -356,6 +357,7 @@ export class BoilerplateItem extends Item {
 			</blockquote>
 		</details>
 		<div class="moveDetailsArea">
+			<i>Utilizado por: ${this.actor.name}</i>
 			${attributeText ? `<i>Atributo escolhido: ${attributeText}</i>` : ""}
 			${modeText ? `<i>${modeText}</i>` : ""}
 			<i>Resultado: ${actionDiceRoll.result}</i>

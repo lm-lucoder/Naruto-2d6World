@@ -35,16 +35,16 @@ export class BoilerplateActorSheet extends ActorSheet {
 	get template() {
 		return `systems/naruto2d6world/templates/actor/actor-${this.actor.type}-sheet.html`;
 	}
-	_onDropItem(e, data){
+	_onDropItem(e, data) {
 		if (data.type === "Item" && !e.ctrlKey) {
 			const itemId = data.uuid.split(".")[1]
 			const itemName = Item.get(itemId).name
 			const actorItem = this.object.items.find(item => item.name == itemName)
 			if (actorItem) {
 				return actorItem.updateQuantity(1)
-			} 
+			}
 		}
-		
+
 		super._onDropItem(e, data)
 	}
 	/* -------------------------------------------- */
@@ -93,7 +93,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 			context.space
 		);
 		context.advantageLevel = this.object.system.advantageLevel
+		context.momentum = this.object.system.momentum
 		context.advantageLevel.range = this.getAdvantageLevelRange(context.advantageLevel)
+		context.momentum.range = this.getMomentumRange(context.momentum)
 
 		for (const item of context.gear) {
 			await this._prepareDescriptionData(item);
@@ -171,12 +173,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const moves = [];
 		for (let item of context.items) {
 			item.img = item.img || DEFAULT_TOKEN;
-			 if (item.type === "condition") {
+			if (item.type === "condition") {
 				conditions.push(item);
-			} 
-			 if (item.type === "move") {
+			}
+			if (item.type === "move") {
 				moves.push(item);
-			} 
+			}
 		}
 		context.conditions = conditions;
 		context.moves = moves;
@@ -244,9 +246,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const itemId = event.target.closest("li").getAttribute("data-item-id");
 			const item = this.object.items.get(itemId)
 			if (item.system.onHand) {
-				this.object.items.get(itemId).update({system: {onHand: false}})
+				this.object.items.get(itemId).update({ system: { onHand: false } })
 			} else {
-				this.object.items.get(itemId).update({system: {onHand: true}})
+				this.object.items.get(itemId).update({ system: { onHand: true } })
 			}
 		})
 		html.find(".item-attribute-quantity").mousedown((e) => {
@@ -256,10 +258,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 			if (e.button === 0) {
 				if (e.shiftKey) {
 					item.system.quantity += 5
-					return item.update({system: {quantity : item.system.quantity}})
+					return item.update({ system: { quantity: item.system.quantity } })
 				}
 				item.system.quantity += 1
-				return item.update({system: {quantity : item.system.quantity}})
+				return item.update({ system: { quantity: item.system.quantity } })
 			}
 			if (e.button === 2) {
 				if (item.system.quantity == 0) {
@@ -270,13 +272,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 					if (item.system.quantity < 0) {
 						item.system.quantity = 0
 					}
-					return item.update({system: {quantity : item.system.quantity}})
+					return item.update({ system: { quantity: item.system.quantity } })
 				}
 				if (e.ctrlKey) {
-					return item.update({system: {quantity : 0}})
+					return item.update({ system: { quantity: 0 } })
 				}
 				item.system.quantity -= 1
-				return item.update({system: {quantity : item.system.quantity}})
+				return item.update({ system: { quantity: item.system.quantity } })
 			}
 		})
 		html.find(".item-card-attribute-tag").mousedown((e) => {
@@ -290,35 +292,35 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 				if (e.ctrlKey) {
 					attribute.value = attribute.maxValue
-					return item.update({system: {attributes : [... item.system.attributes]}})
+					return item.update({ system: { attributes: [...item.system.attributes] } })
 				}
 				if (e.shiftKey) {
 					attribute.value = parseInt(attribute.value) + 5
 					if (attribute.value > attribute.maxValue) {
 						attribute.value = attribute.maxValue
 					}
-					return item.update({system: {attributes : [... item.system.attributes]}})
+					return item.update({ system: { attributes: [...item.system.attributes] } })
 				}
 				attribute.value = parseInt(attribute.value) + 1
-			} 
+			}
 			if (e.button === 2) {
 				if (attribute.value == 0) {
 					return ui.notifications.info(`${attribute.name} já está no mínimo!`);
 				}
 				if (e.ctrlKey) {
 					attribute.value = 0
-					return item.update({system: {attributes : [... item.system.attributes]}})
+					return item.update({ system: { attributes: [...item.system.attributes] } })
 				}
 				if (e.shiftKey) {
 					attribute.value = parseInt(attribute.value) - 5
 					if (attribute.value < 0) {
 						attribute.value = 0
 					}
-					return item.update({system: {attributes : [... item.system.attributes]}})
+					return item.update({ system: { attributes: [...item.system.attributes] } })
 				}
 				attribute.value = parseInt(attribute.value) - 1
 			}
-			item.update({system: {attributes : [... item.system.attributes]}})
+			item.update({ system: { attributes: [...item.system.attributes] } })
 		})
 
 		html.find('.chakra-tag').mousedown((e) => {
@@ -328,10 +330,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 			if (e.target.classList.contains("image")) {
 				const actorChakraValue = parseInt(this.object.system.chakra.value)
 				const actorMaxChakraValue = parseInt(this.object.system.chakra.maxValue)
-				if(actorChakraValue == 0){
+				if (actorChakraValue == 0) {
 					return ui.notifications.info("Você não possui pontos de chakra para isso");
 				}
-				if(item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints){
+				if (item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
 				}
 				item.refillChakraPointsFromActor(this.object.id)
@@ -354,15 +356,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 					if (item.system.chakra.chakraPoints > item.system.chakra.maxChakraPoints) {
 						item.system.chakra.chakraPoints = item.system.chakra.maxChakraPoints
 					}
-					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+					return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
 				}
 				if (e.ctrlKey) {
 					item.system.chakra.chakraPoints = item.system.chakra.maxChakraPoints
-					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+					return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
 				}
 				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints += 1
-				return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
-			} 
+				return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
+			}
 			if (e.button === 2) {
 				if (item.system.chakra.chakraPoints == 0) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no mínimo");
@@ -372,14 +374,14 @@ export class BoilerplateActorSheet extends ActorSheet {
 					if (item.system.chakra.chakraPoints < 0) {
 						item.system.chakra.chakraPoints = 0
 					}
-					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+					return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
 				}
 				if (e.ctrlKey) {
 					item.system.chakra.chakraPoints = 0
-					return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+					return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
 				}
 				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints -= 1
-				return item.update({system: {chakra : {chakraPoints : item.system.chakra.chakraPoints }}})
+				return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
 			}
 		})
 
@@ -388,7 +390,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const ability = this.object.items.get(abilityId)
 			const resourceId = e.target.closest(".ability-resource-tag").getAttribute("data-resource-id")
 			const resource = ability.system.resources.find(resource => resource.id == resourceId)
-			
+
 			if (e.button === 0) {
 				if (resource.value == resource.maxValue) {
 					return ui.notifications.info("Os pontos deste recurso já estão no máximo");
@@ -398,15 +400,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 					if (resource.value > resource.maxValue) {
 						resource.value = resource.maxValue
 					}
-					return ability.update({system: {resources: [... ability.system.resources]}})
+					return ability.update({ system: { resources: [...ability.system.resources] } })
 				}
 				if (e.ctrlKey) {
 					resource.value = resource.maxValue
-					return ability.update({system: {resources: [... ability.system.resources]}})
+					return ability.update({ system: { resources: [...ability.system.resources] } })
 				}
 				resource.value = parseInt(resource.value) + 1
-				return ability.update({system: {resources: [... ability.system.resources]}})
-			} 
+				return ability.update({ system: { resources: [...ability.system.resources] } })
+			}
 			if (e.button === 2) {
 				if (resource.value == 0) {
 					return ui.notifications.info("Os pontos deste recurso já estão no mínimo");
@@ -416,18 +418,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 					if (resource.value < 0) {
 						resource.value = 0
 					}
-					return ability.update({system: {resources: [... ability.system.resources]}})
+					return ability.update({ system: { resources: [...ability.system.resources] } })
 				}
 				if (e.ctrlKey) {
 					resource.value = 0
-					return ability.update({system: {resources: [... ability.system.resources]}})
+					return ability.update({ system: { resources: [...ability.system.resources] } })
 				}
 				resource.value = parseInt(resource.value) - 1
-				return ability.update({system: {resources: [... ability.system.resources]}})
+				return ability.update({ system: { resources: [...ability.system.resources] } })
 			}
-			
+
 		})
-		html.find('.item-scroll-unseal-btn').click(e=>{
+		html.find('.item-scroll-unseal-btn').click(e => {
 			const itemId = e.target.closest(".item-card").getAttribute('data-item-id')
 			const scroll = this.object.items.get(itemId)
 			const scrollItems = scroll.system.scroll.scrollItemsComplete.map(item => {
@@ -441,9 +443,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 				const itemExists = parent.items.find(item => item.name == scrollItem.name)
 				if (itemExists) {
 					const newQt = itemExists.system.quantity + scrollItem.system.quantity
-					itemExists.update({system: {quantity: newQt}})
+					itemExists.update({ system: { quantity: newQt } })
 				} else {
-					Item.create(scrollItem, {parent})
+					Item.create(scrollItem, { parent })
 				}
 			}
 			const speaker = ChatMessage.getSpeaker({ actor: this.object });
@@ -454,12 +456,23 @@ export class BoilerplateActorSheet extends ActorSheet {
 				${scrollItems.map(item => `<p style="display:flex; align-items:center"><img src="${item.img}" style="max-width: 35px; border: none"> ${item.name} (${item.system.quantity})</p>`).join("")} 
 				`
 			});
-			scroll.update({system: {scroll: {scrollItems: []}}})
+			scroll.update({ system: { scroll: { scrollItems: [] } } })
 		})
-		html.find('.range-option-icon').click(e => {
+		html.find('.range-option-icon-advantage-level').click(e => {
 			const newAdvantageLevel = parseInt(e.target.querySelector('.value').innerText)
-			this.object.update({system:{advantageLevel:{actual: newAdvantageLevel}}})
-			console.log(newAdvantageLevel)
+			this.object.update({ system: { advantageLevel: { actual: newAdvantageLevel } } })
+			ChatMessage.create({
+				speaker: ChatMessage.getSpeaker(),
+				content: `${this.object.name} alterou seu NV para: ${newAdvantageLevel}`,
+			});
+		})
+		html.find('.range-option-icon-momentum').click(e => {
+			const newMomentum = parseInt(e.target.querySelector('.value').innerText)
+			this.object.update({ system: { momentum: { actual: newMomentum } } })
+			ChatMessage.create({
+				speaker: ChatMessage.getSpeaker(),
+				content: `${this.object.name} alterou seu momentum para: ${newMomentum}`,
+			});
 		})
 		// Drag events for macros.
 		if (this.actor.isOwner) {
@@ -574,14 +587,14 @@ export class BoilerplateActorSheet extends ActorSheet {
 			windowElement.innerHTML = `
 				<ul class="item-attributes-list">
 					${itemAttributes.map(attribute => {
-						console.log("attribute", attribute)
-						return `
+				console.log("attribute", attribute)
+				return `
 						<li class="item-attribute-card" data-item-attribute-id="${attribute.id}">
 							<span><b>${attribute.name}:</b></span>
 							<span>${attribute.value} / ${attribute.maxValue}</span>
 						</li>
 						`
-					}).join('')}
+			}).join('')}
 				</ul>
 				
 				`
@@ -590,13 +603,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 					${item.system.description}
 				</div>
 			`
-			if(itemIsScroll){
+			if (itemIsScroll) {
 				windowElement.innerHTML += `
 				<div class="item-scroll-items">
 					<h3>Itens Selados:</h3>
 					<ul class="item-scroll-items-list">
 						${item.system.scroll.scrollItemsComplete.map(item => {
-							return `
+					return `
 							<li class="scroll-item-card" data-item-id="{{item.data.id}}">
 								<div class="info">
 									<img src="${item.data.img}">
@@ -604,19 +617,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 									<div class="scroll-item-attributes">
 										<i class="fa-solid fa-sack"></i> (${item.quantity})
 										<span class="slots">
-											<i class="fa-solid fa-weight-hanging"></i> (${
-												(()=>{
-													const result = item.data.system.slots * item.quantity
-													const roundedResult = Math.round(result * 100) / 100;
-													return roundedResult
-												})()
-											})
+											<i class="fa-solid fa-weight-hanging"></i> (${(() => {
+							const result = item.data.system.slots * item.quantity
+							const roundedResult = Math.round(result * 100) / 100;
+							return roundedResult
+						})()
+						})
 										</span>
 									</div>
 								</div>
 							</li>
 							`
-						}).join("")}
+				}).join("")}
 					</ul>
 				</div>
 				`
@@ -638,20 +650,20 @@ export class BoilerplateActorSheet extends ActorSheet {
 			windowElement.innerHTML = `
 				<ul class="ability-resources-description-list">
 					${abilityResources.map(resource => {
-						console.log("attribute", resource)
-						return `
+				console.log("attribute", resource)
+				return `
 							<li class="ability-resource-description-card" data-item-attribute-id="${resource.id}">
 								<span><b>${resource.name}:</b></span>
 								<span>${resource.value} / ${resource.maxValue}</span>
 							</li>
 						`
-					}).join('')}
+			}).join('')}
 				</ul>
 				<div class="item-description">
 					${ability.system.description}
 				</div>
 			`
-			;
+				;
 		} else {
 			windowElement.innerHTML = "";
 		}
@@ -659,7 +671,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 	_getUsedSpace(items) {
 		const total = items.reduce(
-			(total, item) =>{
+			(total, item) => {
 				if (item.system.considerSlots && !item.system.onHand) {
 					return total + item.system.slots * item.system.quantity
 				} else {
@@ -686,12 +698,22 @@ export class BoilerplateActorSheet extends ActorSheet {
 		console.log(usedSpace, maxSpace);
 		return usedSpace > maxSpace;
 	}
-	
-	getAdvantageLevelRange(advantageLevel){
+
+	getAdvantageLevelRange(advantageLevel) {
 		const range = []
-		for (let i = advantageLevel.min; i <= advantageLevel.max ; i++) {
+		for (let i = advantageLevel.min; i <= advantageLevel.max; i++) {
 			range.push({
 				actual: advantageLevel.actual == i,
+				value: i
+			})
+		}
+		return range
+	}
+	getMomentumRange(momentum) {
+		const range = []
+		for (let i = momentum.min; i <= momentum.max; i++) {
+			range.push({
+				actual: momentum.actual == i,
 				value: i
 			})
 		}
@@ -709,5 +731,5 @@ export class BoilerplateActorSheet extends ActorSheet {
 		);
 	}
 
-	
+
 }

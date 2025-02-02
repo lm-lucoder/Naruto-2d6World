@@ -18,7 +18,7 @@ class RollMoveDialog extends Dialog {
 			const options = validAttributes.map(
 				(attribute, i) => `
 				<label>
-					<input type="radio" name="option" value="${attribute.name}">
+					<input type="radio" name="option" value="${attribute.ref}">
 					${attribute.name[0].toUpperCase() + attribute.name.slice(1)}
 				</label>
 			`
