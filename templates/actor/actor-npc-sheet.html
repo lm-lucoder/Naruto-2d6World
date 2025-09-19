@@ -91,8 +91,15 @@
               <li class="move-card item" data-item-id="{{move._id}}" data-tooltip="{{move.system.description}}" data-tooltip-direction="LEFT">
                   <span class="title">{{move.name}}
                     {{#if move.system.isNpcMove}}
-                      {{#if move.system.npcMoveLevel.on}} (Nv: {{move.system.npcMoveLevel.value}}) {{/if}}
-                      {{#if move.system.npcUses.on}} (Uses: {{move.system.npcUses.min}} / {{move.system.npcUses.max}}) {{/if}}
+
+                      {{#if move.system.npcMoveLevel.on}} 
+                        (Nv: <span class="move-card-number-change" data-number-reference="npcMoveLevel.value">{{move.system.npcMoveLevel.value}}</span>) 
+                      {{/if}}
+
+                      {{#if move.system.npcUses.on}} 
+                        (Uses: <span class="move-card-number-change" data-number-reference="npcUses.min">{{move.system.npcUses.min}}</span> / <span class="move-card-number-change" data-number-reference="npcUses.max">{{move.system.npcUses.max}}</span>) 
+                      {{/if}}
+
                     {{/if}}
                   </span>
                   <div class="controls">

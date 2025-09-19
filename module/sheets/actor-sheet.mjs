@@ -474,6 +474,22 @@ export class BoilerplateActorSheet extends ActorSheet {
 				content: `${this.object.name} alterou seu momentum para: ${newMomentum}`,
 			});
 		})
+		html.find('.move-card-number-change').mousedown(e => {
+			const moveId = e.target.closest(".move-card").getAttribute('data-item-id');
+			const reference = e.target.getAttribute('data-number-reference');
+			const move = this.object.items.get(moveId)
+			const attributePath = "system." + reference
+			if (e.button === 0) {
+				// Clique esquerdo
+				const actualValue = this._getByPath(move, attributePath);
+				move.update({ [attributePath]: +actualValue + 1 })
+			}
+			if (e.button === 2) {
+				// Clique direito
+				const actualValue = this._getByPath(move, attributePath);
+				move.update({ [attributePath]: +actualValue - 1 })
+			}
+		});
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);
@@ -733,6 +749,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 				relativeTo: this.object,
 			}
 		);
+	}
+
+	_getByPath(obj, path) {
+		return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 	}
 
 
