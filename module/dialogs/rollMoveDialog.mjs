@@ -76,10 +76,7 @@ class RollMoveDialog extends Dialog {
 			.querySelectorAll('[name="option"]');
 		const checkedOption = [...options].find((option) => option.checked);
 		if (!checkedOption) {
-			ui.notifications.info(
-				"Escolha um atributo para rolar com o movimento!"
-			);
-			return;
+			throw new Error("Escolha um atributo para rolar com o movimento!");
 		}
 		const chosenAttribute = checkedOption.value;
 		const rollModifier = e.target
