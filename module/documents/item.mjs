@@ -43,6 +43,9 @@ export class BoilerplateItem extends Item {
 				this.system.scroll.scrollUsedSlots = this.ScrollAPI.getSlotsStatus(this)
 			}
 		}
+		if (this.type === "move") {
+			this.moveDescription = this._prepareMoveDescription();
+		}
 	}
 
 	/**
@@ -356,7 +359,6 @@ export class BoilerplateItem extends Item {
 			if (this.system.npcUses.consumesOnChatSending) {
 				canUpdateUses = true
 			}
-			MoveAttributesMessage += `<p><strong>Cargas Restantes:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
 		}
 
 
@@ -366,16 +368,17 @@ export class BoilerplateItem extends Item {
 		}
 		if (canUpdateUses) {
 			await this.update({ "system.npcUses.min": this.system.npcUses.min - 1 })
+			MoveAttributesMessage += `<p><strong>Cargas Restantes:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
 		}
 
 		let treatedDescription = ""
 
 		if (move.system.description) {
 			//Treat Movement description data
-			treatedDescription = move.system.description
+			/* treatedDescription = move.system.description
 				.replaceAll("//Level//", new String(this.system.npcMoveLevel.value).toString())
 				.replaceAll("//MinUses//", new String(this.system.npcUses.min).toString())
-				.replaceAll("//MaxUses//", new String(this.system.npcUses.max).toString())
+				.replaceAll("//MaxUses//", new String(this.system.npcUses.max).toString()) */
 
 			const regex = /\[\[(.*?)\]\]/g;
 			const operations = [...treatedDescription.matchAll(regex)]
@@ -623,6 +626,13 @@ export class BoilerplateItem extends Item {
     </div>
     `;
 		return label;
+	}
+
+	_prepareMoveDescription() {
+		this.system.moveDescription = this.system.description
+			.replaceAll("//Level//", new String(this.system.npcMoveLevel.value).toString())
+			.replaceAll("//MinUses//", new String(this.system.npcUses.min).toString())
+			.replaceAll("//MaxUses//", new String(this.system.npcUses.max).toString())
 	}
 
 	ScrollAPI = ScrollAPI

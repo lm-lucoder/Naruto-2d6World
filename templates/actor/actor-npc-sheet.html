@@ -88,7 +88,7 @@
         </div>
         <ul class="moves-list">
           {{#each moves as |move|}}
-              <li class="move-card item" data-item-id="{{move._id}}" data-tooltip="{{move.system.description}}" data-tooltip-direction="LEFT">
+              <li class="move-card item" data-item-id="{{move._id}}" data-tooltip="{{move.system.moveDescription}}" data-tooltip-direction="LEFT">
                   <span class="title">{{move.name}}
                     {{#if move.system.isNpcMove}}
 
