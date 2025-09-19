@@ -108,7 +108,11 @@
                       <i class="fa-solid fa-rotate-right" {{#if move.system.npcUses.consumesNPCChakraOnReload.on}}style="color: #7CACF8;"{{/if}}></i>
                       </a>
                     {{/if}}
-                    <a class="rollableWithDialog" data-roll-type="item" title="Enviar para o chat"><i class="fa-solid fa-comment"></i></a>
+                    <a class="rollableWithDialog" data-roll-type="item" title="Enviar para o chat">
+                      <i class="fa-solid fa-comment"
+                      {{#if move.system.npcMoveConsumesNPCChakraOnUse.on}}style="color: #7CACF8;"{{/if}}>
+                      </i>
+                    </a>
                     <a class="item-edit" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
                     <a class="item-delete" title="Excluir"><i class="fa-solid fa-trash"></i></a>
                   </div>

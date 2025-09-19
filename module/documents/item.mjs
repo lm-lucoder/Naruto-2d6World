@@ -412,7 +412,7 @@ export class BoilerplateItem extends Item {
 		});
 	}
 
-	async reloadNPCMoveUses(dontWarnInChat) {
+	async reloadNPCMoveUses(hardReload) {
 		if (this.type !== "move") return;
 		if (!this.system.npcUses.on) return;
 		if (this.system.npcUses.min >= this.system.npcUses.max) {
@@ -421,7 +421,7 @@ export class BoilerplateItem extends Item {
 
 		let message = `<strong>Recarregou ${this.name}</strong>`
 
-		if (this.system.npcUses.consumesNPCChakraOnReload.on) {
+		if (this.system.npcUses.consumesNPCChakraOnReload.on && !hardReload) {
 			if (this.actor.system.chakra.value < this.system.npcUses.consumesNPCChakraOnReload.value) {
 				return ui.notifications.info("Você não possui chakra suficiente para recarregar as cargas deste movimento!");
 			}
@@ -430,7 +430,7 @@ export class BoilerplateItem extends Item {
 		}
 		await this.update({ "system.npcUses.min": this.system.npcUses.max })
 
-		if (!dontWarnInChat) {
+		if (!hardReload) {
 			const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 			await ChatMessage.create({
 				speaker: speaker,
