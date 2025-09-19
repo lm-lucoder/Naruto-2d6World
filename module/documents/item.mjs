@@ -325,6 +325,21 @@ export class BoilerplateItem extends Item {
 		const rollMode = game.settings.get("core", "rollMode");
 
 		let MoveAttributesMessage = ""
+		let canUpdateChakra = false
+		let newChakraAmount = 0
+		let canUpdateUses = false
+
+		//Handle Chakra consumption for this movement
+		if (this.system.npcMoveConsumesNPCChakraOnUse) {
+
+			if (this.actor.system.chakra.value < this.system.npcMoveConsumesNPCChakraOnUse.value) {
+				return ui.notifications.info("Você não possui chakra suficiente para realizar este movimento!");
+			}
+
+			newChakraAmount = this.actor.system.chakra.value - this.system.npcMoveConsumesNPCChakraOnUse.value;
+			canUpdateChakra = true
+			MoveAttributesMessage += `<p><strong style="color: #7CACF8; text-shadow: 0 0 5px white">${this.system.npcMoveConsumesNPCChakraOnUse.value} pontos de chakra foram utilizados</strong></p>`;
+		}
 
 		//Handle NPC Levels on this movement
 		if (this.system.npcMoveLevel.on) {
@@ -333,10 +348,24 @@ export class BoilerplateItem extends Item {
 
 		//Handle NPC Uses for this movement
 		if (this.system.npcUses.on) {
+			if (this.system.npcUses.min <= 0) {
+				return ui.notifications.info("Você não possui mais cargas disponíveis para este movimento!");
+			}
+
+			//Handle the reduction of uses when sending to chat
 			if (this.system.npcUses.consumesOnChatSending) {
-				await this.update({ "system.npcUses.min": this.system.npcUses.min - 1 })
+				canUpdateUses = true
 			}
 			MoveAttributesMessage += `<p><strong>Cargas Restantes:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
+		}
+
+
+		//Handle update of charges
+		if (canUpdateChakra) {
+			this.actor.update({ "system.chakra.value": newChakraAmount });
+		}
+		if (canUpdateUses) {
+			await this.update({ "system.npcUses.min": this.system.npcUses.min - 1 })
 		}
 
 		let treatedDescription = ""
@@ -378,6 +407,7 @@ export class BoilerplateItem extends Item {
 			flavor: label,
 		});
 	}
+
 	async reloadNPCMoveUses(dontWarnInChat) {
 		if (this.type !== "move") return;
 		if (!this.system.npcUses.on) return;

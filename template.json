@@ -120,7 +120,11 @@
 				"on":false,
 				"min": 0,
 				"max": 0,
-				"consumesOnChatSending": true
+				"consumesOnChatSending": true,
+				"consumesNPCChakraOnReload": {
+					"on": false,
+					"value": 0
+				}
 			},
 			"npcMoveLevel" : {
 				"value" : 0,
@@ -129,6 +133,10 @@
 			"npcMoveRoll" : {
 				"on" : false,
 				"value" : 0
+			},
+			"npcMoveConsumesNPCChakraOnUse": {
+				"on": false,
+				"value": 0
 			}
 		},
 		"skill": {
