@@ -307,9 +307,63 @@ export class BoilerplateItem extends Item {
 		const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 		const rollMode = game.settings.get("core", "rollMode");
 		const label = `<div class="rollCard">
-		<i>Utilizado por: ${this.actor.name}</i>
+			<i>Utilizado por: ${this.actor.name}</i>
+			<h3>Movimento: ${move.name}</h3>
+			${move.system.description}
+			</div>`.trim()
+
+		ChatMessage.create({
+			speaker: speaker,
+			rollMode: rollMode,
+			flavor: label,
+		});
+	}
+	async moveRollNPC() {
+		const move = this;
+
+		const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+		const rollMode = game.settings.get("core", "rollMode");
+
+		let MoveAttributesMessage = ""
+		if (this.system.npcMoveLevel.on) {
+			MoveAttributesMessage += `<p><strong>Nível do Movimento:</strong> ${this.system.npcMoveLevel.value}</p>`;
+		}
+		if (this.system.npcUses.on) {
+			MoveAttributesMessage += `<p><strong>Cargas:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
+		}
+
+		let treatedDescription = ""
+
+		if (move.system.description) {
+			//Treat Text Data
+			treatedDescription = move.system.description
+				.replaceAll("//Level//", new String(this.system.npcMoveLevel.value).toString())
+				.replaceAll("//MinUses//", new String(this.system.npcUses.min).toString())
+				.replaceAll("//ActualUses//", new String(this.system.npcUses.actual).toString())
+				.replaceAll("//MaxUses//", new String(this.system.npcUses.max).toString())
+
+			const regex = /\[\[(.*?)\]\]/g;
+			const operations = [...treatedDescription.matchAll(regex)]
+			if (operations.length > 0) {
+				for (const operation of operations) {
+					const string = operation[0];
+					const expression = operation[1];
+					let result = ""
+					try {
+						result = new Function('return ' + expression)()
+					} catch (error) {
+						result = "Error in expression"
+					}
+					treatedDescription = treatedDescription.replace(string, result)
+				}
+			};
+
+		}
+
+		const label = `<div class="rollCard">
 		<h3>Movimento: ${move.name}</h3>
-		${move.system.description}
+		${MoveAttributesMessage}
+		${treatedDescription || ""}
     </div>`.trim()
 
 		ChatMessage.create({
@@ -318,6 +372,7 @@ export class BoilerplateItem extends Item {
 			flavor: label,
 		});
 	}
+
 
 	_rankSkill() {
 		let name = "";

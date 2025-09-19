@@ -563,6 +563,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const item = this.object.items.find(
 			(item) => item.id === li.dataset.itemId
 		);
+		const isNPCMove = item.system.isNpcMove;
+		if (isNPCMove) {
+			return item.moveRollNPC();
+		}
 		const isRollableMove = Object.values(item.system.attributes).find(
 			(attribute) => attribute.on
 		);
