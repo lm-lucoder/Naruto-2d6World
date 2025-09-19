@@ -414,13 +414,23 @@ export class BoilerplateItem extends Item {
 		if (this.system.npcUses.min >= this.system.npcUses.max) {
 			return ui.notifications.info("As cargas deste movimento já estão completas!")
 		}
+
+		let message = `<strong>Recarregou ${this.name}</strong>`
+
+		if (this.system.npcUses.consumesNPCChakraOnReload.on) {
+			if (this.actor.system.chakra.value < this.system.npcUses.consumesNPCChakraOnReload.value) {
+				return ui.notifications.info("Você não possui chakra suficiente para recarregar as cargas deste movimento!");
+			}
+			await this.actor.update({ "system.chakra.value": this.actor.system.chakra.value - this.system.npcUses.consumesNPCChakraOnReload.value });
+			message += `<p><strong style="color: #7CACF8; text-shadow: 0 0 5px white">${this.system.npcUses.consumesNPCChakraOnReload.value} pontos de chakra foram utilizados</strong></p>`
+		}
 		await this.update({ "system.npcUses.min": this.system.npcUses.max })
 
 		if (!dontWarnInChat) {
 			const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 			await ChatMessage.create({
 				speaker: speaker,
-				content: `<strong>Recarregou as cargas de ${this.name}</strong>`
+				content: message
 			});
 		}
 	}
