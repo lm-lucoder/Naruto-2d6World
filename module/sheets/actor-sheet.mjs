@@ -490,6 +490,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 				move.update({ [attributePath]: +actualValue - 1 })
 			}
 		});
+		html.find('.item-npc-movement-reload-uses').click(e => {
+			const moveId = e.target.closest(".move-card").getAttribute('data-item-id');
+			const move = this.object.items.get(moveId);
+			move.reloadNPCMoveUses(e.shiftKey);
+		})
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);

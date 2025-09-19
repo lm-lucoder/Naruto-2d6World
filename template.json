@@ -120,7 +120,7 @@
 				"on":false,
 				"min": 0,
 				"max": 0,
-				"actual": 0
+				"consumesOnChatSending": true
 			},
 			"npcMoveLevel" : {
 				"value" : 0,

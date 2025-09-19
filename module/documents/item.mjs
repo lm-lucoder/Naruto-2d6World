@@ -325,21 +325,27 @@ export class BoilerplateItem extends Item {
 		const rollMode = game.settings.get("core", "rollMode");
 
 		let MoveAttributesMessage = ""
+
+		//Handle NPC Levels on this movement
 		if (this.system.npcMoveLevel.on) {
 			MoveAttributesMessage += `<p><strong>Nível do Movimento:</strong> ${this.system.npcMoveLevel.value}</p>`;
 		}
+
+		//Handle NPC Uses for this movement
 		if (this.system.npcUses.on) {
-			MoveAttributesMessage += `<p><strong>Cargas:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
+			if (this.system.npcUses.consumesOnChatSending) {
+				await this.update({ "system.npcUses.min": this.system.npcUses.min - 1 })
+			}
+			MoveAttributesMessage += `<p><strong>Cargas Restantes:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
 		}
 
 		let treatedDescription = ""
 
 		if (move.system.description) {
-			//Treat Text Data
+			//Treat Movement description data
 			treatedDescription = move.system.description
 				.replaceAll("//Level//", new String(this.system.npcMoveLevel.value).toString())
 				.replaceAll("//MinUses//", new String(this.system.npcUses.min).toString())
-				.replaceAll("//ActualUses//", new String(this.system.npcUses.actual).toString())
 				.replaceAll("//MaxUses//", new String(this.system.npcUses.max).toString())
 
 			const regex = /\[\[(.*?)\]\]/g;
@@ -371,6 +377,22 @@ export class BoilerplateItem extends Item {
 			rollMode: rollMode,
 			flavor: label,
 		});
+	}
+	async reloadNPCMoveUses(dontWarnInChat) {
+		if (this.type !== "move") return;
+		if (!this.system.npcUses.on) return;
+		if (this.system.npcUses.min >= this.system.npcUses.max) {
+			return ui.notifications.info("As cargas deste movimento já estão completas!")
+		}
+		await this.update({ "system.npcUses.min": this.system.npcUses.max })
+
+		if (!dontWarnInChat) {
+			const speaker = ChatMessage.getSpeaker({ actor: this.actor });
+			await ChatMessage.create({
+				speaker: speaker,
+				content: `<strong>Recarregou as cargas de ${this.name}</strong>`
+			});
+		}
 	}
 
 

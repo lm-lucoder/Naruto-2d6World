@@ -103,9 +103,12 @@
                     {{/if}}
                   </span>
                   <div class="controls">
-                      <a class="rollableWithDialog"  data-roll-type="item"><i class="fa-solid fa-comment"></i></a>
-                      <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
-                      <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+                    {{#if move.system.npcUses.on}}
+                    <a class="item-npc-movement-reload-uses" title="Recarregar"><i class="fa-solid fa-rotate-right"></i></a>
+                    {{/if}}
+                      <a class="rollableWithDialog" data-roll-type="item" title="Enviar para o chat"><i class="fa-solid fa-comment"></i></a>
+                      <a class="item-edit" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
+                      <a class="item-delete" title="Excluir"><i class="fa-solid fa-trash"></i></a>
                   </div>
               </li>
           {{/each}}
