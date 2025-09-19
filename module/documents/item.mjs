@@ -333,7 +333,7 @@ export class BoilerplateItem extends Item {
 		let canUpdateUses = false
 
 		//Handle Chakra consumption for this movement
-		if (this.system.npcMoveConsumesNPCChakraOnUse) {
+		if (this.system.npcMoveConsumesNPCChakraOnUse.on) {
 
 			if (this.actor.system.chakra.value < this.system.npcMoveConsumesNPCChakraOnUse.value) {
 				return ui.notifications.info("Você não possui chakra suficiente para realizar este movimento!");
@@ -373,12 +373,13 @@ export class BoilerplateItem extends Item {
 
 		let treatedDescription = ""
 
-		if (move.system.description) {
+		if (move.system.moveDescription) {
 			//Treat Movement description data
 			/* treatedDescription = move.system.description
 				.replaceAll("//Level//", new String(this.system.npcMoveLevel.value).toString())
 				.replaceAll("//MinUses//", new String(this.system.npcUses.min).toString())
 				.replaceAll("//MaxUses//", new String(this.system.npcUses.max).toString()) */
+			treatedDescription = move.system.moveDescription
 
 			const regex = /\[\[(.*?)\]\]/g;
 			const operations = [...treatedDescription.matchAll(regex)]
