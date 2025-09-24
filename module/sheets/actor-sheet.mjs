@@ -64,7 +64,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 
 		if (actorData.type == "npc") {
-			// this._prepareItems(context);
+			this._prepareCharacterItems(context);
 			this._prepareNPCItems(context)
 		}
 
@@ -167,6 +167,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.abilitiesByCategory = abilitiesByCategory;
 		context.gear = gear;
 		context.gearByCategory = gearByCategory;
+
+		console.log(context);
 	}
 	_prepareNPCItems(context) {
 		const conditions = [];
