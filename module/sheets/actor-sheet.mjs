@@ -92,9 +92,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.space.isAboveSpace = this._getIsAboveSpaceCondition(
 			context.space
 		);
-		context.advantageLevel = this.object.system.advantageLevel
+		/* context.advantageLevel = this.object.system.advantageLevel */
 		context.momentum = this.object.system.momentum
-		context.advantageLevel.range = this.getAdvantageLevelRange(context.advantageLevel)
+		/* context.advantageLevel.range = this.getAdvantageLevelRange(context.advantageLevel) */
 		context.momentum.range = this.getMomentumRange(context.momentum)
 
 		AdvantageLevelApi.buildAdvantageLevel(context)
@@ -498,6 +498,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const moveId = e.target.closest(".move-card").getAttribute('data-item-id');
 			const move = this.object.items.get(moveId);
 			move.reloadNPCMoveUses(e.shiftKey);
+		})
+		html.find('.btn-increase-advantage-level').click(e => {
+			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual + 1 })
+		})
+		html.find('.btn-decrease-advantage-level').click(e => {
+			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual - 1 })
 		})
 		// Drag events for macros.
 		if (this.actor.isOwner) {

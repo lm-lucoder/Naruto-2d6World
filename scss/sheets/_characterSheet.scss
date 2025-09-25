@@ -212,15 +212,50 @@
 				padding: 5px;
 				border: 1px solid $c-beige;
 				border-radius: 3px;
+				h3{
+					margin: 0;
+					padding: 0;
+					text-align: center;
+					width: 100%;
+					font-size: 1.1em;
+					font-weight: bold;
+					border: none;
+				}
 				.panel{
 					border: 1px solid $c-beige;
 					border-radius: 3px;
 					padding: 5px 10px;
 					min-width: 50px;
+					width: 100%;
 					text-align: center;
-					font-size: 1.2em;
-					font-weight: bold;
-					background-color: #0000001e;
+					/* background-color: #0000001e; */
+					display: flex;
+					flex-direction: column;
+					gap: 3px;
+					justify-content: center;
+					.nv{
+						font-size: 1em;
+						font-weight: bold;
+					}
+					.val{
+						font-size: 1.2em;
+						font-weight: bold;
+					}
+				}
+				.bad{
+					background-color: #d85c6070;
+				}
+				.real-bad{
+					background-color: #b40309a1;
+				}
+				.neutral{
+					background-color: #79797970;
+				}
+				.good{
+					background-color: #42c45470;
+				}
+				.really-good{
+					background-color: #038a1591;
 				}
 				.controls{
 					display: flex;

@@ -33,8 +33,24 @@
 <div class="moves-section">
 	<div class="left-section">
         <div class="advantage-level-container">
-            <div class="panel" data-tooltip="{{actualAdvantageLevel.finalReason}}" data-tooltip-direction="LEFT">
-                <span>{{actualAdvantageLevel.value}}</span>
+            <h3>Nível de Vantagem</h3>
+            <div class="
+            panel
+            {{#if (lowerThan actualAdvantageLevel.value -2)}}real-bad{{/if}}
+            {{#if (lowerThan actualAdvantageLevel.value 0)}}bad{{/if}}
+            {{#if (equals actualAdvantageLevel.value 0)}}neutral{{/if}}
+            {{#if (greaterThan actualAdvantageLevel.value 0)}}good{{/if}}
+            {{#if (greaterThan actualAdvantageLevel.value 2)}}really-good{{/if}}
+            "
+             data-tooltip="{{actualAdvantageLevel.finalReason}}" data-tooltip-direction="LEFT">
+                <span class="nv">
+                    {{#if (lowerThan actualAdvantageLevel.value -2)}}Grande Desvantagem{{/if}}
+                    {{#if (between actualAdvantageLevel.value -2 -1)}}Desvantagem{{/if}}
+                    {{#if (equals actualAdvantageLevel.value 0)}}Normal{{/if}}
+                    {{#if (between actualAdvantageLevel.value 1 2)}}Vantagem{{/if}}
+                    {{#if (greaterThan actualAdvantageLevel.value 2)}}Grande Vantagem{{/if}}
+                </span>
+                <span class="val">{{actualAdvantageLevel.value}} NV</span>
             </div>
             <div class="controls">
                 <button class="btn-decrease-advantage-level"> < </button>

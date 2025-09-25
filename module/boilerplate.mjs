@@ -84,6 +84,9 @@ Handlebars.registerHelper('lowerThan', function (a, b) {
 Handlebars.registerHelper('greaterThan', function (a, b) {
   return a > b
 })
+Handlebars.registerHelper("between", function (value, min, max) {
+  return value >= min && value <= max;
+});
 Handlebars.registerHelper('equals', function (a, b) {
   return a == b
 })
