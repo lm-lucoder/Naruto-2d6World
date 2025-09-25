@@ -115,6 +115,11 @@
 					"ref": "cun"
 				}
 			},
+			"results" : {
+				"strong" : "",
+				"weak" : "",
+				"miss" : ""
+			},
 			"rollMode" : "normal",
 			"isNpcMove" : false,
 			"npcUses": {

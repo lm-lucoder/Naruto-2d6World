@@ -58,13 +58,12 @@
           </div>
           {{#if system.isNpcMove}}
             <div>
-            <label class="resource-label">Move uses</label>
-            <div style="display: flex; gap: 15px;">
-              <input type="checkbox" name="system.npcUses.on" {{checked system.npcUses.on}}>
-              <input type="number" name="system.npcUses.min" value="{{system.npcUses.min}}" data-dtype="String"/> | <input type="number" name="system.npcUses.max" value="{{system.npcUses.max}}" data-dtype="String"/>
+              <label class="resource-label">Move uses</label>
+              <div style="display: flex; gap: 15px;">
+                <input type="checkbox" name="system.npcUses.on" {{checked system.npcUses.on}}>
+                <input type="number" name="system.npcUses.min" value="{{system.npcUses.min}}" data-dtype="String"/> | <input type="number" name="system.npcUses.max" value="{{system.npcUses.max}}" data-dtype="String"/>
+              </div>
             </div>
-            </div>
-            <div>
             {{#if system.npcUses.on}}
               <label class="resource-label">Consumes NPC Chakra on Reload</label>
               <div style="display: flex; gap: 15px;">
@@ -72,21 +71,34 @@
                 <input type="number" name="system.npcUses.consumesNPCChakraOnReload.value" value="{{system.npcUses.consumesNPCChakraOnReload.value}}" data-dtype="String"/>
               </div>
             {{/if}}
-          <div>
-            <label class="resource-label">Consumes NPC Chakra on Use</label>
-            <div style="display: flex; gap: 15px;">
-              <input type="checkbox" name="system.npcMoveConsumesNPCChakraOnUse.on" {{checked system.npcMoveConsumesNPCChakraOnUse.on}}>
-              <input type="number" name="system.npcMoveConsumesNPCChakraOnUse.value" value="{{system.npcMoveConsumesNPCChakraOnUse.value}}" data-dtype="String"/>
-            </div>
-          </div>
-          <div>
-            <label class="resource-label">Move level</label>
             <div>
-              <input type="checkbox" name="system.npcMoveLevel.on" {{checked system.npcMoveLevel.on}}>
-              <input type="number" name="system.npcMoveLevel.value" value="{{system.npcMoveLevel.value}}" data-dtype="String"/>
+              <label class="resource-label">Consumes NPC Chakra on Use</label>
+              <div style="display: flex; gap: 15px;">
+                <input type="checkbox" name="system.npcMoveConsumesNPCChakraOnUse.on" {{checked system.npcMoveConsumesNPCChakraOnUse.on}}>
+                <input type="number" name="system.npcMoveConsumesNPCChakraOnUse.value" value="{{system.npcMoveConsumesNPCChakraOnUse.value}}" data-dtype="String"/>
+              </div>
             </div>
-          </div>
+            <div>
+              <label class="resource-label">Move level</label>
+              <div>
+                <input type="checkbox" name="system.npcMoveLevel.on" {{checked system.npcMoveLevel.on}}>
+                <input type="number" name="system.npcMoveLevel.value" value="{{system.npcMoveLevel.value}}" data-dtype="String"/>
+              </div>
+            </div>
           {{/if}}
+        </div>
+        <hr>
+        <div class="resource">
+          <label class="resource-label">Strong Hit Result</label>
+          {{editor system.results.strong target="system.results.strong" rollData=rollData button=true owner=owner editable=editable}}
+        </div>
+        <div class="resource">
+          <label class="resource-label">Weak Hit Result</label>
+          {{editor system.results.weak target="system.results.weak" rollData=rollData button=true owner=owner editable=editable}}
+        </div>
+        <div class="resource">
+          <label class="resource-label">Miss Hit Result</label>
+          {{editor system.results.miss target="system.results.miss" rollData=rollData button=true owner=owner editable=editable}}
         </div>
       </div>
       {{/unless}}

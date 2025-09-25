@@ -495,6 +495,7 @@ export class BoilerplateItem extends Item {
 	_getMoveLabelRollTemplate({ move, mode, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, rerollMode }) {
 		let successCount = 0
 		let match = false
+		let resultType = ""
 
 		if (actionDiceRoll.total > challengeDiceOneRoll.total) successCount++;
 		if (actionDiceRoll.total > challengeDiceTwoRoll.total) successCount++;
@@ -503,14 +504,19 @@ export class BoilerplateItem extends Item {
 		let message = "";
 		if (match && actionDiceRoll.total > challengeDiceOneRoll.total) {
 			message = "Sucesso Crítico!!!"
+			resultType = "strong"
 		} else if (match && actionDiceRoll.total <= challengeDiceOneRoll.total) {
 			message = "Falha Crítica!!!"
+			resultType = "miss"
 		} else if (successCount === 2) {
 			message = "Sucesso Total!";
+			resultType = "strong"
 		} else if (successCount === 1) {
 			message = "Sucesso Parcial!";
+			resultType = "weak"
 		} else {
 			message = "Falha!";
+			resultType = "miss"
 		}
 
 		let modeText;
@@ -557,6 +563,8 @@ export class BoilerplateItem extends Item {
 				attributeText = undefined;
 				break;
 		}
+
+		const moveResultDescription = move.system?.results?.[resultType] || ""
 
 		const actor = move.actor
 		const freeRerollIcon = `<button class="reroll-dice" data-reroll-mode="free"><img class="icon-image" src="systems/naruto2d6world/assets/icons/reRollIcon.png" name="reRollImage"></button>`
@@ -614,6 +622,11 @@ export class BoilerplateItem extends Item {
 			${isMomentumPossible ? momentumButton : ""}
 			${isFireWillPossible ? fireWillButton : ""}
 		</div>
+		${moveResultDescription ? `
+			<div class="move-result-description">
+				<hr><strong>Resultado do Movimento:</strong>
+				${moveResultDescription.replaceAll("<p></p>", "")}
+			</div>` : ""}
     </div>
 `.trim();
 

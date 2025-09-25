@@ -12,12 +12,15 @@
 @import 'global/grid';
 @import 'global/flex';
 @import 'global/fonts';
+@import 'global/_tinymce';
+
 @import 'components/chat-templates/chatMoveTemplate_new';
 @import 'components/chat-templates/chatMoveTemplate';
 @import 'components/chat-templates/chatSkillTemplate';
 @import 'components/chat-templates/chatAbilityTemplate';
 @import 'components/dialogs/dialogRollMove';
 @import 'components/animations';
+
 
 /* Styles limited to boilerplate sheets */
 .boilerplate {
