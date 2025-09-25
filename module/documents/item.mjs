@@ -310,7 +310,6 @@ export class BoilerplateItem extends Item {
 		const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 		const rollMode = game.settings.get("core", "rollMode");
 		const label = `<div class="rollCard">
-				<i>Utilizado por: ${this.actor.name}</i>
 				<h3 class="rollcard-title">Movimento: ${move.name}</h3>
 				<div class="rollcard-content">
 					${move.system.description}
@@ -597,7 +596,6 @@ export class BoilerplateItem extends Item {
 			</blockquote>
 		</details>
 		<div class="moveDetailsArea">
-			<i>Realizado por: ${this.actor.name}</i>
 			${attributeText ? `<i>Atributo escolhido: ${attributeText}</i>` : ""}
 			${modeText ? `<i>${modeText}</i>` : ""}
 		</div>
