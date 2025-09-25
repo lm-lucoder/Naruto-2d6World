@@ -115,6 +115,7 @@
 					"ref": "cun"
 				}
 			},
+			"rollMode" : "normal",
 			"isNpcMove" : false,
 			"npcUses": {
 				"on":false,

@@ -43,6 +43,13 @@
           <label class="resource-label">Category</label>
           <input type="text" name="system.category" value="{{system.category}}" data-dtype="String"/>
         </div>
+        <div class="resource" style="margin-top: 5px;">
+          <label class="resource-label">Roll Mode</label>
+          <select name="system.rollMode">
+            <option value="normal" {{#if (eq system.rollMode "normal")}}selected{{/if}}>Normal</option>
+            <option value="custom" {{#if (eq system.rollMode "custom")}}selected{{/if}}>Customizado</option>
+          </select>
+        </div>
         <hr>
         <div class="npc-move-config">
           <div>
