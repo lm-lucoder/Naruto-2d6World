@@ -92,9 +92,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.space.isAboveSpace = this._getIsAboveSpaceCondition(
 			context.space
 		);
-		/* context.advantageLevel = this.object.system.advantageLevel */
 		context.momentum = this.object.system.momentum
-		/* context.advantageLevel.range = this.getAdvantageLevelRange(context.advantageLevel) */
 		context.momentum.range = this.getMomentumRange(context.momentum)
 
 		AdvantageLevelApi.buildAdvantageLevelContext(context)
@@ -734,16 +732,6 @@ export class BoilerplateActorSheet extends ActorSheet {
 		return usedSpace > maxSpace;
 	}
 
-	getAdvantageLevelRange(advantageLevel) {
-		const range = []
-		for (let i = advantageLevel.min; i <= advantageLevel.max; i++) {
-			range.push({
-				actual: advantageLevel.actual == i,
-				value: i
-			})
-		}
-		return range
-	}
 	getMomentumRange(momentum) {
 		const range = []
 		for (let i = momentum.min; i <= momentum.max; i++) {
