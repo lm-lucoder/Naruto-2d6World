@@ -12,6 +12,15 @@
         display: flex;
         justify-content: center;
         gap: 10px;
+        flex-wrap: wrap;
+        label {
+            padding: 2px 4px;
+            border: 1px solid $c-beige;
+            border-radius: 2px;
+            cursor: pointer;
+            background-color: #0000001e;
+            white-space: nowrap;
+        }
     }
     .traditional-buttons-container{
         display: flex;
@@ -44,7 +53,6 @@
             min-width: 50px;
             width: 100%;
             text-align: center;
-            /* background-color: #0000001e; */
             display: flex;
             flex-direction: column;
             gap: 3px;

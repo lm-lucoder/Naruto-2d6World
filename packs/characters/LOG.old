@@ -1,7 +1,3 @@
-2025/09/24-20:43:38.640 f30 Recovering log #276
-2025/09/24-20:43:38.642 f30 Delete type=0 #276
-2025/09/24-20:43:38.642 f30 Delete type=3 #274
-2025/09/25-00:18:12.194 3780 Level-0 table #281: started
-2025/09/25-00:18:12.194 3780 Level-0 table #281: 0 bytes OK
-2025/09/25-00:18:12.195 3780 Delete type=0 #279
-2025/09/25-00:18:12.197 3780 Manual compaction at level-0 from 'undefined' @ 72057594037927935 : 1 .. 'undefined' @ 0 : 0; will stop at (end)
+2025/09/25-00:18:16.405 f30 Recovering log #280
+2025/09/25-00:18:16.408 f30 Delete type=0 #280
+2025/09/25-00:18:16.408 f30 Delete type=3 #278
