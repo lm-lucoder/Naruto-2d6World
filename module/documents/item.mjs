@@ -310,9 +310,11 @@ export class BoilerplateItem extends Item {
 		const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 		const rollMode = game.settings.get("core", "rollMode");
 		const label = `<div class="rollCard">
-			<i>Utilizado por: ${this.actor.name}</i>
-			<h3>Movimento: ${move.name}</h3>
-			${move.system.description}
+				<i>Utilizado por: ${this.actor.name}</i>
+				<h3 class="rollcard-title">Movimento: ${move.name}</h3>
+				<div class="rollcard-content">
+					${move.system.description}
+				</div>
 			</div>`.trim()
 
 		ChatMessage.create({
@@ -341,12 +343,12 @@ export class BoilerplateItem extends Item {
 
 			newChakraAmount = this.actor.system.chakra.value - this.system.npcMoveConsumesNPCChakraOnUse.value;
 			canUpdateChakra = true
-			MoveAttributesMessage += `<p><strong style="color: #7CACF8; text-shadow: 0 0 5px white">${this.system.npcMoveConsumesNPCChakraOnUse.value} pontos de chakra foram utilizados</strong></p>`;
+			MoveAttributesMessage += `<p class="chat-tag chakra-info"><strong >${this.system.npcMoveConsumesNPCChakraOnUse.value} pontos de chakra foram utilizados</strong></p>`;
 		}
 
 		//Handle NPC Levels on this movement
 		if (this.system.npcMoveLevel.on) {
-			MoveAttributesMessage += `<p><strong>Nível do Movimento:</strong> ${this.system.npcMoveLevel.value}</p>`;
+			MoveAttributesMessage += `<p class="chat-tag"><strong>Nível do Movimento:</strong> ${this.system.npcMoveLevel.value}</p>`;
 		}
 
 		//Handle NPC Uses for this movement
@@ -368,7 +370,7 @@ export class BoilerplateItem extends Item {
 		}
 		if (canUpdateUses) {
 			await this.update({ "system.npcUses.min": this.system.npcUses.min - 1 })
-			MoveAttributesMessage += `<p><strong>Cargas Restantes:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
+			MoveAttributesMessage += `<p class="chat-tag"><strong>Cargas Restantes:</strong> ${this.system.npcUses.min} / ${this.system.npcUses.max}</p>`;
 		}
 
 		let treatedDescription = ""
@@ -400,9 +402,11 @@ export class BoilerplateItem extends Item {
 		}
 
 		const label = `<div class="rollCard">
-		<h3>Movimento: ${move.name}</h3>
-		${MoveAttributesMessage}
-		${treatedDescription || ""}
+			<h3 class="rollcard-title">Movimento: ${move.name}</h3>
+			<div class="rollcard-content">
+				${MoveAttributesMessage}
+				${treatedDescription || ""}
+			</div>
     </div>`.trim()
 
 		ChatMessage.create({
@@ -419,14 +423,19 @@ export class BoilerplateItem extends Item {
 			return ui.notifications.info("As cargas deste movimento já estão completas!")
 		}
 
-		let message = `<strong>Recarregou ${this.name}</strong>`
+		let title = `<h3 class="rollcard-title">Recarregou movimento: "${this.name}"</h3>`
+		let message = ""
 
 		if (this.system.npcUses.consumesNPCChakraOnReload.on && !hardReload) {
 			if (this.actor.system.chakra.value < this.system.npcUses.consumesNPCChakraOnReload.value) {
 				return ui.notifications.info("Você não possui chakra suficiente para recarregar as cargas deste movimento!");
 			}
 			await this.actor.update({ "system.chakra.value": this.actor.system.chakra.value - this.system.npcUses.consumesNPCChakraOnReload.value });
-			message += `<p><strong style="color: #7CACF8; text-shadow: 0 0 5px white">${this.system.npcUses.consumesNPCChakraOnReload.value} pontos de chakra foram utilizados</strong></p>`
+			message += `
+			<div class="rollcard-content">
+			<p class="chat-tag chakra-info"><strong>${this.system.npcUses.consumesNPCChakraOnReload.value} pontos de chakra foram utilizados</strong></p>
+			</div>
+			`
 		}
 		await this.update({ "system.npcUses.min": this.system.npcUses.max })
 
@@ -434,7 +443,10 @@ export class BoilerplateItem extends Item {
 			const speaker = ChatMessage.getSpeaker({ actor: this.actor });
 			await ChatMessage.create({
 				speaker: speaker,
-				content: message
+				content: `<div class="rollCard">
+					${title}
+					${message}
+				</div>`
 			});
 		}
 	}

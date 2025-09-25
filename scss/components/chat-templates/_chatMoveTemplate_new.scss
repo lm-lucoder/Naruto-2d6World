@@ -1,4 +1,32 @@
 .rollCard{
+    line-height: normal;
+    .rollcard-title{
+        /* border-bottom: 1px solid $c-beige; */
+        border: 0;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 15px;
+        color: #4b4a44;
+    }
+    .rollcard-content{
+        margin-top: 5px;
+        padding-top: 5px;
+        border-top: 1px solid $c-beige;
+    }
+    .chat-tag{
+        border-radius: 5px;
+        background-color: $c-beige;
+        padding: 3px 6px;
+        text-align: center;
+        color: #333330;
+        font-size: 14px;
+    }
+    .chakra-info{
+        background-color: #7CACF8;
+    }
     .moveDetailsArea{
         display: flex;
         flex-direction: column;
