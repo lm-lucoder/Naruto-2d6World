@@ -555,6 +555,18 @@ export class BoilerplateItem extends Item {
 				actor.system.momentum.actual >= challengeDiceTwoRoll.total
 			) && (
 				challengeDiceOneRoll.total > 0 || challengeDiceTwoRoll.total > 0
+			) && !(
+				actionDiceRoll.total > challengeDiceOneRoll.total &&
+				actionDiceRoll.total > challengeDiceTwoRoll.total
+			) && !(
+				(actor.system.momentum.actual > challengeDiceOneRoll.total &&
+					actionDiceRoll.total > challengeDiceOneRoll.total) && (
+					actor.system.momentum.actual < challengeDiceTwoRoll.total
+				) ||
+				(actor.system.momentum.actual > challengeDiceTwoRoll.total &&
+					actionDiceRoll.total > challengeDiceTwoRoll.total) && (
+					actor.system.momentum.actual < challengeDiceOneRoll.total
+				)
 			)
 		)
 		const momentumButton = `<button class="reroll-dice" data-reroll-mode="momentum" data-message-id="{{messageId}}"><img class="icon-image burn-momentum-icon" src="systems/naruto2d6world/assets/icons/burnMomentum.png" name="MomentumImage"></button>`
