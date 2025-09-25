@@ -15,12 +15,14 @@
                                     <img src="{{ability.img}}" name="{{ability.name}}"> 
                                     <span class="name"><a class="show-ability-description-window-btn">{{ability.name}}</a></span>
                                     <span class="level">
-                                        (Nível: {{ability.system.level}}
-                                            {{#if ability.system.maxLevel}}
-                                                {{#if ability.system.showMaxLevel}}
-                                                    /{{ability.system.maxLevel}}
-                                                {{/if}}
-                                            {{/if}})
+                                        {{#if ability.system.level}}
+                                            (Nível: {{ability.system.level}}
+                                                {{#if ability.system.maxLevel}}
+                                                    {{#if ability.system.showMaxLevel}}
+                                                        /{{ability.system.maxLevel}}
+                                                    {{/if}}
+                                                {{/if}})
+                                        {{/if}}
                                     </span>
                                     {{#if ability.system.levelDescription}}<span class="levelDescription">{{ability.system.levelDescription}}</span>{{/if}}
                                     <div class="ability-resources-tag-container">
