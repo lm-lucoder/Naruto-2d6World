@@ -243,6 +243,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find(".show-ability-description-window-btn").click((event) => {
 			this._toggleAbilityDescriptionWindow(event);
 		});
+		html.find(".show-move-description-window-btn").click((event) => {
+			this._toggleMoveDescriptionWindow(event);
+		});
 
 		html.find(".item-on-hand-btn").click((event) => {
 			const itemId = event.target.closest("li").getAttribute("data-item-id");
@@ -669,6 +672,22 @@ export class BoilerplateActorSheet extends ActorSheet {
 			;
 		} else {
 			windowElement.classList.remove("description-window-opened");
+			windowElement.innerHTML = "";
+		}
+	}
+	_toggleMoveDescriptionWindow(event) {
+		const itemId = event.target.closest("li").getAttribute("data-item-id");
+		const windowElement = event.target
+			.closest("li")
+			.querySelector(".description-window");
+		const move = this.actor.items.get(itemId);
+		if (windowElement.innerHTML.trim() === "") {
+			windowElement.innerHTML = `
+				<div class="item-description">
+					${move.system.description}
+				</div>
+			`;
+		} else {
 			windowElement.innerHTML = "";
 		}
 	}
