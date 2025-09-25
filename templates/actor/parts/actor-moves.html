@@ -1,4 +1,4 @@
-<div class="advantage-level-block sheet-block">
+<!-- <div class="advantage-level-block sheet-block">
     <h3 class="sheet-block-title">Nível de Vantagem</h3>
     <div class="block-range-part">
         {{#each advantageLevel.range as |rangeOption|}}
@@ -14,7 +14,7 @@
             </span>
         {{/each}}
     </div>
-</div>
+</div> -->
 <div class="momentum-block sheet-block">
     <h3 class="sheet-block-title">Momentum <img class="icon-image" src="systems/naruto2d6world/assets/icons/momentumIcon.png" name="MomentumImage"></h3>
     <div class="block-range-part">
@@ -32,6 +32,15 @@
 </div>
 <div class="moves-section">
 	<div class="left-section">
+        <div class="advantage-level-container">
+            <div class="panel" data-tooltip="{{actualAdvantageLevel.finalReason}}" data-tooltip-direction="LEFT">
+                <span>{{actualAdvantageLevel.value}}</span>
+            </div>
+            <div class="controls">
+                <button class="btn-decrease-advantage-level"> < </button>
+                <button class="btn-increase-advantage-level"> > </button>
+            </div>
+        </div>
         <nav class="att-cond-tabs tabs" data-group="secondary">
             <a class="item " data-tab="attributes"><i class="att-cond-icon fa-solid fa-person"></i></a>
             <a class="item " data-tab="conditions"><i class="att-cond-icon fa-brands fa-creative-commons-by"></i></a>
