@@ -402,6 +402,9 @@ export class BoilerplateItem extends Item {
 
 		const label = `<div class="rollCard">
 			<h3 class="rollcard-title">Movimento: ${move.name}</h3>
+			<p class="rollcard-category">
+				<i>Categoria: ${move.system.category.replace("NPC - ", "")}</i>
+			</p>
 			<div class="rollcard-content">
 				${MoveAttributesMessage}
 				${treatedDescription || ""}
