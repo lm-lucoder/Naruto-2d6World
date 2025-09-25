@@ -46,22 +46,30 @@
       <!-- {{> "systems/naruto2d6world/templates/actor/parts/actor-description-npc.html"}}
        -->
        <div class="resources grid grid-2col">
-        <div class="resource-card">
-          <label for="system.health.value" class="resource-label">Ferimentos</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number"/>
-            <span>/</span>
-            <input type="text" name="system.wounds.max" value="{{system.wounds.max}}" data-dtype="Number"/>
+          <div class="resource-card">
+            <label for="system.health.value" class="resource-label">Ferimentos</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.wounds.max" value="{{system.wounds.max}}" data-dtype="Number"/>
+            </div>
           </div>
-        </div>
-        <div class="resource-card">
-          <label for="system.health.value" class="resource-label">Chakra</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number"/>
-            <span>/</span>
-            <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number"/>
+          <div class="resource-card">
+            <label for="system.armor.value" class="resource-label">Armadura</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.armor.value" value="{{system.armor.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.armor.max" value="{{system.armor.max}}" data-dtype="Number"/>
+            </div>
           </div>
-        </div>
+          <div class="resource-card">
+            <label for="system.health.value" class="resource-label">Chakra</label>
+            <div class="resource-content flexrow flex-center flex-between">
+              <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number"/>
+              <span>/</span>
+              <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number"/>
+            </div>
+          </div>
         </div>
       <div class="conditions-container" data-group="secondary" data-tab="conditions">
         <h3 class="conditions-title">Condições</h3>
