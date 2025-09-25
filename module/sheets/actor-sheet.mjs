@@ -97,7 +97,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		/* context.advantageLevel.range = this.getAdvantageLevelRange(context.advantageLevel) */
 		context.momentum.range = this.getMomentumRange(context.momentum)
 
-		AdvantageLevelApi.buildAdvantageLevel(context)
+		AdvantageLevelApi.buildAdvantageLevelContext(context)
 
 		for (const item of context.gear) {
 			await this._prepareDescriptionData(item);
@@ -773,22 +773,39 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 }
 
-class AdvantageLevelApi {
-	static buildAdvantageLevel(context) {
+export class AdvantageLevelApi {
+	static buildAdvantageLevelContext(context) {
 		const baseLevel = context.actor.system.advantageLevel.actual;
 		context.actualAdvantageLevel = {
 			value: 0,
 			reasons: []
 		}
-		this.addAdvantageLevel(context, baseLevel, "Base")
+		this.addAdvantageLevelContext(context, baseLevel, "Base")
 
 		context.actualAdvantageLevel.finalReason = context.actualAdvantageLevel.reasons.map(reasonObj => {
 			return `${reasonObj.reason} (${reasonObj.value > 0 ? "+" : ""}${reasonObj.value})`
 		}).join(", ")
 	}
 
-	static addAdvantageLevel(context, value, reason) {
+	static addAdvantageLevelContext(context, value, reason) {
 		context.actualAdvantageLevel.reasons.push({ value, reason })
 		context.actualAdvantageLevel.value += value
+	}
+
+	static buildAdvantageLevel(actor) {
+		const baseLevel = actor.system.advantageLevel.actual;
+		const data = {
+			value: baseLevel,
+			reasons: [
+				{ value: baseLevel, reason: "Base" }
+			]
+		}
+		return data
+	}
+
+	static addAdvantageLevel(data, value, reason) {
+		data.reasons.push({ value, reason })
+		data.value += value
+		return data
 	}
 }
