@@ -20,14 +20,16 @@ class RollMoveDialog extends Dialog {
 				(attribute) => attribute.on === true
 			);
 
-			const options = validAttributes.map(
-				(attribute) => `
-				<label>
-					<input type="radio" name="option" value="${attribute.ref}">
-					${attribute.name[0].toUpperCase() + attribute.name.slice(1)} (${actor.system.attributes[attribute.ref].actual})
-				</label>
-			`
-			);
+			const options = []
+
+			validAttributes.forEach((attribute) => {
+				options.push(`
+					<label>
+						<input type="radio" name="option" value="${attribute.ref}" ${validAttributes.length === 1 ? "checked" : ""}>
+						${attribute.name[0].toUpperCase() + attribute.name.slice(1)} (${actor.system.attributes[attribute.ref].actual})
+					</label>
+				`)
+			});
 
 			const traditionalButtons = `
 				<button type="button" class="roll-move-button" data-mode="+advantage">Grande Vantagem</button>
