@@ -36,7 +36,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		return `systems/naruto2d6world/templates/actor/actor-${this.actor.type}-sheet.html`;
 	}
 	_onDropItem(e, data) {
-		if (data.type === "Item" && !e.ctrlKey) {
+		if (data.type === "Item" && e.ctrlKey) {
 			const itemId = data.uuid.split(".")[1]
 			const itemName = Item.get(itemId).name
 			const actorItem = this.object.items.find(item => item.name == itemName)

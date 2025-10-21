@@ -5,7 +5,7 @@
 			"base": {
 				"wounds": {
 					"value": 0,
-					"max": 5
+					"max": 6
 				},
 				"chakra": {
 					"value": 5,
