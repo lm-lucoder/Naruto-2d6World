@@ -41,19 +41,21 @@
         .section-buttons{
             margin: 10px 0;
         }
-        .moves-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            .move-card {
-                border-bottom: 1px solid $c-beige;
-				padding: 4px 0;
-                display: flex;
-                justify-content: space-between;
-                .controls{
+        .npc-categories-list{
+            .moves-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                .move-card {
+                    border-bottom: 1px solid $c-beige;
+                    padding: 4px 0;
                     display: flex;
-                    align-items: center;
-                    gap: 5px;
+                    justify-content: space-between;
+                    .controls{
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                    }
                 }
             }
         }
