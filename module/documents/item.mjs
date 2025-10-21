@@ -129,8 +129,33 @@ export class BoilerplateItem extends Item {
 			content: ability.system.description ?? "",
 		});
 	}
-	async moveRoll({ mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls }) {
-		const item = this;
+	async moveRoll(params) {
+		const { mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, modifiers } = params;
+		if (isUpdate && rerollMode == "adjustment") {
+			const newValues = {
+				actionDiceRoll: +oldMessageRolls.actionDiceResult + (modifiers.actionDiceModifier ? parseInt(modifiers.actionDiceModifier) : 0),
+				challengeDiceOneRoll: +oldMessageRolls.challengeDiceOneResult + (modifiers.challengeDiceAModifier ? parseInt(modifiers.challengeDiceAModifier) : 0),
+				challengeDiceTwoRoll: +oldMessageRolls.challengeDiceTwoResult + (modifiers.challengeDiceBModifier ? parseInt(modifiers.challengeDiceBModifier) : 0),
+			};
+			const label = this._getMoveLabelRollTemplate({
+				move: this,
+				mode,
+				attribute,
+				rollModifier,
+				actionDiceRoll: newValues.actionDiceRoll,
+				challengeDiceOneRoll: newValues.challengeDiceOneRoll,
+				challengeDiceTwoRoll: newValues.challengeDiceTwoRoll,
+				modifiers
+			});
+			await oldMessage.update({
+				flavor: label,
+			})
+			await ChatMessage.create({
+				speaker: ChatMessage.getSpeaker(),
+				content: `<i>Adicionou modificadores na rolagem!</i>`
+			})
+			return
+		}
 		//Lidar com a existência de configurações específicas para este movimento, vinda de condições
 		let attributeModifier = 0;
 		const parentConditions = this.parent.items.filter(
@@ -215,9 +240,9 @@ export class BoilerplateItem extends Item {
 			mode,
 			attribute,
 			rollModifier,
-			actionDiceRoll,
-			challengeDiceOneRoll,
-			challengeDiceTwoRoll,
+			actionDiceRoll: actionDiceRoll.total,
+			challengeDiceOneRoll: challengeDiceOneRoll.total,
+			challengeDiceTwoRoll: challengeDiceTwoRoll.total,
 			rerollMode
 		});
 
@@ -229,24 +254,48 @@ export class BoilerplateItem extends Item {
 
 		// const updateMode
 		// Criar a mensagem no chat com rolagens interativas
-		if (rerollMode == "momentum") {
-			await oldMessage.update({
-				user: game.user.id,
-				speaker: ChatMessage.getSpeaker(),
-				flavor: label,
-				rolls: rolls,
-				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-				content: `<h4 style="font-size: 16px;color:rgb(65, 65, 65);text-align: center;margin-top: 5px; font-weight: bold;">Momentum queimado!</h4>`
-			})
+		if (isUpdate) {
+			if (rerollMode == "momentum") {
+				await oldMessage.update({
+					user: game.user.id,
+					speaker: ChatMessage.getSpeaker(),
+					flavor: label,
+					rolls: rolls,
+					type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+					content: `<h4 style="font-size: 16px;color:rgb(65, 65, 65);text-align: center;margin-top: 5px; font-weight: bold;">Momentum queimado!</h4>`
+				})
 
-			actor.resetMomentum();
+				actor.resetMomentum();
 
-			await ChatMessage.create({
-				speaker: ChatMessage.getSpeaker(),
-				content: `<i>${actor.name} queimou o momentum!</i>`
-			})
-		} else if (rerollMode == "fireWill") {
-			if (actor.system.fireWill.value >= 1) {
+				await ChatMessage.create({
+					speaker: ChatMessage.getSpeaker(),
+					content: `<i>${actor.name} queimou o momentum!</i>`
+				})
+			} else if (rerollMode == "fireWill") {
+				if (actor.system.fireWill.value >= 1) {
+					await oldMessage.update({
+						user: game.user.id,
+						speaker: ChatMessage.getSpeaker(),
+						flavor: label,
+						rolls: rolls,
+						type: CONST.CHAT_MESSAGE_TYPES.OTHER,
+						content: `
+							<details class="move-card-roll-details">
+								<summary style="font-size: 12px;color: #807f7b;text-align: center;margin-top: 5px;"><i>Detalhes da Rolagem</i></summary>
+								<blockquote>${renderedRolls.join('')}</blockquote>
+							</details>
+						`
+					})
+					actor.update({ 'system.fireWill.value': actor.system.fireWill.value - 1 })
+					await ChatMessage.create({
+						speaker: ChatMessage.getSpeaker(),
+						content: `<i>${actor.name} refez uma rolagem utilizando a vontade do fogo!</i>`
+					})
+				} else {
+					ui.notifications.info("Você não possui pontos de vontade do fogo disponíveis!")
+				}
+
+			} else if (rerollMode == "free") {
 				await oldMessage.update({
 					user: game.user.id,
 					speaker: ChatMessage.getSpeaker(),
@@ -260,33 +309,11 @@ export class BoilerplateItem extends Item {
 						</details>
 					`
 				})
-				actor.update({ 'system.fireWill.value': actor.system.fireWill.value - 1 })
 				await ChatMessage.create({
 					speaker: ChatMessage.getSpeaker(),
-					content: `<i>${actor.name} refez uma rolagem utilizando a vontade do fogo!</i>`
+					content: `<i>${actor.name} refez uma rolagem de forma livre!</i>`
 				})
-			} else {
-				ui.notifications.info("Você não possui pontos de vontade do fogo disponíveis!")
 			}
-
-		} else if (rerollMode == "free") {
-			await oldMessage.update({
-				user: game.user.id,
-				speaker: ChatMessage.getSpeaker(),
-				flavor: label,
-				rolls: rolls,
-				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
-				content: `
-					<details class="move-card-roll-details">
-						<summary style="font-size: 12px;color: #807f7b;text-align: center;margin-top: 5px;"><i>Detalhes da Rolagem</i></summary>
-						<blockquote>${renderedRolls.join('')}</blockquote>
-					</details>
-				`
-			})
-			await ChatMessage.create({
-				speaker: ChatMessage.getSpeaker(),
-				content: `<i>${actor.name} refez uma rolagem de forma livre!</i>`
-			})
 		} else {
 			await ChatMessage.create({
 				user: game.user.id,
@@ -495,20 +522,20 @@ export class BoilerplateItem extends Item {
 		this.system.rank = rank;
 	}
 
-	_getMoveLabelRollTemplate({ move, mode, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, rerollMode }) {
+	_getMoveLabelRollTemplate({ move, mode, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, modifiers }) {
 		let successCount = 0
 		let match = false
 		let resultType = ""
 
-		if (actionDiceRoll.total > challengeDiceOneRoll.total) successCount++;
-		if (actionDiceRoll.total > challengeDiceTwoRoll.total) successCount++;
-		if (challengeDiceOneRoll.total == challengeDiceTwoRoll.total) match == true
+		if (actionDiceRoll > challengeDiceOneRoll) successCount++;
+		if (actionDiceRoll > challengeDiceTwoRoll) successCount++;
+		if (challengeDiceOneRoll == challengeDiceTwoRoll) match == true
 
 		let message = "";
-		if (match && actionDiceRoll.total > challengeDiceOneRoll.total) {
+		if (match && actionDiceRoll > challengeDiceOneRoll) {
 			message = "Sucesso Crítico!!!"
 			resultType = "strong"
-		} else if (match && actionDiceRoll.total <= challengeDiceOneRoll.total) {
+		} else if (match && actionDiceRoll <= challengeDiceOneRoll) {
 			message = "Falha Crítica!!!"
 			resultType = "miss"
 		} else if (successCount === 2) {
@@ -573,24 +600,33 @@ export class BoilerplateItem extends Item {
 		const freeRerollIcon = `<button class="reroll-dice" data-reroll-mode="free"><img class="icon-image" src="systems/naruto2d6world/assets/icons/reRollIcon.png" name="reRollImage"></button>`
 		const isMomentumPossible = (
 			(
-				actor.system.momentum.actual >= challengeDiceOneRoll.total ||
-				actor.system.momentum.actual >= challengeDiceTwoRoll.total
+				actor.system.momentum.actual >= challengeDiceOneRoll ||
+				actor.system.momentum.actual >= challengeDiceTwoRoll
 			) && (
-				challengeDiceOneRoll.total > 0 || challengeDiceTwoRoll.total > 0
+				challengeDiceOneRoll > 0 || challengeDiceTwoRoll > 0
 			) && !(
-				actionDiceRoll.total > challengeDiceOneRoll.total &&
-				actionDiceRoll.total > challengeDiceTwoRoll.total
+				actionDiceRoll > challengeDiceOneRoll &&
+				actionDiceRoll > challengeDiceTwoRoll
 			) && !(
-				(actor.system.momentum.actual > challengeDiceOneRoll.total &&
-					actionDiceRoll.total > challengeDiceOneRoll.total) && (
-					actor.system.momentum.actual < challengeDiceTwoRoll.total
+				(actor.system.momentum.actual > challengeDiceOneRoll &&
+					actionDiceRoll > challengeDiceOneRoll) && (
+					actor.system.momentum.actual < challengeDiceTwoRoll
 				) ||
-				(actor.system.momentum.actual > challengeDiceTwoRoll.total &&
-					actionDiceRoll.total > challengeDiceTwoRoll.total) && (
-					actor.system.momentum.actual < challengeDiceOneRoll.total
+				(actor.system.momentum.actual > challengeDiceTwoRoll &&
+					actionDiceRoll > challengeDiceTwoRoll) && (
+					actor.system.momentum.actual < challengeDiceOneRoll
 				)
 			)
 		)
+
+		//modifiers in case of manual adjustment after rolls
+		const hasModifiers = Object.keys(modifiers).length > 0
+		const modifiersDisplays = {
+			action: ` + ${modifiers.actionDiceModifier} `,
+			challengeA: ` + ${modifiers.challengeDiceAModifier}`,
+			challengeB: ` + ${modifiers.challengeDiceBModifier}`,
+		}
+
 		const momentumButton = `<button class="reroll-dice" data-reroll-mode="momentum" data-message-id="{{messageId}}"><img class="icon-image burn-momentum-icon" src="systems/naruto2d6world/assets/icons/burnMomentum.png" name="MomentumImage"></button>`
 		const isFireWillPossible = (actor.system.fireWill.value > 0)
 		const fireWillButton = `<button class="reroll-dice" data-reroll-mode="fireWill" data-message-id="{{messageId}}"><img class="icon-image" src="systems/naruto2d6world/assets/icons/fireWillIcon.png" name="FireWillImage"></button>`
@@ -610,16 +646,17 @@ export class BoilerplateItem extends Item {
 			${attributeText ? `<i>Atributo escolhido: ${attributeText}</i>` : ""}
 			${modeText ? `<i>${modeText}</i>` : ""}
 		</div>
-        <div class="rolls">
+    <div class="rolls">
 			<div class="actionDiceDisplayPart rollDisplayPart">
-				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll.total}</span>
+				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll}</span>
 			</div>
-            <div class="challengeDicesDisplayPart rollDisplayPart">
-				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay">${challengeDiceOneRoll.total}</span>
-				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay">${challengeDiceTwoRoll.total}</span>
+      <div class="challengeDicesDisplayPart rollDisplayPart">
+				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay">${challengeDiceOneRoll}</span>
+				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay">${challengeDiceTwoRoll}</span>
+				<a><i class="fas fa-cog btn-adjust-roll-result"></i></a>
 			</div>
-        </div>
-        <span class="resultDisplay result-${successCount}">${message}</span>
+    </div>
+    <span class="resultDisplay result-${successCount}">${message}</span>
 		<div class="reroll-buttons">
 			${freeRerollIcon}
 			${isMomentumPossible ? momentumButton : ""}

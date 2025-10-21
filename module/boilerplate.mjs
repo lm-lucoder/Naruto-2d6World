@@ -7,6 +7,7 @@ import { BoilerplateItemSheet } from "./sheets/item-sheet.mjs";
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from "./helpers/templates.mjs";
 import { BOILERPLATE } from "./helpers/config.mjs";
+import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -99,6 +100,7 @@ Hooks.once("ready", async function () {
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on("hotbarDrop", (bar, data, slot) => createItemMacro(data, slot));
 
+  // Chat Move Message card Reroll event
   window.addEventListener("click", async (event) => {
     if (event.target.classList.contains("reroll-dice")) {
       const button = event.target
@@ -124,7 +126,42 @@ Hooks.once("ready", async function () {
         }
       })
     }
+
+    if (event.target.classList.contains("btn-adjust-roll-result")) {
+      const button = event.target
+      const chatMessageCard = button.closest(".chat-message")
+      const messageId = chatMessageCard.dataset.messageId
+      const oldMessage = game.messages.get(messageId)
+      if (!oldMessage) return console.error(`Message: ${messageId} not found`);
+      const rollCard = chatMessageCard.querySelector(".rollCard")
+      const { attribute, mode, rollModifier, actor, item } = rollCard.dataset
+      const { rerollMode } = button.dataset
+      const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText
+      const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText
+      const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText
+      const move = await fromUuid(`Actor.${actor}.Item.${item}`)
+      AlterMoveResultDialog.create({
+        messageData: {
+          oldMessage,
+          attribute,
+          mode,
+          rollModifier,
+          actor,
+          item,
+          move,
+          isUpdate: true,
+          rerollMode: "adjustment",
+          oldMessageRolls: {
+            challengeDiceOneResult,
+            challengeDiceTwoResult,
+            actionDiceResult
+          }
+
+        }, messageCard: chatMessageCard
+      })
+    }
   })
+
 
   /* Hooks.on("renderChatMessage", (message, html) => {
     const button = html.find(".reroll-dice")
