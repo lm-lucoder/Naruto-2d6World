@@ -11,6 +11,10 @@
   justify-content: flex-start;
   margin-bottom: 10px;
 
+  @media (max-width: 768px) {
+    flex-direction: column !important;
+  }
+
   .profile-img {
     flex: 0 0 100px;
     height: 100px;
