@@ -130,29 +130,20 @@ export class BoilerplateItem extends Item {
 		});
 	}
 	async moveRoll(params) {
-		const { mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, modifiers } = params;
+		const { mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
 		if (isUpdate && rerollMode == "adjustment") {
-			const newValues = {
-				actionDiceRoll: +oldMessageRolls.actionDiceResult + (modifiers.actionDiceModifier ? parseInt(modifiers.actionDiceModifier) : 0),
-				challengeDiceOneRoll: +oldMessageRolls.challengeDiceOneResult + (modifiers.challengeDiceAModifier ? parseInt(modifiers.challengeDiceAModifier) : 0),
-				challengeDiceTwoRoll: +oldMessageRolls.challengeDiceTwoResult + (modifiers.challengeDiceBModifier ? parseInt(modifiers.challengeDiceBModifier) : 0),
-			};
 			const label = this._getMoveLabelRollTemplate({
 				move: this,
 				mode,
 				attribute,
 				rollModifier,
-				actionDiceRoll: newValues.actionDiceRoll,
-				challengeDiceOneRoll: newValues.challengeDiceOneRoll,
-				challengeDiceTwoRoll: newValues.challengeDiceTwoRoll,
-				modifiers
+				actionDiceRoll: oldMessageRolls.actionDiceResult,
+				challengeDiceOneRoll: oldMessageRolls.challengeDiceOneResult,
+				challengeDiceTwoRoll: oldMessageRolls.challengeDiceTwoResult,
+				newModifiers
 			});
 			await oldMessage.update({
 				flavor: label,
-			})
-			await ChatMessage.create({
-				speaker: ChatMessage.getSpeaker(),
-				content: `<i>Adicionou modificadores na rolagem!</i>`
 			})
 			return
 		}
@@ -522,20 +513,30 @@ export class BoilerplateItem extends Item {
 		this.system.rank = rank;
 	}
 
-	_getMoveLabelRollTemplate({ move, mode, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, modifiers }) {
+	_getMoveLabelRollTemplate({ move, mode, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, newModifiers }) {
 		let successCount = 0
 		let match = false
 		let resultType = ""
 
-		if (actionDiceRoll > challengeDiceOneRoll) successCount++;
-		if (actionDiceRoll > challengeDiceTwoRoll) successCount++;
-		if (challengeDiceOneRoll == challengeDiceTwoRoll) match == true
+		//modifiers in case of manual adjustment after rolls
+		let actualActionDiceRoll = +actionDiceRoll
+		let actualChallengeDiceOneRoll = +challengeDiceOneRoll
+		let actualChallengeDiceTwoRoll = +challengeDiceTwoRoll
+		if (newModifiers) {
+			actualActionDiceRoll = +actionDiceRoll + (newModifiers.actionDiceModifier ? parseInt(newModifiers.actionDiceModifier) : 0)
+			actualChallengeDiceOneRoll = +challengeDiceOneRoll + (newModifiers.challengeDiceAModifier ? parseInt(newModifiers.challengeDiceAModifier) : 0)
+			actualChallengeDiceTwoRoll = +challengeDiceTwoRoll + (newModifiers.challengeDiceBModifier ? parseInt(newModifiers.challengeDiceBModifier) : 0)
+		}
+
+		if (actualActionDiceRoll > actualChallengeDiceOneRoll) successCount++;
+		if (actualActionDiceRoll > actualChallengeDiceTwoRoll) successCount++;
+		if (actualChallengeDiceOneRoll == actualChallengeDiceTwoRoll) match == true
 
 		let message = "";
-		if (match && actionDiceRoll > challengeDiceOneRoll) {
+		if (match && actualActionDiceRoll > actualChallengeDiceOneRoll) {
 			message = "Sucesso Crítico!!!"
 			resultType = "strong"
-		} else if (match && actionDiceRoll <= challengeDiceOneRoll) {
+		} else if (match && actualActionDiceRoll <= actualChallengeDiceOneRoll) {
 			message = "Falha Crítica!!!"
 			resultType = "miss"
 		} else if (successCount === 2) {
@@ -600,32 +601,25 @@ export class BoilerplateItem extends Item {
 		const freeRerollIcon = `<button class="reroll-dice" data-reroll-mode="free"><img class="icon-image" src="systems/naruto2d6world/assets/icons/reRollIcon.png" name="reRollImage"></button>`
 		const isMomentumPossible = (
 			(
-				actor.system.momentum.actual >= challengeDiceOneRoll ||
-				actor.system.momentum.actual >= challengeDiceTwoRoll
+				actor.system.momentum.actual >= actualChallengeDiceOneRoll ||
+				actor.system.momentum.actual >= actualChallengeDiceTwoRoll
 			) && (
-				challengeDiceOneRoll > 0 || challengeDiceTwoRoll > 0
+				actualChallengeDiceOneRoll > 0 || actualChallengeDiceTwoRoll > 0
 			) && !(
-				actionDiceRoll > challengeDiceOneRoll &&
-				actionDiceRoll > challengeDiceTwoRoll
+				actualActionDiceRoll > actualChallengeDiceOneRoll &&
+				actualActionDiceRoll > actualChallengeDiceTwoRoll
 			) && !(
-				(actor.system.momentum.actual > challengeDiceOneRoll &&
-					actionDiceRoll > challengeDiceOneRoll) && (
-					actor.system.momentum.actual < challengeDiceTwoRoll
+				(actor.system.momentum.actual > actualChallengeDiceOneRoll &&
+					actualActionDiceRoll > actualChallengeDiceOneRoll) && (
+					actor.system.momentum.actual < actualChallengeDiceTwoRoll
 				) ||
-				(actor.system.momentum.actual > challengeDiceTwoRoll &&
-					actionDiceRoll > challengeDiceTwoRoll) && (
-					actor.system.momentum.actual < challengeDiceOneRoll
+				(actor.system.momentum.actual > actualChallengeDiceTwoRoll &&
+					actualActionDiceRoll > actualChallengeDiceTwoRoll) && (
+					actor.system.momentum.actual < actualChallengeDiceOneRoll
 				)
 			)
 		)
 
-		//modifiers in case of manual adjustment after rolls
-		const hasModifiers = Object.keys(modifiers).length > 0
-		const modifiersDisplays = {
-			action: ` + ${modifiers.actionDiceModifier} `,
-			challengeA: ` + ${modifiers.challengeDiceAModifier}`,
-			challengeB: ` + ${modifiers.challengeDiceBModifier}`,
-		}
 
 		const momentumButton = `<button class="reroll-dice" data-reroll-mode="momentum" data-message-id="{{messageId}}"><img class="icon-image burn-momentum-icon" src="systems/naruto2d6world/assets/icons/burnMomentum.png" name="MomentumImage"></button>`
 		const isFireWillPossible = (actor.system.fireWill.value > 0)
@@ -648,11 +642,15 @@ export class BoilerplateItem extends Item {
 		</div>
     <div class="rolls">
 			<div class="actionDiceDisplayPart rollDisplayPart">
-				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll}</span>
+				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll}${newModifiers?.actionDiceModifier ? ` + ${parseInt(newModifiers?.actionDiceModifier)}` : ""}</span>
 			</div>
       <div class="challengeDicesDisplayPart rollDisplayPart">
-				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay">${challengeDiceOneRoll}</span>
-				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay">${challengeDiceTwoRoll}</span>
+				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay">
+					${challengeDiceOneRoll}${newModifiers?.challengeDiceAModifier ? ` + ${parseInt(newModifiers?.challengeDiceAModifier)}` : ""}
+				</span>
+				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay">
+					${challengeDiceTwoRoll}${newModifiers?.challengeDiceBModifier ? ` + ${parseInt(newModifiers?.challengeDiceBModifier)}` : ""}
+				</span>
 				<a><i class="fas fa-cog btn-adjust-roll-result"></i></a>
 			</div>
     </div>

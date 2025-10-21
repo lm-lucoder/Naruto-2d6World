@@ -75,7 +75,7 @@ class AlterMoveResultDialog extends Dialog {
 		const move = this._currentMessageData.move
 		move.moveRoll({
 			...this._currentMessageData,
-			modifiers: {
+			newModifiers: {
 				actionDiceModifier,
 				challengeDiceAModifier,
 				challengeDiceBModifier
