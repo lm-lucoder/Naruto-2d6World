@@ -624,6 +624,9 @@ export class BoilerplateItem extends Item {
 		const momentumButton = `<button class="reroll-dice" data-reroll-mode="momentum" data-message-id="{{messageId}}"><img class="icon-image burn-momentum-icon" src="systems/naruto2d6world/assets/icons/burnMomentum.png" name="MomentumImage"></button>`
 		const isFireWillPossible = (actor.system.fireWill.value > 0)
 		const fireWillButton = `<button class="reroll-dice" data-reroll-mode="fireWill" data-message-id="{{messageId}}"><img class="icon-image" src="systems/naruto2d6world/assets/icons/fireWillIcon.png" name="FireWillImage"></button>`
+		const actionDiceModifiersDesc = newModifiers?.actionDiceModifier ? ` ${parseInt(newModifiers?.actionDiceModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.actionDiceModifier) != 0 ? parseInt(newModifiers?.actionDiceModifier) : ""}` : ""
+		const challengeDiceAModifiersDesc = newModifiers?.challengeDiceAModifier ? ` ${parseInt(newModifiers?.challengeDiceAModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.challengeDiceAModifier) != 0 ? parseInt(newModifiers?.challengeDiceAModifier) : ""}` : ""
+		const challengeDiceBModifiersDesc = newModifiers?.challengeDiceBModifier ? ` ${parseInt(newModifiers?.challengeDiceBModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.challengeDiceBModifier) != 0 ? parseInt(newModifiers?.challengeDiceBModifier) : ""}` : ""
 		const label = `
     <div class="rollCard" data-actor="${this.actor.id}" data-item="${this.id}" data-mode="${mode}" data-attribute="${attribute}" data-roll-modifier="${rollModifier}">
 		<details class="moveDescriptionArea">
@@ -642,14 +645,14 @@ export class BoilerplateItem extends Item {
 		</div>
     <div class="rolls">
 			<div class="actionDiceDisplayPart rollDisplayPart">
-				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll}${newModifiers?.actionDiceModifier ? ` + ${parseInt(newModifiers?.actionDiceModifier)}` : ""}</span>
+				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll}${actionDiceModifiersDesc}</span>
 			</div>
       <div class="challengeDicesDisplayPart rollDisplayPart">
 				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay">
-					${challengeDiceOneRoll}${newModifiers?.challengeDiceAModifier ? ` + ${parseInt(newModifiers?.challengeDiceAModifier)}` : ""}
+					${challengeDiceOneRoll}${challengeDiceAModifiersDesc}
 				</span>
 				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay">
-					${challengeDiceTwoRoll}${newModifiers?.challengeDiceBModifier ? ` + ${parseInt(newModifiers?.challengeDiceBModifier)}` : ""}
+					${challengeDiceTwoRoll}${challengeDiceBModifiersDesc}
 				</span>
 				<a><i class="fas fa-cog btn-adjust-roll-result"></i></a>
 			</div>

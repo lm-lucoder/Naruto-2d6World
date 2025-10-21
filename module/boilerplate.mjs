@@ -136,9 +136,9 @@ Hooks.once("ready", async function () {
       const rollCard = chatMessageCard.querySelector(".rollCard")
       const { attribute, mode, rollModifier, actor, item } = rollCard.dataset
       const { rerollMode } = button.dataset
-      const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText.split("+")[0]
-      const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText.split("+")[0]
-      const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText.split("+")[0]
+      const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText.trim().split("+")[0].split("-")[0]
+      const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText.trim().split("+")[0].split("-")[0]
+      const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText.trim().split("+")[0].split("-")[0]
       const move = await fromUuid(`Actor.${actor}.Item.${item}`)
       AlterMoveResultDialog.create({
         messageData: {

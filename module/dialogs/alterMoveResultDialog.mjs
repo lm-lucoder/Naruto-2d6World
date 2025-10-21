@@ -56,11 +56,13 @@ class AlterMoveResultDialog extends Dialog {
 				e.preventDefault(e);
 				this.submitChange(e);
 				this._currentResolve(true);
+				this.close();
 			}
 		});
 		html.find(".cancel-button").on("click", (e) => {
 			if (this._currentResolve) {
 				this._currentResolve(false);
+				this.close();
 			}
 		});
 
