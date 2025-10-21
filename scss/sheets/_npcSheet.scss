@@ -43,21 +43,13 @@
         }
         .moves-list {
             list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
             padding: 0;
             margin: 0;
             .move-card {
-                padding: 5px 10px;
-                margin: 0;
+                border-bottom: 1px solid $c-beige;
+				padding: 4px 0;
                 display: flex;
-                align-items: center;
                 justify-content: space-between;
-                gap: 10px;
-                border: 1px solid $c-beige;
-                border-radius: 3px;
-                
                 .controls{
                     display: flex;
                     align-items: center;
