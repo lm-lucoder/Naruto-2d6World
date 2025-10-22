@@ -8,6 +8,7 @@ import { BoilerplateItemSheet } from "./sheets/item-sheet.mjs";
 import { preloadHandlebarsTemplates } from "./helpers/templates.mjs";
 import { BOILERPLATE } from "./helpers/config.mjs";
 import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
+import { GameSettings } from "./settings/settings.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -17,6 +18,8 @@ Hooks.once('init', async function () {
 
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
+  GameSettings.start();
+
   game.boilerplate = {
     BoilerplateActor,
     BoilerplateItem,
@@ -90,6 +93,32 @@ Handlebars.registerHelper("between", function (value, min, max) {
 });
 Handlebars.registerHelper('equals', function (a, b) {
   return a == b
+})
+
+//Handlebars específicos
+Handlebars.registerHelper('renderNvText', function (actualNv) {
+  const { greatDisadvantage, disadvantage, advantage, greatAdvantage } = GameSettings.getNVThresholds();
+
+  switch (true) {
+    case actualNv <= greatDisadvantage: return "Grande Desvantagem";
+    case (actualNv <= disadvantage && actualNv > greatDisadvantage): return "Desvantagem";
+    case (actualNv >= advantage && actualNv < greatAdvantage): return "Vantagem";
+    case actualNv >= greatAdvantage: return "Grande Vantagem";
+    default: return "Normal";
+  }
+
+})
+
+Handlebars.registerHelper('renderNvClass', function (actualNv) {
+  const { greatDisadvantage, disadvantage, advantage, greatAdvantage } = GameSettings.getNVThresholds();
+
+  switch (true) {
+    case actualNv <= greatDisadvantage: return "real-bad";
+    case (actualNv <= disadvantage && actualNv > greatDisadvantage): return "bad";
+    case (actualNv >= advantage && actualNv < greatAdvantage): return "good";
+    case actualNv >= greatAdvantage: return "really-good";
+    default: return "neutral";
+  }
 })
 
 /* -------------------------------------------- */

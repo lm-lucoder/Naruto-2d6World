@@ -1,3 +1,4 @@
+import { GameSettings } from "../settings/settings.mjs";
 import { AdvantageLevelApi } from "../sheets/actor-sheet.mjs";
 
 class RollMoveDialog extends Dialog {
@@ -213,34 +214,38 @@ class RollMoveDialog extends Dialog {
 	}
 
 	static _calculateModeByValue(paramValue) {
+		const { greatDisadvantage, disadvantage, advantage, greatAdvantage } = GameSettings.getNVThresholds();
+
 		switch (true) {
-			case paramValue <= -3: return "+disadvantage";
-			case (paramValue <= -1 && paramValue > -3): return "disadvantage";
-			case paramValue === 0: return "normal";
-			case (paramValue >= 1 && paramValue < 3): return "advantage";
-			case paramValue >= 3: return "+advantage";
+			case paramValue <= greatDisadvantage: return "+disadvantage";
+			case (paramValue <= disadvantage && paramValue > greatDisadvantage): return "disadvantage";
+			case (paramValue >= advantage && paramValue < greatAdvantage): return "advantage";
+			case paramValue >= greatAdvantage: return "+advantage";
 			default: return "normal";
 		}
 	}
 
 	static _getAdvantageLevelClass(paramValue) {
+		const { greatDisadvantage, disadvantage, advantage, greatAdvantage } = GameSettings.getNVThresholds();
+
 		switch (true) {
-			case paramValue <= -3: return "real-bad";
-			case (paramValue <= -1 && paramValue > -3): return "bad";
-			case paramValue === 0: return "neutral";
-			case (paramValue >= 1 && paramValue < 3): return "good";
-			case paramValue >= 3: return "really-good";
+			case paramValue <= greatDisadvantage: return "real-bad";
+			case (paramValue <= disadvantage && paramValue > greatDisadvantage): return "bad";
+			//case paramValue === 0: return "neutral";
+			case (paramValue >= advantage && paramValue < greatAdvantage): return "good";
+			case paramValue >= greatAdvantage: return "really-good";
 			default: return "neutral";
 		}
 	}
 
 	static _getAdvantageLevelText(paramValue) {
+		const { greatDisadvantage, disadvantage, advantage, greatAdvantage } = GameSettings.getNVThresholds();
+
 		switch (true) {
-			case paramValue <= -3: return "Grande Desvantagem";
-			case (paramValue <= -1 && paramValue > -3): return "Desvantagem";
-			case paramValue === 0: return "Normal";
-			case (paramValue >= 1 && paramValue < 3): return "Vantagem";
-			case paramValue >= 3: return "Grande Vantagem";
+			case paramValue <= greatDisadvantage: return "Grande Desvantagem";
+			case (paramValue <= disadvantage && paramValue > greatDisadvantage): return "Desvantagem";
+			case (paramValue >= advantage && paramValue < greatAdvantage): return "Vantagem";
+			case paramValue >= greatAdvantage: return "Grande Vantagem";
 			default: return "Normal";
 		}
 	}
