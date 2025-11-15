@@ -334,25 +334,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const item = this.object.items.get(itemId)
 			item.system.chakra.chakraPoints = parseInt(item.system.chakra.chakraPoints)
 			if (e.target.classList.contains("image")) {
-				ManageAbilityChakraDialog.create({ ability: item })
-				/* const actorChakraValue = parseInt(this.object.system.chakra.value)
-				const actorMaxChakraValue = parseInt(this.object.system.chakra.maxValue)
-				if (actorChakraValue == 0) {
-					return ui.notifications.info("Você não possui pontos de chakra para isso");
-				}
-				if (item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints) {
-					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
-				}
-				item.refillChakraPointsFromActor(this.object.id)
-				const speaker = ChatMessage.getSpeaker({ actor: this.object });
-				ChatMessage.create({
-					speaker: speaker,
-					flavor: `${this.object.name} CP: ${this.object.system.chakra.value}/${this.object.system.chakra.max}`,
-					content: `${this.object.name} consumiu 1 ponto de chakra e recarregou a habilidade: ${item.name}`
-				});
-				return */
+				return ManageAbilityChakraDialog.create({ ability: item })
 			}
-			/* if (e.button === 0) {
+			if (e.button === 0 && game.user.isGM) {
 				if (item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
 				}
@@ -370,7 +354,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints += 1
 				return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
 			}
-			if (e.button === 2) {
+			if (e.button === 2 && game.user.isGM) {
 				if (item.system.chakra.chakraPoints == 0) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no mínimo");
 				}
@@ -387,7 +371,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints -= 1
 				return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
-			} */
+			}
 		})
 
 		html.find('.ability-resource-tag').mousedown((e) => {
