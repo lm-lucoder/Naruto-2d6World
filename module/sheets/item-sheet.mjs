@@ -1,3 +1,5 @@
+import { ItemResourceManager } from "../classes/item-resource-manager.mjs";
+
 /**
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
@@ -89,6 +91,13 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const value = parseInt(ev.target.value);
 			this.object.update({ system: { rank: { value } } });
 		});
+		html.find(".level-input").change(async (ev) => {
+			// Quando o nível mudar, recalcula os recursos
+			if (this.object.type === "ability") {
+				await this.object.update({ system: { level: parseInt(ev.target.value) || 1 } });
+				ItemResourceManager.recalculateAllResources(this.object);
+			}
+		});
 		html.find(".add-level-description-btn").click(async (ev) => {
 			const levelDescriptions = this.object.system.levelDescriptions
 			levelDescriptions.push({ level: 0, description: "", id: randomID(7) })
@@ -132,35 +141,20 @@ export class BoilerplateItemSheet extends ItemSheet {
 		})
 
 		html.find(".add-ability-resource").click(async (ev) => {
-			const resources = this.object.system.resources
-			resources.push({ name: "New Resource", value: 0, maxValue: 0, show: false, id: randomID(7) })
-			this.object.update({ system: { resources } });
+			ItemResourceManager.addResource(this.object);
 		})
 		html.find(".ability-resource-remove-btn").click(async (ev) => {
-			const id = ev.target.closest("li").getAttribute("data-item-id")
-			const resources = this.object.system.resources
-			const toRemoveIndex = resources.findIndex(element => element.id === id)
-			resources.splice(toRemoveIndex, 1)
-			this.object.update({ system: { resources: [...resources] } });
+			const id = ev.target.closest("li").getAttribute("data-item-id");
+			ItemResourceManager.removeResource(this.object, id);
 		})
 		html.find(".ability-resource-input").blur(async (ev) => {
-			const inputObjective = ev.target.getAttribute("data-input-objective")
-			const id = ev.target.closest("li").getAttribute("data-item-id")
-			const resources = this.object.system.resources
-			const resource = resources.find(element => element.id === id)
-			resource[inputObjective] = ev.target.value
-			this.object.update({ system: { resources: [...resources] } });
+			const inputObjective = ev.target.getAttribute("data-input-objective");
+			const id = ev.target.closest("li").getAttribute("data-item-id");
+			ItemResourceManager.updateResourceField(this.object, id, inputObjective, ev.target.value);
 		})
 		html.find(".ability-resource-card-checkbox").change(async (e) => {
-			const id = e.target.closest("li").getAttribute("data-item-id")
-			const resources = this.object.system.resources
-			const resource = resources.find(element => element.id === id)
-			if (e.target.checked) {
-				resource.show = true
-			} else {
-				resource.show = false
-			}
-			this.object.update({ system: { resources: [...resources] } });
+			const id = e.target.closest("li").getAttribute("data-item-id");
+			ItemResourceManager.toggleResourceVisibility(this.object, id, e.target.checked);
 		})
 		html.find(".scroll-item-quantity").mousedown(async (e) => {
 			const scroll = this.object

@@ -100,12 +100,16 @@
                     <input class="ability-resource-input" type="text" value="{{resource.name}}" data-input-objective="name">
                   </div>
                   <div>
-                    <span>Value:</span>
+                    <span>Value ({{resource.value}} / {{resource.maxValue}}):</span>
                     <input class="ability-resource-input" type="text" value="{{resource.value}}" data-input-objective="value">
                   </div>
                   <div>
-                    <span>Max value:</span>
-                    <input class="ability-resource-input" type="text" value="{{resource.maxValue}}" data-input-objective="maxValue">
+                    <span>Por nível:</span>
+                    <input class="ability-resource-input" type="text" value="{{resource.valuePerLevel}}" data-input-objective="valuePerLevel">
+                  </div>
+                  <div>
+                    <span>Padrão:</span>
+                    <input class="ability-resource-input" type="text" value="{{resource.defaultValue}}" data-input-objective="defaultValue">
                   </div>
                 </div>
                 <div class="control">

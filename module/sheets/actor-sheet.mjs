@@ -4,6 +4,7 @@ import {
 	onManageActiveEffect,
 	prepareActiveEffectCategories,
 } from "../helpers/effects.mjs";
+import { ItemResourceManager } from "../classes/item-resource-manager.mjs";
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -375,48 +376,28 @@ export class BoilerplateActorSheet extends ActorSheet {
 		})
 
 		html.find('.ability-resource-tag').mousedown((e) => {
-			const abilityId = e.target.closest(".item").getAttribute('data-item-id')
-			const ability = this.object.items.get(abilityId)
-			const resourceId = e.target.closest(".ability-resource-tag").getAttribute("data-resource-id")
-			const resource = ability.system.resources.find(resource => resource.id == resourceId)
+			const abilityId = e.target.closest(".item").getAttribute('data-item-id');
+			const ability = this.object.items.get(abilityId);
+			const resourceId = e.target.closest(".ability-resource-tag").getAttribute("data-resource-id");
 
 			if (e.button === 0) {
-				if (resource.value == resource.maxValue) {
-					return ui.notifications.info("Os pontos deste recurso já estão no máximo");
-				}
 				if (e.shiftKey) {
-					resource.value = parseInt(resource.value) + 5
-					if (resource.value > resource.maxValue) {
-						resource.value = resource.maxValue
-					}
-					return ability.update({ system: { resources: [...ability.system.resources] } })
+					return ItemResourceManager.increaseResourceValue(ability, resourceId, 5);
 				}
 				if (e.ctrlKey) {
-					resource.value = resource.maxValue
-					return ability.update({ system: { resources: [...ability.system.resources] } })
+					return ItemResourceManager.setResourceToMax(ability, resourceId);
 				}
-				resource.value = parseInt(resource.value) + 1
-				return ability.update({ system: { resources: [...ability.system.resources] } })
+				return ItemResourceManager.increaseResourceValue(ability, resourceId, 1);
 			}
 			if (e.button === 2) {
-				if (resource.value == 0) {
-					return ui.notifications.info("Os pontos deste recurso já estão no mínimo");
-				}
 				if (e.shiftKey) {
-					resource.value = parseInt(resource.value) - 5
-					if (resource.value < 0) {
-						resource.value = 0
-					}
-					return ability.update({ system: { resources: [...ability.system.resources] } })
+					return ItemResourceManager.decreaseResourceValue(ability, resourceId, 5);
 				}
 				if (e.ctrlKey) {
-					resource.value = 0
-					return ability.update({ system: { resources: [...ability.system.resources] } })
+					return ItemResourceManager.setResourceToZero(ability, resourceId);
 				}
-				resource.value = parseInt(resource.value) - 1
-				return ability.update({ system: { resources: [...ability.system.resources] } })
+				return ItemResourceManager.decreaseResourceValue(ability, resourceId, 1);
 			}
-
 		})
 		html.find('.item-scroll-unseal-btn').click(e => {
 			const itemId = e.target.closest(".item-card").getAttribute('data-item-id')

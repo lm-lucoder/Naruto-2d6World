@@ -24,6 +24,14 @@ export class BoilerplateItem extends Item {
 			if (this.system.chakra.useChakraPoints) {
 				this.system.chakra.maxChakraPoints = +this.system.level * +this.system.chakra.chakraPointsPerLevel + +this.system.chakra.defaultChakraPoints
 			}
+			// Calcula maxValue para cada recurso baseado no nível
+			if (this.system.resources && Array.isArray(this.system.resources)) {
+				this.system.resources.forEach(resource => {
+					if (resource.valuePerLevel !== undefined && resource.defaultValue !== undefined) {
+						resource.maxValue = +this.system.level * +resource.valuePerLevel + +resource.defaultValue;
+					}
+				});
+			}
 			this.refillChakraPoints = function refillChakraPoints() {
 				this.update({ system: { chakra: { chakraPoints: (this.system.chakra.maxChakraPoints) } } })
 			}
