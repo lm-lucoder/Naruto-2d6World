@@ -52,13 +52,13 @@ export class ChatMessageAbilitiesChakraTemplates {
       // Chakra foi reduzido'
       messageText = `
       ${chakraChangeDisplay}
-      <span class="description-text">${actor.name} <strong>consumiu ${modifierAbs} ponto(s) de chakra</strong>.</span>
+      <span class="description-text">${actor.name} <strong>consumiu ${modifierAbs} ponto(s) de chakra</strong> da habilidade.</span>
       `;
     } else if (modifierValue > 0) {
       // Chakra foi aumentado
       messageText = `
       ${chakraChangeDisplay}
-      <span class="description-text">${actor.name} <strong>aumentou ${modifierAbs} ponto(s) de chakra</strong>.</span>
+      <span class="description-text">${actor.name} <strong>aumentou ${modifierAbs} ponto(s) de chakra</strong> na habilidade.</span>
       `;
     }
 

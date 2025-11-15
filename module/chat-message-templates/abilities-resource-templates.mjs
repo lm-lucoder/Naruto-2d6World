@@ -53,13 +53,13 @@ export class ChatMessageAbilitiesResourceTemplates {
       // Recurso foi reduzido
       messageText = `
       ${resourceChangeDisplay}
-      <span class="description-text">${actor.name} consumiu ${modifierAbs} ponto(s) de ${resource.name}.</span>
+      <span class="description-text">${actor.name} consumiu ${modifierAbs} ponto(s) de ${resource.name} da habilidade.</span>
       `;
     } else if (modifierValue > 0) {
       // Recurso foi aumentado
       messageText = `
       ${resourceChangeDisplay}
-      <span class="description-text">${actor.name} aumentou ${modifierAbs} ponto(s) de ${resource.name}.</span>
+      <span class="description-text">${actor.name} aumentou ${modifierAbs} ponto(s) de ${resource.name} da habilidade.</span>
       `;
     }
 
