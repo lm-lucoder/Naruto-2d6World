@@ -1,7 +1,7 @@
 /**
- * Classe para templates de mensagens de chat relacionadas ao gerenciamento de chakra de habilidades
+ * Classe para templates de mensagens de chat relacionadas ao gerenciamento de recursos de habilidades
  */
-export class ChatMessageAbilitiesChakraTemplates {
+export class ChatMessageAbilitiesResourceTemplates {
 
   static _getChatContent(content) {
     return `
@@ -27,38 +27,39 @@ export class ChatMessageAbilitiesChakraTemplates {
   }
 
   /**
-   * Cria uma mensagem de chat quando o chakra de uma habilidade é alterado
+   * Cria uma mensagem de chat quando o recurso de uma habilidade é alterado
    * @param {Object} params - Parâmetros da mensagem
-   * @param {Actor} params.actor - O ator que está alterando o chakra
-   * @param {Item} params.ability - A habilidade cujo chakra está sendo alterado
+   * @param {Actor} params.actor - O ator que está alterando o recurso
+   * @param {Item} params.ability - A habilidade cujo recurso está sendo alterado
+   * @param {Object} params.resource - O recurso que está sendo alterado
    * @param {number} params.modifierValue - O valor do modificador (positivo ou negativo)
-   * @param {number} params.newChakraValue - O novo valor de chakra após a alteração
+   * @param {number} params.newResourceValue - O novo valor do recurso após a alteração
    * @returns {Promise<ChatMessage>}
    */
-  static createChakraChangedMessage({ actor, ability, modifierValue, newChakraValue }) {
+  static createResourceChangedMessage({ actor, ability, resource, modifierValue, newResourceValue }) {
     const modifierAbs = Math.abs(modifierValue);
     const speaker = ChatMessage.getSpeaker().alias;
     const header = this._abilityHeader(ability);
     let messageText = "";
 
-    const chakraChangeDisplay = `
+    const resourceChangeDisplay = `
     <span class="chat-tag resource-change-display">
-      <img src="systems/naruto2d6world/assets/icons/chakraIcon.png" name="CP">
-      <span class="chakra-change-value">${modifierValue < 0 ? "-" : "+"} ${modifierAbs}</span>
+      <span class="resource-name">${resource.name}</span>
+      <span class="resource-change-value">${modifierValue < 0 ? "-" : "+"} ${modifierAbs}</span>
     </span>
     `;
 
     if (modifierValue < 0) {
-      // Chakra foi reduzido'
+      // Recurso foi reduzido
       messageText = `
-      ${chakraChangeDisplay}
-      <span class="description-text">${actor.name} <strong>consumiu ${modifierAbs} ponto(s) de chakra</strong>.</span>
+      ${resourceChangeDisplay}
+      <span class="description-text">${actor.name} consumiu ${modifierAbs} ponto(s) de ${resource.name}.</span>
       `;
     } else if (modifierValue > 0) {
-      // Chakra foi aumentado
+      // Recurso foi aumentado
       messageText = `
-      ${chakraChangeDisplay}
-      <span class="description-text">${actor.name} <strong>aumentou ${modifierAbs} ponto(s) de chakra</strong>.</span>
+      ${resourceChangeDisplay}
+      <span class="description-text">${actor.name} aumentou ${modifierAbs} ponto(s) de ${resource.name}.</span>
       `;
     }
 
@@ -66,30 +67,29 @@ export class ChatMessageAbilitiesChakraTemplates {
 
     return ChatMessage.create({
       speaker: speaker,
-      flavor: `${actor.name} CP: ${actor.system.chakra.value}/${actor.system.chakra.max}`,
       content: this._getChatContent(content)
     });
   }
 
   /**
-   * Cria uma mensagem de chat quando o chakra de uma habilidade é recarregado completamente
+   * Cria uma mensagem de chat quando o recurso de uma habilidade é recarregado completamente
    * @param {Object} params - Parâmetros da mensagem
-   * @param {Actor} params.actor - O ator que está recarregando o chakra
-   * @param {Item} params.ability - A habilidade cujo chakra está sendo recarregado
+   * @param {Actor} params.actor - O ator que está recarregando o recurso
+   * @param {Item} params.ability - A habilidade cujo recurso está sendo recarregado
+   * @param {Object} params.resource - O recurso que está sendo recarregado
    * @returns {Promise<ChatMessage>}
    */
-  static createChakraReloadedMessage({ actor, ability }) {
+  static createResourceReloadedMessage({ actor, ability, resource }) {
     const speaker = ChatMessage.getSpeaker().alias;
     const header = this._abilityHeader(ability);
     const messageText = `
-    <span class="chat-tag chakra-info">1 ponto de chakra foi utilizado</span>
-    <span class="description-text">${actor.name} Recarregou a habilidade.</span>
+    <span class="chat-tag resource-info">${resource.name} foi recarregado</span>
+    <span class="description-text">${actor.name} recarregou ${resource.name} para o máximo.</span>
     `;
     const content = `${header}<div class="resource-message-content">${messageText}</div>`;
 
     return ChatMessage.create({
       speaker: speaker,
-      flavor: `${actor.name} CP: ${actor.system.chakra.value}/${actor.system.chakra.max}`,
       content: this._getChatContent(content)
     });
   }

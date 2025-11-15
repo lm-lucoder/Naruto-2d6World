@@ -1,4 +1,5 @@
 import ManageAbilityChakraDialog from "../dialogs/manageAbilityChakraDialog.mjs";
+import ManageAbilityResourceDialog from "../dialogs/manageAbilityResourceDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
 import {
 	onManageActiveEffect,
@@ -379,8 +380,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const abilityId = e.target.closest(".item").getAttribute('data-item-id');
 			const ability = this.object.items.get(abilityId);
 			const resourceId = e.target.closest(".ability-resource-tag").getAttribute("data-resource-id");
+			const resource = ability.system.resources.find(resource => resource.id == resourceId);
 
-			if (e.button === 0) {
+			// Se clicou no valor (span.data), abre o dialog
+			if (e.target.classList.contains("data") || e.target.closest(".data")) {
+				return ManageAbilityResourceDialog.create({ ability: ability, resource: resource });
+			}
+
+			// Comportamento padrão para aumentar/diminuir
+			if (e.button === 0 && game.user.isGM) {
 				if (e.shiftKey) {
 					return ItemResourceManager.increaseResourceValue(ability, resourceId, 5);
 				}
@@ -389,7 +397,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 				return ItemResourceManager.increaseResourceValue(ability, resourceId, 1);
 			}
-			if (e.button === 2) {
+			if (e.button === 2 && game.user.isGM) {
 				if (e.shiftKey) {
 					return ItemResourceManager.decreaseResourceValue(ability, resourceId, 5);
 				}

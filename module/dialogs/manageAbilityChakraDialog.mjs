@@ -1,4 +1,4 @@
-import { ChatMessageTemplates } from "../chat-message-templates/abilities-chakra-templates.mjs";
+import { ChatMessageAbilitiesChakraTemplates } from "../chat-message-templates/abilities-chakra-templates.mjs";
 
 class ManageAbilityChakraDialog extends Dialog {
 	constructor(dialogData = {}, options = {}) {
@@ -177,7 +177,7 @@ class ManageAbilityChakraDialog extends Dialog {
 		ui.notifications.info(`Chakra atualizado para ${newChakraValue}`);
 
 		// Cria mensagem no chat usando template
-		ChatMessageTemplates.createChakraChangedMessage({
+		ChatMessageAbilitiesChakraTemplates.createChakraChangedMessage({
 			actor: this._currentActor,
 			ability: this._currentAbility,
 			modifierValue: modifierValue,
@@ -215,7 +215,7 @@ class ManageAbilityChakraDialog extends Dialog {
 		this._currentAbility.refillChakraPointsFromActor(actor.id)
 
 		// Cria mensagem no chat usando template
-		ChatMessageTemplates.createChakraReloadedMessage({
+		ChatMessageAbilitiesChakraTemplates.createChakraReloadedMessage({
 			actor: actor,
 			ability: this._currentAbility
 		});

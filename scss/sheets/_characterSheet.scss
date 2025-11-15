@@ -432,21 +432,22 @@
 									padding: 3px 6px;
 									display: flex;
 									align-items: center;
-									cursor: pointer;
 									transition: .1s;
 									span{
 										font-size: 0.8em;
 										white-space: nowrap;
 									}
-									.data{
-										padding-left: 3px;
-										margin-left: 3px;
-										border-left: 1px solid $c-beige;
+									.name{
+										border-right: 1px solid $c-beige;
+										padding-right: 3px;
+										margin-right: 3px;
 									}
-									
-								}
-								.ability-resource-tag:hover{
-									filter: brightness(1.5);
+									.data{
+										cursor: pointer;
+										padding-left: 3px;
+										padding-right: 3px;
+										border-radius: 3px;
+									}
 								}
 							}
 							
