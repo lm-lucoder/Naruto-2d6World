@@ -29,6 +29,9 @@ export class BoilerplateItem extends Item {
 			}
 			this.refillChakraPointsFromActor = function refillChakraPoints(actorId) {
 				const actor = Actor.get(actorId);
+				if (actor.system.chakra.value < 0) {
+					return ui.notifications.info("Você não possui pontos de chakra suficientes para isso!");
+				}
 				actor.update({ system: { chakra: { value: parseInt(actor.system.chakra.value) - 1 } } })
 				this.refillChakraPoints()
 			}
@@ -696,7 +699,7 @@ export class BoilerplateItem extends Item {
       <div class="info">
         ${hasImg ? `<img src="${ability.img}" name="${ability.name}">` : ""}
         <div class="title">
-          <h3>Hablidade: ${ability.name}</h3>
+          <h3>Habilidade: ${ability.name}</h3>
           <i>Nível: ${ability.system.level}</i>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import ManageAbilityChakraDialog from "../dialogs/manageAbilityChakraDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
 import {
 	onManageActiveEffect,
@@ -333,7 +334,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const item = this.object.items.get(itemId)
 			item.system.chakra.chakraPoints = parseInt(item.system.chakra.chakraPoints)
 			if (e.target.classList.contains("image")) {
-				const actorChakraValue = parseInt(this.object.system.chakra.value)
+				ManageAbilityChakraDialog.create({ ability: item })
+				/* const actorChakraValue = parseInt(this.object.system.chakra.value)
 				const actorMaxChakraValue = parseInt(this.object.system.chakra.maxValue)
 				if (actorChakraValue == 0) {
 					return ui.notifications.info("Você não possui pontos de chakra para isso");
@@ -348,11 +350,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 					flavor: `${this.object.name} CP: ${this.object.system.chakra.value}/${this.object.system.chakra.max}`,
 					content: `${this.object.name} consumiu 1 ponto de chakra e recarregou a habilidade: ${item.name}`
 				});
-				// item.update({system: {chakra : {chakraPoints : (item.system.chakra.maxChakraPoints) }}})
-				// this.object.update({system: {chakra: {value : actorChakraValue - 1}}})
-				return
+				return */
 			}
-			if (e.button === 0) {
+			/* if (e.button === 0) {
 				if (item.system.chakra.chakraPoints == item.system.chakra.maxChakraPoints) {
 					return ui.notifications.info("Os pontos de chakra desta habilidade já estão no máximo");
 				}
@@ -387,7 +387,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 				item.system.chakra.chakraPoints = item.system.chakra.chakraPoints -= 1
 				return item.update({ system: { chakra: { chakraPoints: item.system.chakra.chakraPoints } } })
-			}
+			} */
 		})
 
 		html.find('.ability-resource-tag').mousedown((e) => {

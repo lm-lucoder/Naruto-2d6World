@@ -19,13 +19,14 @@
 @import 'components/chat-templates/chatSkillTemplate';
 @import 'components/chat-templates/chatAbilityTemplate';
 @import 'components/dialogs/dialogRollMove';
+@import 'components/dialogs/dialogManageAbilityChakra';
 @import 'components/animations';
 
+@import 'components/resource';
 
 /* Styles limited to boilerplate sheets */
 .boilerplate {
   @import 'components/forms';
-  @import 'components/resource';
   @import 'components/items';
   @import 'components/effects';
   @import 'components/animations';

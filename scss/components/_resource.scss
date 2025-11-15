@@ -2,3 +2,23 @@
   font-weight: bold;
 }
 
+.chat-tag{
+  border-radius: 5px;
+  background-color: $c-beige;
+  padding: 3px 6px;
+  text-align: center;
+  color: #333330;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.chakra-info{
+  background-color: $c-chakra-color;
+}
+
+.chakra-color{
+  color: $c-chakra-color;
+}
