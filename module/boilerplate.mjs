@@ -182,6 +182,10 @@ Hooks.once("ready", async function () {
       const challengeDiceTwoResult = challengeDiceTwoElement?.dataset.challengeDiceTwoValue || challengeDiceTwoElement?.innerText.trim().split("+")[0].split("-")[0].split("<")[0]
       const actionDiceResult = actionDiceElement?.dataset.actionDiceValue || actionDiceElement?.innerText.trim().split("+")[0].split("-")[0]
 
+      // Recuperar valores originais dos data attributes para preservar o valor riscado
+      const originalChallengeDiceOne = challengeDiceOneElement?.dataset.challengeDiceOneOriginal || undefined
+      const originalChallengeDiceTwo = challengeDiceTwoElement?.dataset.challengeDiceTwoOriginal || undefined
+
       const move = await fromUuid(`Actor.${actor}.Item.${item}`)
       AlterMoveResultDialog.create({
         messageData: {
@@ -198,7 +202,9 @@ Hooks.once("ready", async function () {
             challengeDiceOneResult,
             challengeDiceTwoResult,
             actionDiceResult
-          }
+          },
+          originalChallengeDiceOne: originalChallengeDiceOne ? parseInt(originalChallengeDiceOne) : undefined,
+          originalChallengeDiceTwo: originalChallengeDiceTwo ? parseInt(originalChallengeDiceTwo) : undefined
 
         }, messageCard: chatMessageCard
       })

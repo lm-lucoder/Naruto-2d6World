@@ -222,7 +222,7 @@ export class BoilerplateItem extends Item {
 	}
 
 	async moveRoll(params) {
-		const { advantageLevel, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
+		const { advantageLevel, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
 		if (isUpdate && rerollMode == "adjustment") {
 			const label = this._getMoveLabelRollTemplate({
 				move: this,
@@ -232,8 +232,8 @@ export class BoilerplateItem extends Item {
 				actionDiceRoll: oldMessageRolls.actionDiceResult,
 				challengeDiceOneRoll: oldMessageRolls.challengeDiceOneResult,
 				challengeDiceTwoRoll: oldMessageRolls.challengeDiceTwoResult,
-				originalChallengeDiceOne: undefined, // Ajuste manual não tem valor original
-				originalChallengeDiceTwo: undefined, // Ajuste manual não tem valor original
+				originalChallengeDiceOne: preservedOriginalOne, // Preservar valor original da mensagem anterior
+				originalChallengeDiceTwo: preservedOriginalTwo, // Preservar valor original da mensagem anterior
 				newModifiers
 			});
 			await oldMessage.update({
@@ -702,7 +702,7 @@ export class BoilerplateItem extends Item {
 		// Formatar exibição dos dados de desafio com valor original riscado quando diferente
 		const formatChallengeDice = (modifiedValue, originalValue, modifiersDesc) => {
 			if (originalValue !== undefined && originalValue !== null && originalValue !== modifiedValue) {
-				return `${modifiedValue}<span style="text-decoration: line-through; opacity: 0.6; margin-left: 4px;">${originalValue}</span>${modifiersDesc}`;
+				return `<span style="text-decoration: line-through; opacity: 0.6; margin-right: 4px;">${originalValue}</span>${modifiedValue}${modifiersDesc}`;
 			}
 			return `${modifiedValue}${modifiersDesc}`;
 		};
