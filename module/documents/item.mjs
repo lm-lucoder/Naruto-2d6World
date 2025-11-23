@@ -232,6 +232,8 @@ export class BoilerplateItem extends Item {
 				actionDiceRoll: oldMessageRolls.actionDiceResult,
 				challengeDiceOneRoll: oldMessageRolls.challengeDiceOneResult,
 				challengeDiceTwoRoll: oldMessageRolls.challengeDiceTwoResult,
+				originalChallengeDiceOne: undefined, // Ajuste manual não tem valor original
+				originalChallengeDiceTwo: undefined, // Ajuste manual não tem valor original
 				newModifiers
 			});
 			await oldMessage.update({
@@ -293,12 +295,16 @@ export class BoilerplateItem extends Item {
 			await challengeDiceTwoRoll.evaluate({ async: true })
 		}
 
+		// Armazenar valores originais antes de aplicar NV
+		const originalChallengeDiceOne = challengeDiceOneRoll.total;
+		const originalChallengeDiceTwo = challengeDiceTwoRoll.total;
+
 		// Aplicar modificações de NV aos dados de desafio
 		const nvValue = advantageLevel || 0;
 		const modifiedDice = this._applyAdvantageLevelToChallengeDice(
 			nvValue,
-			challengeDiceOneRoll.total,
-			challengeDiceTwoRoll.total
+			originalChallengeDiceOne,
+			originalChallengeDiceTwo
 		);
 
 		// Atualizar os totais dos dados de desafio
@@ -313,6 +319,8 @@ export class BoilerplateItem extends Item {
 			actionDiceRoll: actionDiceRoll.total,
 			challengeDiceOneRoll: challengeDiceOneRoll.total,
 			challengeDiceTwoRoll: challengeDiceTwoRoll.total,
+			originalChallengeDiceOne,
+			originalChallengeDiceTwo,
 			rerollMode
 		});
 
@@ -592,7 +600,7 @@ export class BoilerplateItem extends Item {
 		this.system.rank = rank;
 	}
 
-	_getMoveLabelRollTemplate({ move, advantageLevel, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, newModifiers }) {
+	_getMoveLabelRollTemplate({ move, advantageLevel, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
 		let successCount = 0
 		let match = false
 		let resultType = ""
@@ -690,6 +698,18 @@ export class BoilerplateItem extends Item {
 		const actionDiceModifiersDesc = newModifiers?.actionDiceModifier ? ` ${parseInt(newModifiers?.actionDiceModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.actionDiceModifier) != 0 ? parseInt(newModifiers?.actionDiceModifier) : ""}` : ""
 		const challengeDiceAModifiersDesc = newModifiers?.challengeDiceAModifier ? ` ${parseInt(newModifiers?.challengeDiceAModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.challengeDiceAModifier) != 0 ? parseInt(newModifiers?.challengeDiceAModifier) : ""}` : ""
 		const challengeDiceBModifiersDesc = newModifiers?.challengeDiceBModifier ? ` ${parseInt(newModifiers?.challengeDiceBModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.challengeDiceBModifier) != 0 ? parseInt(newModifiers?.challengeDiceBModifier) : ""}` : ""
+
+		// Formatar exibição dos dados de desafio com valor original riscado quando diferente
+		const formatChallengeDice = (modifiedValue, originalValue, modifiersDesc) => {
+			if (originalValue !== undefined && originalValue !== null && originalValue !== modifiedValue) {
+				return `${modifiedValue}<span style="text-decoration: line-through; opacity: 0.6; margin-left: 4px;">${originalValue}</span>${modifiersDesc}`;
+			}
+			return `${modifiedValue}${modifiersDesc}`;
+		};
+
+		const challengeDiceOneDisplay = formatChallengeDice(challengeDiceOneRoll, originalChallengeDiceOne, challengeDiceAModifiersDesc);
+		const challengeDiceTwoDisplay = formatChallengeDice(challengeDiceTwoRoll, originalChallengeDiceTwo, challengeDiceBModifiersDesc);
+
 		const label = `
     <div class="rollCard" data-actor="${this.actor.id}" data-item="${this.id}" data-advantage-level="${advantageLevel || 0}" data-attribute="${attribute}" data-roll-modifier="${rollModifier}">
 		<details class="moveDescriptionArea">
@@ -708,14 +728,14 @@ export class BoilerplateItem extends Item {
 		</div>
     <div class="rolls">
 			<div class="actionDiceDisplayPart rollDisplayPart">
-				<span class="actionDiceDisplay rollDisplay">${actionDiceRoll}${actionDiceModifiersDesc}</span>
+				<span class="actionDiceDisplay rollDisplay" data-action-dice-value="${actionDiceRoll}">${actionDiceRoll}${actionDiceModifiersDesc}</span>
 			</div>
       <div class="challengeDicesDisplayPart rollDisplayPart">
-				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay">
-					${challengeDiceOneRoll}${challengeDiceAModifiersDesc}
+				<span class="challengeDiceDisplay challengeDiceOneDisplay rollDisplay" data-challenge-dice-one-value="${challengeDiceOneRoll}" ${originalChallengeDiceOne !== undefined && originalChallengeDiceOne !== null && originalChallengeDiceOne !== challengeDiceOneRoll ? `data-challenge-dice-one-original="${originalChallengeDiceOne}"` : ''}>
+					${challengeDiceOneDisplay}
 				</span>
-				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay">
-					${challengeDiceTwoRoll}${challengeDiceBModifiersDesc}
+				<span class="challengeDiceDisplay challengeDiceTwoDisplay rollDisplay" data-challenge-dice-two-value="${challengeDiceTwoRoll}" ${originalChallengeDiceTwo !== undefined && originalChallengeDiceTwo !== null && originalChallengeDiceTwo !== challengeDiceTwoRoll ? `data-challenge-dice-two-original="${originalChallengeDiceTwo}"` : ''}>
+					${challengeDiceTwoDisplay}
 				</span>
 				<a><i class="fas fa-cog btn-adjust-roll-result"></i></a>
 			</div>

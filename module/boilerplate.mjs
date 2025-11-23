@@ -140,9 +140,16 @@ Hooks.once("ready", async function () {
       const rollCard = chatMessageCard.querySelector(".rollCard")
       const { attribute, advantageLevel, rollModifier, actor, item } = rollCard.dataset
       const { rerollMode } = button.dataset
-      const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText
-      const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText
-      const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText
+
+      // Ler valores dos data attributes em vez do texto visível
+      const challengeDiceOneElement = rollCard.querySelector(".challengeDiceOneDisplay")
+      const challengeDiceTwoElement = rollCard.querySelector(".challengeDiceTwoDisplay")
+      const actionDiceElement = rollCard.querySelector(".actionDiceDisplay")
+
+      const challengeDiceOneResult = challengeDiceOneElement?.dataset.challengeDiceOneValue || challengeDiceOneElement?.innerText.trim().split("<")[0]
+      const challengeDiceTwoResult = challengeDiceTwoElement?.dataset.challengeDiceTwoValue || challengeDiceTwoElement?.innerText.trim().split("<")[0]
+      const actionDiceResult = actionDiceElement?.dataset.actionDiceValue || actionDiceElement?.innerText.trim()
+
       const move = await fromUuid(`Actor.${actor}.Item.${item}`)
       if (rerollMode == "free" && !game.user.isGM) {
         return ui.warn("Somente o Mestre pode realizar uma rolagem livre")
@@ -165,9 +172,16 @@ Hooks.once("ready", async function () {
       const rollCard = chatMessageCard.querySelector(".rollCard")
       const { attribute, advantageLevel, rollModifier, actor, item } = rollCard.dataset
       const { rerollMode } = button.dataset
-      const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText.trim().split("+")[0].split("-")[0]
-      const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText.trim().split("+")[0].split("-")[0]
-      const actionDiceResult = rollCard.querySelector(".actionDiceDisplay").innerText.trim().split("+")[0].split("-")[0]
+
+      // Ler valores dos data attributes em vez do texto visível
+      const challengeDiceOneElement = rollCard.querySelector(".challengeDiceOneDisplay")
+      const challengeDiceTwoElement = rollCard.querySelector(".challengeDiceTwoDisplay")
+      const actionDiceElement = rollCard.querySelector(".actionDiceDisplay")
+
+      const challengeDiceOneResult = challengeDiceOneElement?.dataset.challengeDiceOneValue || challengeDiceOneElement?.innerText.trim().split("+")[0].split("-")[0].split("<")[0]
+      const challengeDiceTwoResult = challengeDiceTwoElement?.dataset.challengeDiceTwoValue || challengeDiceTwoElement?.innerText.trim().split("+")[0].split("-")[0].split("<")[0]
+      const actionDiceResult = actionDiceElement?.dataset.actionDiceValue || actionDiceElement?.innerText.trim().split("+")[0].split("-")[0]
+
       const move = await fromUuid(`Actor.${actor}.Item.${item}`)
       AlterMoveResultDialog.create({
         messageData: {
