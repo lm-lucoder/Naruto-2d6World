@@ -154,13 +154,31 @@ Hooks.once("ready", async function () {
       if (rerollMode == "free" && !game.user.isGM) {
         return ui.warn("Somente o Mestre pode realizar uma rolagem livre")
       }
-      move.moveRoll({
-        attribute, advantageLevel: parseInt(advantageLevel) || 0, rollModifier, isUpdate: true, rerollMode, oldMessage, oldMessageRolls: {
+
+      // Check if legacy mode is enabled
+      const useLegacy = game.settings.get("naruto2d6world", "use-legacy-roll");
+      const rollParams = {
+        attribute,
+        rollModifier,
+        isUpdate: true,
+        rerollMode,
+        oldMessage,
+        oldMessageRolls: {
           challengeDiceOneResult,
           challengeDiceTwoResult,
           actionDiceResult
         }
-      })
+      };
+
+      // In legacy mode, we need to extract mode from the rollCard dataset
+      if (useLegacy) {
+        const mode = rollCard.dataset.mode;
+        rollParams.mode = mode;
+      } else {
+        rollParams.advantageLevel = parseInt(advantageLevel) || 0;
+      }
+
+      move.moveRoll(rollParams)
     }
 
     if (event.target.classList.contains("btn-adjust-roll-result")) {
@@ -170,7 +188,7 @@ Hooks.once("ready", async function () {
       const oldMessage = game.messages.get(messageId)
       if (!oldMessage) return console.error(`Message: ${messageId} not found`);
       const rollCard = chatMessageCard.querySelector(".rollCard")
-      const { attribute, advantageLevel, rollModifier, actor, item } = rollCard.dataset
+      const { attribute, advantageLevel, mode, rollModifier, actor, item } = rollCard.dataset
       const { rerollMode } = button.dataset
 
       // Ler valores dos data attributes em vez do texto visível
@@ -182,31 +200,41 @@ Hooks.once("ready", async function () {
       const challengeDiceTwoResult = challengeDiceTwoElement?.dataset.challengeDiceTwoValue || challengeDiceTwoElement?.innerText.trim().split("+")[0].split("-")[0].split("<")[0]
       const actionDiceResult = actionDiceElement?.dataset.actionDiceValue || actionDiceElement?.innerText.trim().split("+")[0].split("-")[0]
 
-      // Recuperar valores originais dos data attributes para preservar o valor riscado
-      const originalChallengeDiceOne = challengeDiceOneElement?.dataset.challengeDiceOneOriginal || undefined
-      const originalChallengeDiceTwo = challengeDiceTwoElement?.dataset.challengeDiceTwoOriginal || undefined
+      // Recuperar valores originais dos data attributes para preservar o valor riscado (apenas no modo novo)
+      const useLegacy = game.settings.get("naruto2d6world", "use-legacy-roll");
+      const originalChallengeDiceOne = useLegacy ? undefined : (challengeDiceOneElement?.dataset.challengeDiceOneOriginal || undefined);
+      const originalChallengeDiceTwo = useLegacy ? undefined : (challengeDiceTwoElement?.dataset.challengeDiceTwoOriginal || undefined);
 
       const move = await fromUuid(`Actor.${actor}.Item.${item}`)
-      AlterMoveResultDialog.create({
-        messageData: {
-          oldMessage,
-          attribute,
-          advantageLevel: parseInt(advantageLevel) || 0,
-          rollModifier,
-          actor,
-          item,
-          move,
-          isUpdate: true,
-          rerollMode: "adjustment",
-          oldMessageRolls: {
-            challengeDiceOneResult,
-            challengeDiceTwoResult,
-            actionDiceResult
-          },
-          originalChallengeDiceOne: originalChallengeDiceOne ? parseInt(originalChallengeDiceOne) : undefined,
-          originalChallengeDiceTwo: originalChallengeDiceTwo ? parseInt(originalChallengeDiceTwo) : undefined
 
-        }, messageCard: chatMessageCard
+      const messageData = {
+        oldMessage,
+        attribute,
+        rollModifier,
+        actor,
+        item,
+        move,
+        isUpdate: true,
+        rerollMode: "adjustment",
+        oldMessageRolls: {
+          challengeDiceOneResult,
+          challengeDiceTwoResult,
+          actionDiceResult
+        }
+      };
+
+      // Add appropriate parameters based on mode
+      if (useLegacy) {
+        messageData.mode = mode;
+      } else {
+        messageData.advantageLevel = parseInt(advantageLevel) || 0;
+        messageData.originalChallengeDiceOne = originalChallengeDiceOne ? parseInt(originalChallengeDiceOne) : undefined;
+        messageData.originalChallengeDiceTwo = originalChallengeDiceTwo ? parseInt(originalChallengeDiceTwo) : undefined;
+      }
+
+      AlterMoveResultDialog.create({
+        messageData,
+        messageCard: chatMessageCard
       })
     }
   })

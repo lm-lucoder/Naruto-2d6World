@@ -29,6 +29,15 @@ class GameSettings {
       default: -5,
     });
 
+    game.settings.register("naruto2d6world", "use-legacy-roll", {
+      name: "Usar rolagem legada (com modos)",
+      hint: "Se ativado, usa o sistema antigo de rolagem com modos (vantagem/desvantagem). Se desativado, usa o novo sistema que aplica NV diretamente aos dados.",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+    });
+
   }
 
   static getNVThresholds() {

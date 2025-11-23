@@ -1,10 +1,19 @@
 import { ItemRollManager } from "../classes/item-roll-manager.mjs";
+import { ItemLegacyRollManager } from "../classes/item-legacy-roll-manager.mjs";
 
 /**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
  */
 export class BoilerplateItem extends Item {
+	/**
+	 * Get the appropriate roll manager based on settings
+	 * @returns {Object} The roll manager class to use
+	 */
+	static getRollManager() {
+		const useLegacy = game.settings.get("naruto2d6world", "use-legacy-roll");
+		return useLegacy ? ItemLegacyRollManager : ItemRollManager;
+	}
 	/**
 	 * Augment the basic Item data model with additional dynamic data.
 	 */
@@ -81,27 +90,33 @@ export class BoilerplateItem extends Item {
 	 * @private
 	 */
 	async roll() {
-		return ItemRollManager.roll(this);
+		const RollManager = BoilerplateItem.getRollManager();
+		return RollManager.roll(this);
 	}
 
 	async skillRoll() {
-		return ItemRollManager.skillRoll(this);
+		const RollManager = BoilerplateItem.getRollManager();
+		return RollManager.skillRoll(this);
 	}
 
 	async abilityRoll() {
-		return ItemRollManager.abilityRoll(this);
+		const RollManager = BoilerplateItem.getRollManager();
+		return RollManager.abilityRoll(this);
 	}
 
 	async moveRoll(params) {
-		return ItemRollManager.moveRoll(this, params);
+		const RollManager = BoilerplateItem.getRollManager();
+		return RollManager.moveRoll(this, params);
 	}
 
 	async moveRollJustSend() {
-		return ItemRollManager.moveRollJustSend(this);
+		const RollManager = BoilerplateItem.getRollManager();
+		return RollManager.moveRollJustSend(this);
 	}
 
 	async moveRollNPC() {
-		return ItemRollManager.moveRollNPC(this);
+		const RollManager = BoilerplateItem.getRollManager();
+		return RollManager.moveRollNPC(this);
 	}
 
 	async reloadNPCMoveUses(hardReload) {
