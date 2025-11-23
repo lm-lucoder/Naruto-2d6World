@@ -138,7 +138,7 @@ Hooks.once("ready", async function () {
       const oldMessage = game.messages.get(messageId)
       if (!oldMessage) return console.error(`Message: ${messageId} not found`);
       const rollCard = chatMessageCard.querySelector(".rollCard")
-      const { attribute, mode, rollModifier, actor, item } = rollCard.dataset
+      const { attribute, advantageLevel, rollModifier, actor, item } = rollCard.dataset
       const { rerollMode } = button.dataset
       const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText
       const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText
@@ -148,7 +148,7 @@ Hooks.once("ready", async function () {
         return ui.warn("Somente o Mestre pode realizar uma rolagem livre")
       }
       move.moveRoll({
-        attribute, mode, rollModifier, isUpdate: true, rerollMode, oldMessage, oldMessageRolls: {
+        attribute, advantageLevel: parseInt(advantageLevel) || 0, rollModifier, isUpdate: true, rerollMode, oldMessage, oldMessageRolls: {
           challengeDiceOneResult,
           challengeDiceTwoResult,
           actionDiceResult
@@ -163,7 +163,7 @@ Hooks.once("ready", async function () {
       const oldMessage = game.messages.get(messageId)
       if (!oldMessage) return console.error(`Message: ${messageId} not found`);
       const rollCard = chatMessageCard.querySelector(".rollCard")
-      const { attribute, mode, rollModifier, actor, item } = rollCard.dataset
+      const { attribute, advantageLevel, rollModifier, actor, item } = rollCard.dataset
       const { rerollMode } = button.dataset
       const challengeDiceOneResult = rollCard.querySelector(".challengeDiceOneDisplay").innerText.trim().split("+")[0].split("-")[0]
       const challengeDiceTwoResult = rollCard.querySelector(".challengeDiceTwoDisplay").innerText.trim().split("+")[0].split("-")[0]
@@ -173,7 +173,7 @@ Hooks.once("ready", async function () {
         messageData: {
           oldMessage,
           attribute,
-          mode,
+          advantageLevel: parseInt(advantageLevel) || 0,
           rollModifier,
           actor,
           item,

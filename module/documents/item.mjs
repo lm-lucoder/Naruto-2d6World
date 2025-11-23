@@ -140,12 +140,93 @@ export class BoilerplateItem extends Item {
 			content: ability.system.description ?? "",
 		});
 	}
+	/**
+	 * Apply advantage level (NV) modifications to challenge dice
+	 * @param {number} advantageLevel - The advantage level (NV) to apply
+	 * @param {number} challengeDiceOne - First challenge die result
+	 * @param {number} challengeDiceTwo - Second challenge die result
+	 * @returns {Object} Modified challenge dice results
+	 */
+	_applyAdvantageLevelToChallengeDice(advantageLevel, challengeDiceOne, challengeDiceTwo) {
+		let diceOne = challengeDiceOne;
+		let diceTwo = challengeDiceTwo;
+		let remainingPoints = Math.abs(advantageLevel);
+
+		if (advantageLevel === 0) {
+			return { diceOne, diceTwo };
+		}
+
+		if (advantageLevel > 0) {
+			// NV positivo: reduzir o maior dado até 0, depois o outro
+			while (remainingPoints > 0) {
+				const highest = Math.max(diceOne, diceTwo);
+				const lowest = Math.min(diceOne, diceTwo);
+
+				if (highest <= 0 && lowest <= 0) {
+					// Ambos já estão no mínimo, ignorar pontos restantes
+					break;
+				}
+
+				if (highest > 0) {
+					const reduction = Math.min(remainingPoints, highest);
+					if (diceOne === highest) {
+						diceOne = Math.max(0, diceOne - reduction);
+					} else {
+						diceTwo = Math.max(0, diceTwo - reduction);
+					}
+					remainingPoints -= reduction;
+				} else if (lowest > 0) {
+					// Se o maior já está em 0, reduzir o menor
+					const reduction = Math.min(remainingPoints, lowest);
+					if (diceOne === lowest) {
+						diceOne = Math.max(0, diceOne - reduction);
+					} else {
+						diceTwo = Math.max(0, diceTwo - reduction);
+					}
+					remainingPoints -= reduction;
+				}
+			}
+		} else {
+			// NV negativo: aumentar o menor dado até 10, depois o outro
+			while (remainingPoints > 0) {
+				const highest = Math.max(diceOne, diceTwo);
+				const lowest = Math.min(diceOne, diceTwo);
+
+				if (highest >= 10 && lowest >= 10) {
+					// Ambos já estão no máximo, ignorar pontos restantes
+					break;
+				}
+
+				if (lowest < 10) {
+					const increase = Math.min(remainingPoints, 10 - lowest);
+					if (diceOne === lowest) {
+						diceOne = Math.min(10, diceOne + increase);
+					} else {
+						diceTwo = Math.min(10, diceTwo + increase);
+					}
+					remainingPoints -= increase;
+				} else if (highest < 10) {
+					// Se o menor já está em 10, aumentar o maior
+					const increase = Math.min(remainingPoints, 10 - highest);
+					if (diceOne === highest) {
+						diceOne = Math.min(10, diceOne + increase);
+					} else {
+						diceTwo = Math.min(10, diceTwo + increase);
+					}
+					remainingPoints -= increase;
+				}
+			}
+		}
+
+		return { diceOne, diceTwo };
+	}
+
 	async moveRoll(params) {
-		const { mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
+		const { advantageLevel, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
 		if (isUpdate && rerollMode == "adjustment") {
 			const label = this._getMoveLabelRollTemplate({
 				move: this,
-				mode,
+				advantageLevel,
 				attribute,
 				rollModifier,
 				actionDiceRoll: oldMessageRolls.actionDiceResult,
@@ -179,12 +260,8 @@ export class BoilerplateItem extends Item {
 			}
 		}
 
-		// const speaker = ChatMessage.getSpeaker({ actor: this.actor });
-		// const rollMode = game.settings.get("core", "rollMode");
-
 		const rollData = this.getRollData();
 		const actor = this.actor
-
 
 		const actionDiceRoll = new Roll(
 			`1d6 + @${attribute} ${attributeModifier ? "+" + attributeModifier : ""} ${rollModifier ? "+" + rollModifier : ""}`
@@ -192,30 +269,9 @@ export class BoilerplateItem extends Item {
 			rollData
 		);
 
-		let challengeDiceOneRoll
-		let challengeDiceTwoRoll
-		if (mode === "+advantage") {
-			challengeDiceOneRoll = new Roll("3d10kl1")
-			challengeDiceTwoRoll = new Roll("3d10kl1")
-		}
-		if (mode === "advantage") {
-			challengeDiceOneRoll = new Roll("2d10kl1")
-			challengeDiceTwoRoll = new Roll("2d10kl1")
-		}
-		if (mode === "normal") {
-			challengeDiceOneRoll = new Roll("1d10")
-			challengeDiceTwoRoll = new Roll("1d10")
-
-		}
-		if (mode === "disadvantage") {
-			challengeDiceOneRoll = new Roll("2d10kh1")
-			challengeDiceTwoRoll = new Roll("2d10kh1")
-
-		}
-		if (mode === "+disadvantage") {
-			challengeDiceOneRoll = new Roll("3d10kh1")
-			challengeDiceTwoRoll = new Roll("3d10kh1")
-		}
+		// Sempre rolar 1d10 para ambos os dados de desafio
+		let challengeDiceOneRoll = new Roll("1d10");
+		let challengeDiceTwoRoll = new Roll("1d10");
 
 		if ((rerollMode == "momentum")) {
 			const momentumValue = actor.system.momentum.actual
@@ -237,9 +293,21 @@ export class BoilerplateItem extends Item {
 			await challengeDiceTwoRoll.evaluate({ async: true })
 		}
 
+		// Aplicar modificações de NV aos dados de desafio
+		const nvValue = advantageLevel || 0;
+		const modifiedDice = this._applyAdvantageLevelToChallengeDice(
+			nvValue,
+			challengeDiceOneRoll.total,
+			challengeDiceTwoRoll.total
+		);
+
+		// Atualizar os totais dos dados de desafio
+		challengeDiceOneRoll._total = modifiedDice.diceOne;
+		challengeDiceTwoRoll._total = modifiedDice.diceTwo;
+
 		const label = this._getMoveLabelRollTemplate({
 			move: this,
-			mode,
+			advantageLevel: nvValue,
 			attribute,
 			rollModifier,
 			actionDiceRoll: actionDiceRoll.total,
@@ -524,7 +592,7 @@ export class BoilerplateItem extends Item {
 		this.system.rank = rank;
 	}
 
-	_getMoveLabelRollTemplate({ move, mode, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, newModifiers }) {
+	_getMoveLabelRollTemplate({ move, advantageLevel, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, newModifiers }) {
 		let successCount = 0
 		let match = false
 		let resultType = ""
@@ -561,27 +629,11 @@ export class BoilerplateItem extends Item {
 			resultType = "miss"
 		}
 
-		let modeText;
-		switch (mode) {
-			case "+advantage":
-				modeText = "Rolagem com Grande vantagem!";
-				break;
-			case "+disadvantage":
-				modeText = "Rolagem com grande desvantagem!";
-				break;
-			case "advantage":
-				modeText = "Rolagem com vantagem";
-				break;
-			case "disadvantage":
-				modeText = "Rolagem com desvantagem";
-				break;
-			case "normal":
-				modeText = "Rolagem normal";
-				break;
-
-			default:
-				modeText = undefined;
-				break;
+		// Mostrar NV aplicado se diferente de 0
+		let nvText = "";
+		if (advantageLevel !== undefined && advantageLevel !== 0) {
+			const nvSign = advantageLevel > 0 ? "+" : "";
+			nvText = `NV: ${nvSign}${advantageLevel}`;
 		}
 
 		let attributeText
@@ -639,7 +691,7 @@ export class BoilerplateItem extends Item {
 		const challengeDiceAModifiersDesc = newModifiers?.challengeDiceAModifier ? ` ${parseInt(newModifiers?.challengeDiceAModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.challengeDiceAModifier) != 0 ? parseInt(newModifiers?.challengeDiceAModifier) : ""}` : ""
 		const challengeDiceBModifiersDesc = newModifiers?.challengeDiceBModifier ? ` ${parseInt(newModifiers?.challengeDiceBModifier) > 0 ? "+" : ""} ${parseInt(newModifiers?.challengeDiceBModifier) != 0 ? parseInt(newModifiers?.challengeDiceBModifier) : ""}` : ""
 		const label = `
-    <div class="rollCard" data-actor="${this.actor.id}" data-item="${this.id}" data-mode="${mode}" data-attribute="${attribute}" data-roll-modifier="${rollModifier}">
+    <div class="rollCard" data-actor="${this.actor.id}" data-item="${this.id}" data-advantage-level="${advantageLevel || 0}" data-attribute="${attribute}" data-roll-modifier="${rollModifier}">
 		<details class="moveDescriptionArea">
 			<summary class="rollCardTitle collapsible-trigger">
 				<a>Movimento: ${move.name}</a>
@@ -652,7 +704,7 @@ export class BoilerplateItem extends Item {
 		</details>
 		<div class="moveDetailsArea">
 			${attributeText ? `<i>Atributo escolhido: ${attributeText}</i>` : ""}
-			${modeText ? `<i>${modeText}</i>` : ""}
+			${nvText ? `<i>${nvText}</i>` : ""}
 		</div>
     <div class="rolls">
 			<div class="actionDiceDisplayPart rollDisplayPart">
