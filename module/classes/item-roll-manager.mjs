@@ -181,6 +181,7 @@ export class ItemRollManager {
 
     //Lidar com a existência de configurações específicas para este movimento, vinda de condições
     let attributeModifier = 0;
+    let attributeNV = 0; // NV adicional do atributo das condições
     const parentConditions = item.parent.items.filter(
       (conditionItem) => conditionItem.type === "condition"
     );
@@ -188,6 +189,13 @@ export class ItemRollManager {
       (condition) => condition.system.isActive
     );
     for (const activeCondition of activeConditions) {
+      // Coletar modificadores de atributo gerais
+      const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
+      if (nvValue !== undefined && nvValue !== null) {
+        attributeNV += parseInt(nvValue) || 0;
+      }
+
+      // Coletar modificadores específicos de movimento
       if (activeCondition.system?.movesConfigs) {
         Object.values(activeCondition.system.movesConfigs).forEach(
           (moveConfig) => {
@@ -238,7 +246,8 @@ export class ItemRollManager {
     const originalChallengeDiceTwo = challengeDiceTwoRoll.total;
 
     // Aplicar modificações de NV aos dados de desafio
-    const nvValue = advantageLevel || 0;
+    // Somar o NV base com o NV adicional do atributo das condições
+    const nvValue = (advantageLevel || 0) + attributeNV;
     const modifiedDice = ItemRollManager.applyAdvantageLevelToChallengeDice(
       nvValue,
       originalChallengeDiceOne,

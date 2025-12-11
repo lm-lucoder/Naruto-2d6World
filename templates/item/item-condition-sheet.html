@@ -29,7 +29,16 @@
             {{#each system.attributes as |attribute|}}
                 <li class="resource conditions-attributes-card">
                     <label class="resource-label">{{attribute.name}}</label>
-                    <input type="number" name="system.attributes.{{attribute.ref}}.mod" value="{{attribute.mod}}" data-dtype="String"/>
+                    <div class="attribute-inputs">
+                        <div class="input-group">
+                            <label>Mod:</label>
+                            <input type="number" name="system.attributes.{{attribute.ref}}.mod" value="{{attribute.mod}}" data-dtype="String"/>
+                        </div>
+                        <div class="input-group">
+                            <label>NV:</label>
+                            <input type="number" name="system.attributes.{{attribute.ref}}.nv" value="{{attribute.nv}}" data-dtype="Number" placeholder="0"/>
+                        </div>
+                    </div>
                 </li>
             {{/each}}
         </ul>

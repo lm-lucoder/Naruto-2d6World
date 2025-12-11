@@ -94,6 +94,17 @@ class RollMoveDialog extends Dialog {
 			this._newAdvantageLevel--
 			this.updateNVPanel(ev)
 		})
+
+		// Listener para quando o atributo é selecionado
+		html.find('input[name="option"]').on("change", (ev) => {
+			this.updateNVPanel(ev)
+		})
+
+		// Atualizar o painel inicialmente se houver um atributo pré-selecionado
+		const checkedOption = html.find('input[name="option"]:checked');
+		if (checkedOption.length > 0) {
+			this.updateNVPanel({ target: checkedOption[0] })
+		}
 	}
 
 	rollDefault(e) {
@@ -111,6 +122,8 @@ class RollMoveDialog extends Dialog {
 			.querySelector('.modifier-input')
 			.value
 
+		// Passar apenas o NV base + ajustes manuais
+		// O ItemRollManager vai somar automaticamente o NV das condições ativas para o atributo escolhido
 		const advantageLevel = this._advantageLevel.value + this._newAdvantageLevel
 
 		this._currentItem.moveRoll({
@@ -122,24 +135,79 @@ class RollMoveDialog extends Dialog {
 		this.close();
 	}
 
-	updateNVPanel(e) {
-		const factor = this._advantageLevel.value + this._newAdvantageLevel
-		const panel = e.target.closest('.dialog-content').querySelector('.panel')
-		panel.querySelector('.nv').innerText = RollMoveDialog._getAdvantageLevelText(factor)
-		panel.classList.remove(...["real-bad", "bad", "neutral", "good", "really-good"])
-		const newClass = RollMoveDialog._getAdvantageLevelClass(factor)
-		panel.classList.add(newClass)
+	/**
+	 * Calcula o NV adicional das condições ativas para um atributo específico
+	 * @param {string} attribute - O atributo a ser verificado
+	 * @returns {number} O NV adicional das condições
+	 */
+	_getConditionNV(attribute) {
+		if (!this._currentItem?.parent) return 0;
 
-		const changingSpan = panel.querySelector('.changing')
-		let newText = ""
-		if (this._newAdvantageLevel > 0) {
-			newText = ` + ${this._newAdvantageLevel} NV`
-		} else if (this._newAdvantageLevel < 0) {
-			newText = ` - ${this._newAdvantageLevel.toString().replace("-", "")} NV`
+		let attributeNV = 0;
+		const parentConditions = this._currentItem.parent.items.filter(
+			(conditionItem) => conditionItem.type === "condition"
+		);
+		const activeConditions = parentConditions.filter(
+			(condition) => condition.system.isActive
+		);
+
+		for (const activeCondition of activeConditions) {
+			const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
+			if (nvValue !== undefined && nvValue !== null) {
+				attributeNV += parseInt(nvValue) || 0;
+			}
 		}
-		changingSpan.innerText = newText
 
+		return attributeNV;
+	}
 
+	/**
+	 * Obtém o atributo atualmente selecionado
+	 * @param {HTMLElement} target - Elemento que disparou o evento
+	 * @returns {string|null} O atributo selecionado ou null
+	 */
+	_getSelectedAttribute(target) {
+		const windowContent = target.closest('.window-content') || target.closest('.dialog-content');
+		if (!windowContent) return null;
+
+		const checkedOption = windowContent.querySelector('input[name="option"]:checked');
+		return checkedOption ? checkedOption.value : null;
+	}
+
+	updateNVPanel(e) {
+		const selectedAttribute = this._getSelectedAttribute(e.target);
+		const conditionNV = selectedAttribute ? this._getConditionNV(selectedAttribute) : 0;
+		const baseNV = this._advantageLevel.value;
+		const manualAdjustment = this._newAdvantageLevel;
+		const totalNV = baseNV + conditionNV + manualAdjustment;
+
+		const panel = e.target.closest('.dialog-content')?.querySelector('.panel') ||
+			e.target.closest('.window-content')?.querySelector('.panel');
+		if (!panel) return;
+
+		panel.querySelector('.nv').innerText = RollMoveDialog._getAdvantageLevelText(totalNV);
+		panel.classList.remove(...["real-bad", "bad", "neutral", "good", "really-good"]);
+		const newClass = RollMoveDialog._getAdvantageLevelClass(totalNV);
+		panel.classList.add(newClass);
+
+		const actualSpan = panel.querySelector('.actual');
+		const changingSpan = panel.querySelector('.changing');
+
+		// Mostrar o NV base
+		actualSpan.innerText = `${baseNV} NV`;
+
+		// Mostrar ajustes manuais e NV das condições
+		let changingText = "";
+		if (conditionNV !== 0) {
+			changingText += conditionNV > 0 ? ` +${conditionNV}` : ` ${conditionNV}`;
+			changingText += " (condições)";
+		}
+		if (manualAdjustment !== 0) {
+			if (changingText) changingText += " | ";
+			changingText += manualAdjustment > 0 ? ` +${manualAdjustment}` : ` ${manualAdjustment}`;
+			changingText += " (manual)";
+		}
+		changingSpan.innerText = changingText;
 	}
 
 	static _getAdvantageLevelClass(paramValue) {

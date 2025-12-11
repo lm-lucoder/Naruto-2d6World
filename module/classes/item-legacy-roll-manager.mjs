@@ -98,8 +98,27 @@ export class ItemLegacyRollManager {
 	static async moveRoll(item, params) {
 		const { advantageLevel, mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
 		
+		// Coletar NV adicional do atributo das condições (antes de calcular o modo)
+		let attributeNV = 0;
+		if (item.parent) {
+			const parentConditions = item.parent.items.filter(
+				(conditionItem) => conditionItem.type === "condition"
+			);
+			const activeConditions = parentConditions.filter(
+				(condition) => condition.system.isActive
+			);
+			for (const activeCondition of activeConditions) {
+				const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
+				if (nvValue !== undefined && nvValue !== null) {
+					attributeNV += parseInt(nvValue) || 0;
+				}
+			}
+		}
+		
 		// Calculate mode from advantage level if not provided (for rerolls, mode is passed directly)
-		const calculatedMode = mode || ItemLegacyRollManager.calculateModeByValue(advantageLevel || 0);
+		// Somar o NV adicional das condições ao advantageLevel antes de calcular o modo
+		const totalAdvantageLevel = (advantageLevel || 0) + attributeNV;
+		const calculatedMode = mode || ItemLegacyRollManager.calculateModeByValue(totalAdvantageLevel);
 		
 		if (isUpdate && rerollMode == "adjustment") {
 			const label = ItemLegacyRollManager.getMoveLabelRollTemplate({
@@ -120,22 +139,26 @@ export class ItemLegacyRollManager {
 		
 		//Lidar com a existência de configurações específicas para este movimento, vinda de condições
 		let attributeModifier = 0;
-		const parentConditions = item.parent.items.filter(
-			(conditionItem) => conditionItem.type === "condition"
-		);
-		const activeConditions = parentConditions.filter(
-			(condition) => condition.system.isActive
-		);
-		for (const activeCondition of activeConditions) {
-			if (activeCondition.system?.movesConfigs) {
-				Object.values(activeCondition.system.movesConfigs).forEach(
-					(moveConfig) => {
-						if (moveConfig.moveName === item.name) {
-							attributeModifier +=
-								moveConfig.attributes[attribute].value;
+		// Reutilizar as condições já coletadas anteriormente
+		if (item.parent) {
+			const parentConditions = item.parent.items.filter(
+				(conditionItem) => conditionItem.type === "condition"
+			);
+			const activeConditions = parentConditions.filter(
+				(condition) => condition.system.isActive
+			);
+			for (const activeCondition of activeConditions) {
+				// Coletar modificadores específicos de movimento
+				if (activeCondition.system?.movesConfigs) {
+					Object.values(activeCondition.system.movesConfigs).forEach(
+						(moveConfig) => {
+							if (moveConfig.moveName === item.name) {
+								attributeModifier +=
+									moveConfig.attributes[attribute].value;
+							}
 						}
-					}
-				);
+					);
+				}
 			}
 		}
 

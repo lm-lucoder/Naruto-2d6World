@@ -158,26 +158,31 @@
 			"attributes": {
 				"bod": {
 					"mod": 0,
+					"nv": 0,
 					"name": "Físico",
 					"ref": "bod"
 				},
 				"agl": {
 					"mod": 0,
+					"nv": 0,
 					"name": "Agilidade",
 					"ref": "agl"
 				},
 				"hrt": {
 					"mod": 0,
+					"nv": 0,
 					"name": "Coração",
 					"ref": "hrt"
 				},
 				"shd": {
 					"mod": 0,
+					"nv": 0,
 					"name": "Sombra",
 					"ref": "shd"
 				},
 				"cun": {
 					"mod": 0,
+					"nv": 0,
 					"name": "Astúcia",
 					"ref": "cun"
 				}
