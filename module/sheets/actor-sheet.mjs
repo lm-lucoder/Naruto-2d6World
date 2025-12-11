@@ -138,6 +138,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 			else if (item.type === "skill") {
 				skills.push(item);
 			} else if (item.type === "condition") {
+				// Preparar dados da condição com modificadores e NVs
+				this._prepareConditionData(item);
 				conditions.push(item);
 			} else if (item.type === "ability") {
 				if (abilitiesByCategory[item.system.category]) {
@@ -179,6 +181,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		for (let item of context.items) {
 			item.img = item.img || DEFAULT_TOKEN;
 			if (item.type === "condition") {
+				// Preparar dados da condição com modificadores e NVs
+				this._prepareConditionData(item);
 				conditions.push(item);
 			}
 			if (item.type === "move") {
@@ -750,6 +754,37 @@ export class BoilerplateActorSheet extends ActorSheet {
 		return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 	}
 
+	/**
+	 * Prepara os dados da condição para exibição, extraindo apenas atributos com modificadores ou NVs
+	 * @param {Object} condition - A condição a ser preparada
+	 */
+	_prepareConditionData(condition) {
+		const attributeNames = {
+			bod: "Fís",
+			agl: "Agl",
+			hrt: "Cor",
+			shd: "Som",
+			cun: "Ast"
+		};
+
+		condition.effects = [];
+
+		if (condition.system?.attributes) {
+			for (const [attrKey, attrData] of Object.entries(condition.system.attributes)) {
+				const mod = parseInt(attrData.mod) || 0;
+				const nv = parseInt(attrData.nv) || 0;
+
+				// Só adiciona se tiver mod ou nv diferente de zero
+				if (mod !== 0 || nv !== 0) {
+					condition.effects.push({
+						name: attributeNames[attrKey] || attrKey,
+						mod: mod !== 0 ? mod : null, // null para não mostrar no template
+						nv: nv !== 0 ? nv : null
+					});
+				}
+			}
+		}
+	}
 
 }
 

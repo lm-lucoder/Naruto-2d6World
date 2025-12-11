@@ -104,7 +104,20 @@
                 <ul class="conditions-list">
                     {{#each conditions as |condition|}}
                         <li class="condition-card item" data-item-id="{{condition._id}}">
-                            <span class="title">{{condition.name}}</span>
+                            <div class="condition-info">
+                                <span class="title">{{condition.name}}</span>
+                                {{#if condition.effects}}
+                                <div class="condition-effects">
+                                    {{#each condition.effects as |effect|}}
+                                        <span class="effect-tag">
+                                            {{effect.name}}:
+                                            {{#if effect.mod}}<span class="mod-value">{{#if (greaterThan effect.mod 0)}}+{{/if}}{{effect.mod}}</span>{{/if}}
+                                            {{#if effect.nv}}<span class="nv-value">{{#if (greaterThan effect.nv 0)}}+{{/if}}{{effect.nv}}NV</span>{{/if}}
+                                        </span>
+                                    {{/each}}
+                                </div>
+                                {{/if}}
+                            </div>
                             <div class="controls">
                                 <a class="item-edit rollable" data-roll-type="item"><i class="fa-solid fa-comment"></i></a>
                                 <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>

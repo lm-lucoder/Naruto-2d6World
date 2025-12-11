@@ -265,12 +265,41 @@
 					padding: 0;
 					margin: 0;
 					.condition-card {
-						padding: 0;
+						padding: 4px 0;
 						margin: 0;
 						display: flex;
 						align-items: center;
 						justify-content: space-between;
 						border-bottom: 1px solid $c-beige;
+						.condition-info {
+							display: flex;
+							flex-direction: column;
+							gap: 2px;
+							flex: 1;
+							.title {
+								font-weight: 500;
+							}
+							.condition-effects {
+								display: flex;
+								flex-wrap: wrap;
+								gap: 4px;
+								font-size: 11px;
+								opacity: 0.8;
+								.effect-tag {
+									display: inline-flex;
+									align-items: center;
+									gap: 2px;
+									.mod-value {
+										color: #4a90e2;
+										font-weight: 500;
+									}
+									.nv-value {
+										color: #7b68ee;
+										font-weight: 500;
+									}
+								}
+							}
+						}
 						.controls{
 							display: flex;
 							align-items: center;
