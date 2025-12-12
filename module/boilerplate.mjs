@@ -75,6 +75,12 @@ Handlebars.registerHelper('multiplyWithTwoDecimalsMax', function (a, b) {
   const roundedResult = Math.round(result * 100) / 100;
   return roundedResult
 });
+Handlebars.registerHelper('formatTwoDecimals', function (value) {
+  if (value === null || value === undefined || isNaN(value)) return value;
+  const numValue = parseFloat(value);
+  const roundedResult = Math.round(numValue * 100) / 100;
+  return roundedResult;
+});
 Handlebars.registerHelper('toLowerCase', function (str) {
   return str.toLowerCase();
 });

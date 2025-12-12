@@ -218,36 +218,66 @@ export class BoilerplateItemSheet extends ItemSheet {
 			system: { movesConfigs: { ...movesConfigsObj } },
 		});
 	}
-	_onDrop(e) {
+	async _onDrop(e) {
 		const data = TextEditor.getDragEventData(e);
 		if (data.type == "Item") {
-			const item = Item.get(data.uuid.split('.')[1])
+			// Usar fromDropData para funcionar tanto com world items quanto owned items
+			const item = await Item.fromDropData(data);
+			if (!item) return;
 
 			if (item.type === "item") {
-				if (e.target.closest(".scroll-items-list")) {
-					this.ScrollAPI.add(item, this.object)
+				const scrollList = e.target?.closest?.(".scroll-items-list");
+				if (scrollList) {
+					// Prevenir o comportamento padrão do drop
+					e.preventDefault();
+					e.stopPropagation();
+					// Adicionar ao scroll (isso vai remover do ator se necessário)
+					await this.ScrollAPI.add(item, this.object);
+					return false;
 				}
 			}
-			//console.log(e, data, item)
 		}
 	}
 	ScrollAPI = ScrollAPI
 }
 
 class ScrollAPI {
-	static add(item, scroll) {
+	static async add(item, scroll) {
 		console.log(scroll)
 		const scrollItems = scroll.system.scroll.scrollItems
+
+		// Se o item pertence a um ator, capturar a quantidade antes de processar
+		const itemParent = item.parent;
+		const isOwnedItem = itemParent && itemParent instanceof Actor;
+		const itemQuantity = isOwnedItem ? (item.system.quantity || 1) : 1;
+
 		const itemSlotsWeight = item.system.slots;
-		const canAdd = (scroll.system.scroll.scrollUsedSlots + itemSlotsWeight) <= scroll.system.scroll.scrollMaxSlots
+		const totalSlotsNeeded = itemSlotsWeight * itemQuantity;
+		const canAdd = (scroll.system.scroll.scrollUsedSlots + totalSlotsNeeded) <= scroll.system.scroll.scrollMaxSlots
 		if (!canAdd) return ui.notifications.info(`Não é possível adicionar! Isso iria extrapolar o limite de espaço do pergaminho`);
-		const itemAlreadyExists = scrollItems.find(scrollItem => scrollItem.id == item.id)
+
+		let itemToUse = item;
+
+		if (isOwnedItem) {
+			// Criar uma cópia do item como world item
+			const itemData = item.toObject();
+			// Remover o _id para criar um novo item
+			delete itemData._id;
+			// Criar o item como world item (sem parent)
+			const worldItem = await Item.create(itemData);
+			itemToUse = worldItem;
+
+			// Remover o item owned do ator
+			await item.delete();
+		}
+
+		const itemAlreadyExists = scrollItems.find(scrollItem => scrollItem.id == itemToUse.id)
 		if (itemAlreadyExists) {
-			itemAlreadyExists.quantity += 1
+			itemAlreadyExists.quantity += itemQuantity
 		} else {
 			scrollItems.push({
-				quantity: 1,
-				id: item.id
+				quantity: itemQuantity,
+				id: itemToUse.id
 			})
 		}
 		scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } })

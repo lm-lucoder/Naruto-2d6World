@@ -39,12 +39,49 @@ export class BoilerplateActorSheet extends ActorSheet {
 		return `systems/naruto2d6world/templates/actor/actor-${this.actor.type}-sheet.html`;
 	}
 	_onDropItem(e, data) {
+		// Verificar se o drop está acontecendo em uma região de scroll do item-sheet
+		// Se sim, não processar aqui (deixar o item-sheet tratar)
+		const scrollList = e.target?.closest?.(".scroll-items-list");
+		if (scrollList) {
+			// Verificar se está em uma janela de item-sheet (não no próprio actor-sheet)
+			const itemSheet = scrollList.closest(".item-sheet");
+			if (itemSheet) {
+				return false; // Deixar o item-sheet processar
+			}
+		}
+
+		// Verificar se o drop está na região de scroll dentro da descrição do item no actor-sheet
+		const itemScrollList = e.target?.closest?.(".item-scroll-items-list");
+		if (itemScrollList) {
+			// Esta é a região de scroll dentro da descrição do item no actor-sheet
+			// Não processar aqui
+			return false;
+		}
+
 		if (data.type === "Item" && e.ctrlKey) {
 			const itemId = data.uuid.split(".")[1]
 			const itemName = Item.get(itemId).name
 			const actorItem = this.object.items.find(item => item.name == itemName)
 			if (actorItem) {
 				return actorItem.updateQuantity(1)
+			}
+		}
+
+		// Verificar se o item já pertence ao ator e se o data não tem id
+		// Isso acontece quando arrasta um item que já pertence ao ator
+		// e o FoundryVTT tenta fazer um sort, mas o data não tem a estrutura correta
+		if (data.type === "Item" && !data.id) {
+			const itemId = data.uuid?.split(".")[1];
+			if (itemId) {
+				const item = Item.get(itemId);
+				// Se o item já pertence ao ator e não está sendo arrastado para scroll, não fazer sort (vai dar erro)
+				if (item && item.parent === this.actor) {
+					// Verificar novamente se não está em uma região de scroll
+					const isInScroll = e.target?.closest?.(".scroll-items-list") || e.target?.closest?.(".item-scroll-items-list");
+					if (!isInScroll) {
+						return false;
+					}
+				}
 			}
 		}
 
