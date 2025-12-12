@@ -343,16 +343,6 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find(".show-move-description-window-btn").click((event) => {
 			this._toggleMoveDescriptionWindow(event);
 		});
-
-		/* html.find(".item-on-hand-btn").click((event) => {
-			const itemId = event.target.closest("li").getAttribute("data-item-id");
-			const item = this.object.items.get(itemId)
-			if (item.system.onHand) {
-				this.object.items.get(itemId).update({ system: { onHand: false } })
-			} else {
-				this.object.items.get(itemId).update({ system: { onHand: true } })
-			}
-		}) */
 		html.find(".item-quantity-manage-btn").click((event) => {
 			const itemId = event.target.closest("li").getAttribute("data-item-id");
 			const item = this.object.items.get(itemId);
