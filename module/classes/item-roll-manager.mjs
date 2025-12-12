@@ -189,7 +189,13 @@ export class ItemRollManager {
       (condition) => condition.system.isActive
     );
     for (const activeCondition of activeConditions) {
-      // Coletar modificadores de atributo gerais
+      // Coletar NV global (aplica a todos os atributos)
+      const globalNV = parseInt(activeCondition.system?.globalNV) || 0;
+      if (globalNV !== 0) {
+        attributeNV += globalNV;
+      }
+
+      // Coletar modificadores de atributo específicos
       const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
       if (nvValue !== undefined && nvValue !== null) {
         attributeNV += parseInt(nvValue) || 0;

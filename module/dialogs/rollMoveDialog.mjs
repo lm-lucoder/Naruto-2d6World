@@ -100,10 +100,17 @@ class RollMoveDialog extends Dialog {
 			this.updateNVPanel(ev)
 		})
 
-		// Atualizar o painel inicialmente se houver um atributo pré-selecionado
-		const checkedOption = html.find('input[name="option"]:checked');
-		if (checkedOption.length > 0) {
-			this.updateNVPanel({ target: checkedOption[0] })
+		// Atualizar o painel inicialmente (mostra valores globais mesmo sem atributo selecionado)
+		// Se houver atributo pré-selecionado, também mostra os valores específicos
+		const panel = html.find('.panel')[0];
+		if (panel) {
+			const checkedOption = html.find('input[name="option"]:checked');
+			if (checkedOption.length > 0) {
+				this.updateNVPanel({ target: checkedOption[0] })
+			} else {
+				// Atualizar sem atributo selecionado para mostrar apenas valores globais
+				this.updateNVPanel({ target: panel })
+			}
 		}
 	}
 
@@ -136,14 +143,14 @@ class RollMoveDialog extends Dialog {
 	}
 
 	/**
-	 * Calcula o NV adicional das condições ativas para um atributo específico
-	 * @param {string} attribute - O atributo a ser verificado
-	 * @returns {number} O NV adicional das condições
+	 * Obtém informações de NV de todas as condições ativas, agrupadas por condição
+	 * @param {string|null} attribute - O atributo selecionado (null se nenhum)
+	 * @returns {Array} Array de objetos com {name, totalNV} para cada condição
 	 */
-	_getConditionNV(attribute) {
-		if (!this._currentItem?.parent) return 0;
+	_getConditionsNVInfo(attribute) {
+		if (!this._currentItem?.parent) return [];
 
-		let attributeNV = 0;
+		const conditionsInfo = [];
 		const parentConditions = this._currentItem.parent.items.filter(
 			(conditionItem) => conditionItem.type === "condition"
 		);
@@ -152,13 +159,29 @@ class RollMoveDialog extends Dialog {
 		);
 
 		for (const activeCondition of activeConditions) {
-			const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
-			if (nvValue !== undefined && nvValue !== null) {
-				attributeNV += parseInt(nvValue) || 0;
+			// Coletar NV global
+			const globalNV = parseInt(activeCondition.system?.globalNV) || 0;
+
+			// Coletar NV específico do atributo (se houver atributo selecionado)
+			let attributeNV = 0;
+			if (attribute) {
+				const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
+				if (nvValue !== undefined && nvValue !== null) {
+					attributeNV = parseInt(nvValue) || 0;
+				}
+			}
+
+			// Só adiciona se houver algum NV (global ou específico)
+			const totalNV = globalNV + attributeNV;
+			if (totalNV !== 0) {
+				conditionsInfo.push({
+					name: activeCondition.name,
+					totalNV: totalNV
+				});
 			}
 		}
 
-		return attributeNV;
+		return conditionsInfo;
 	}
 
 	/**
@@ -176,10 +199,17 @@ class RollMoveDialog extends Dialog {
 
 	updateNVPanel(e) {
 		const selectedAttribute = this._getSelectedAttribute(e.target);
-		const conditionNV = selectedAttribute ? this._getConditionNV(selectedAttribute) : 0;
 		const baseNV = this._advantageLevel.value;
 		const manualAdjustment = this._newAdvantageLevel;
-		const totalNV = baseNV + conditionNV + manualAdjustment;
+
+		// Obter informações de NV de todas as condições (global + específico do atributo somados por condição)
+		const conditionsInfo = this._getConditionsNVInfo(selectedAttribute);
+
+		// Calcular NV total das condições
+		const totalConditionNV = conditionsInfo.reduce((sum, condition) => sum + condition.totalNV, 0);
+
+		// Calcular NV total final
+		const totalNV = baseNV + totalConditionNV + manualAdjustment;
 
 		const panel = e.target.closest('.dialog-content')?.querySelector('.panel') ||
 			e.target.closest('.window-content')?.querySelector('.panel');
@@ -196,17 +226,23 @@ class RollMoveDialog extends Dialog {
 		// Mostrar o NV base
 		actualSpan.innerText = `${baseNV} NV`;
 
-		// Mostrar ajustes manuais e NV das condições
+		// Mostrar cada condição com seu total (global + específico somados)
 		let changingText = "";
-		if (conditionNV !== 0) {
-			changingText += conditionNV > 0 ? ` +${conditionNV}` : ` ${conditionNV}`;
-			changingText += " (condições)";
-		}
+
+		// Mostrar cada condição
+		conditionsInfo.forEach((condition, index) => {
+			if (index > 0) changingText += " | ";
+			changingText += condition.totalNV > 0 ? ` +${condition.totalNV}` : ` ${condition.totalNV}`;
+			changingText += ` (${condition.name})`;
+		});
+
+		// Mostrar ajustes manuais
 		if (manualAdjustment !== 0) {
 			if (changingText) changingText += " | ";
 			changingText += manualAdjustment > 0 ? ` +${manualAdjustment}` : ` ${manualAdjustment}`;
 			changingText += " (manual)";
 		}
+
 		changingSpan.innerText = changingText;
 	}
 

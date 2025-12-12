@@ -155,6 +155,8 @@
 		"condition": {
 			"templates": ["base"],
 			"isActive": false,
+			"globalMod": 0,
+			"globalNV": 0,
 			"attributes": {
 				"bod": {
 					"mod": 0,

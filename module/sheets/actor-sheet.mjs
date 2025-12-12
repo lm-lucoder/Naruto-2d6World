@@ -769,6 +769,20 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 		condition.effects = [];
 
+		// Adicionar valores globais se existirem
+		const globalMod = parseInt(condition.system?.globalMod) || 0;
+		const globalNV = parseInt(condition.system?.globalNV) || 0;
+
+		if (globalMod !== 0 || globalNV !== 0) {
+			condition.effects.push({
+				name: "Global",
+				mod: globalMod !== 0 ? globalMod : null,
+				nv: globalNV !== 0 ? globalNV : null,
+				isGlobal: true
+			});
+		}
+
+		// Adicionar valores específicos por atributo
 		if (condition.system?.attributes) {
 			for (const [attrKey, attrData] of Object.entries(condition.system.attributes)) {
 				const mod = parseInt(attrData.mod) || 0;

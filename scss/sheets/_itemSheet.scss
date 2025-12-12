@@ -30,6 +30,34 @@ header {
 	}
 }
 .item-condition-sheet{
+	.condition-global-modifiers {
+		margin-bottom: 15px;
+		padding-bottom: 15px;
+		border-bottom: 1px solid $c-beige;
+		h3 {
+			margin: 0 0 10px 0;
+			font-size: 14px;
+		}
+		.global-inputs {
+			display: flex;
+			gap: 15px;
+			.input-group {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				flex: 1;
+				label {
+					font-size: 12px;
+					font-weight: 500;
+				}
+				input {
+					padding: 5px;
+					border: 1px solid $c-beige;
+					border-radius: 3px;
+				}
+			}
+		}
+	}
 	.condition-attributes-list {
 		list-style: none;
 		display: flex;

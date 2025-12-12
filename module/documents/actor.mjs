@@ -96,6 +96,15 @@ export class BoilerplateActor extends Actor {
     }
     const conditions = this.items.filter(item => item.type === 'condition').filter(condition => condition.system.isActive)
     for (const condition of conditions) {
+      // Aplicar modificador global a todos os atributos
+      const globalMod = parseInt(condition.system.globalMod) || 0;
+      if (globalMod !== 0) {
+        for (const key of Object.keys(conditionMods)) {
+          conditionMods[key] += globalMod;
+        }
+      }
+      
+      // Aplicar modificadores específicos por atributo
       for (const [attributeName, attributeValue] of Object.entries(condition.system.attributes)) {
         // console.log(attributeName, attributeValue)
         conditionMods[attributeName] += +attributeValue.mod

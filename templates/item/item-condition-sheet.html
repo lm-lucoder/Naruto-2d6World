@@ -24,6 +24,20 @@
       {{!-- Attributes Tab --}}
       {{#unless limited}}
       <div class="tab attributes" data-group="primary" data-tab="attributes">
+        {{!-- Global modifiers --}}
+        <div class="condition-global-modifiers">
+          <h3>Modificadores Globais</h3>
+          <div class="global-inputs">
+            <div class="input-group">
+              <label>Modificador Global:</label>
+              <input type="number" name="system.globalMod" value="{{system.globalMod}}" data-dtype="Number" placeholder="0"/>
+            </div>
+            <div class="input-group">
+              <label>NV Global:</label>
+              <input type="number" name="system.globalNV" value="{{system.globalNV}}" data-dtype="Number" placeholder="0"/>
+            </div>
+          </div>
+        </div>
         {{!-- As you add new fields, add them in here! --}}
         <ul class="condition-attributes-list">
             {{#each system.attributes as |attribute|}}
