@@ -1,5 +1,6 @@
 import ManageAbilityChakraDialog from "../dialogs/manageAbilityChakraDialog.mjs";
 import ManageAbilityResourceDialog from "../dialogs/manageAbilityResourceDialog.mjs";
+import ManageItemQuantityDialog from "../dialogs/manageItemQuantityDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
 import {
 	onManageActiveEffect,
@@ -343,13 +344,20 @@ export class BoilerplateActorSheet extends ActorSheet {
 			this._toggleMoveDescriptionWindow(event);
 		});
 
-		html.find(".item-on-hand-btn").click((event) => {
+		/* html.find(".item-on-hand-btn").click((event) => {
 			const itemId = event.target.closest("li").getAttribute("data-item-id");
 			const item = this.object.items.get(itemId)
 			if (item.system.onHand) {
 				this.object.items.get(itemId).update({ system: { onHand: false } })
 			} else {
 				this.object.items.get(itemId).update({ system: { onHand: true } })
+			}
+		}) */
+		html.find(".item-quantity-manage-btn").click((event) => {
+			const itemId = event.target.closest("li").getAttribute("data-item-id");
+			const item = this.object.items.get(itemId);
+			if (item && item.type === "item") {
+				ManageItemQuantityDialog.create({ item: item });
 			}
 		})
 		html.find(".item-attribute-quantity").mousedown((e) => {
