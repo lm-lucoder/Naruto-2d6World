@@ -214,12 +214,27 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find(".item-create").click(this._onItemCreate.bind(this));
 
 		// Delete Inventory Item
-		html.find(".item-delete").click((ev) => {
+		html.find(".item-delete").click(async (ev) => {
 			const li = $(ev.currentTarget).parents(".item");
-			console.log(li.data("itemId"));
-			const item = this.actor.items.get(li.data("itemId"));
-			item.delete();
-			li.slideUp(200, () => this.render(false));
+			const itemId = li.data("itemId");
+			const item = this.actor.items.get(itemId);
+
+			if (!item) return;
+
+			if (ev.shiftKey) {
+				item.delete();
+				li.slideUp(200, () => this.render(false));
+				return;
+			}
+			await Dialog.confirm({
+				title: "Confirmar Exclusão",
+				content: `<p>Deseja realmente deletar <strong>${item.name}</strong>?</p>`,
+				yes: () => {
+					item.delete();
+					li.slideUp(200, () => this.render(false));
+				},
+				defaultYes: false
+			});
 		});
 
 		// Active Effect management
