@@ -129,12 +129,16 @@ class RollMoveDialog extends Dialog {
 			.querySelector('.modifier-input')
 			.value
 
-		// Passar apenas o NV base + ajustes manuais
+		// Passar NV base e ajuste manual separadamente
 		// O ItemRollManager vai somar automaticamente o NV das condições ativas para o atributo escolhido
-		const advantageLevel = this._advantageLevel.value + this._newAdvantageLevel
+		const baseAdvantageLevel = this._advantageLevel.value; // NV base do personagem
+		const manualAdjustment = this._newAdvantageLevel; // Ajuste manual do diálogo
+		const advantageLevel = baseAdvantageLevel + manualAdjustment; // Total para passar
 
 		this._currentItem.moveRoll({
 			advantageLevel,
+			baseAdvantageLevel, // NV base do personagem
+			manualAdjustment, // Ajuste manual do diálogo
 			attribute: chosenAttribute,
 			rollModifier
 		});

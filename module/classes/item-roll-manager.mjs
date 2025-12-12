@@ -158,12 +158,16 @@ export class ItemRollManager {
    * @param {Object} params - Roll parameters
    */
   static async moveRoll(item, params) {
-    const { advantageLevel, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
+    const { advantageLevel, baseAdvantageLevel, manualAdjustment, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
 
     if (isUpdate && rerollMode == "adjustment") {
+      // Para ajustes manuais, não recalcular condições - usar valores opcionais
       const label = ItemRollManager.getMoveLabelRollTemplate({
         move: item,
         advantageLevel,
+        baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : advantageLevel,
+        manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0,
+        conditionsNVInfo: [], // Não recalcular em ajustes
         attribute,
         rollModifier,
         actionDiceRoll: oldMessageRolls.actionDiceResult,
@@ -182,6 +186,8 @@ export class ItemRollManager {
     //Lidar com a existência de configurações específicas para este movimento, vinda de condições
     let attributeModifier = 0;
     let attributeNV = 0; // NV adicional do atributo das condições
+    const conditionsNVInfo = []; // Array para armazenar informações detalhadas das condições
+
     const parentConditions = item.parent.items.filter(
       (conditionItem) => conditionItem.type === "condition"
     );
@@ -191,14 +197,20 @@ export class ItemRollManager {
     for (const activeCondition of activeConditions) {
       // Coletar NV global (aplica a todos os atributos)
       const globalNV = parseInt(activeCondition.system?.globalNV) || 0;
-      if (globalNV !== 0) {
-        attributeNV += globalNV;
-      }
 
       // Coletar modificadores de atributo específicos
       const nvValue = activeCondition.system?.attributes?.[attribute]?.nv;
-      if (nvValue !== undefined && nvValue !== null) {
-        attributeNV += parseInt(nvValue) || 0;
+      const attributeSpecificNV = (nvValue !== undefined && nvValue !== null) ? parseInt(nvValue) || 0 : 0;
+
+      // Calcular total de NV desta condição (global + específico)
+      const conditionTotalNV = globalNV + attributeSpecificNV;
+
+      if (conditionTotalNV !== 0) {
+        attributeNV += conditionTotalNV;
+        conditionsNVInfo.push({
+          name: activeCondition.name,
+          totalNV: conditionTotalNV
+        });
       }
 
       // Coletar modificadores específicos de movimento
@@ -252,8 +264,12 @@ export class ItemRollManager {
     const originalChallengeDiceTwo = challengeDiceTwoRoll.total;
 
     // Aplicar modificações de NV aos dados de desafio
-    // Somar o NV base com o NV adicional do atributo das condições
-    const nvValue = (advantageLevel || 0) + attributeNV;
+    // advantageLevel já inclui base + manual do diálogo (se fornecido)
+    // Se baseAdvantageLevel e manualAdjustment foram fornecidos separadamente, calcular a partir deles
+    const baseAndManual = (baseAdvantageLevel !== undefined && manualAdjustment !== undefined)
+      ? (baseAdvantageLevel || 0) + (manualAdjustment || 0)
+      : (advantageLevel || 0);
+    const nvValue = baseAndManual + attributeNV;
     const modifiedDice = ItemRollManager.applyAdvantageLevelToChallengeDice(
       nvValue,
       originalChallengeDiceOne,
@@ -266,7 +282,10 @@ export class ItemRollManager {
 
     const label = ItemRollManager.getMoveLabelRollTemplate({
       move: item,
-      advantageLevel: nvValue,
+      advantageLevel: nvValue, // Total: base + manual + condições
+      baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : (advantageLevel || 0), // NV base do personagem
+      manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0, // Ajuste manual do diálogo
+      conditionsNVInfo: conditionsNVInfo, // Informações detalhadas das condições
       attribute,
       rollModifier,
       actionDiceRoll: actionDiceRoll.total,
@@ -477,7 +496,7 @@ export class ItemRollManager {
    * @param {Object} params - Template parameters
    * @returns {string} HTML template string
    */
-  static getMoveLabelRollTemplate({ move, advantageLevel, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
+  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, manualAdjustment, conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
     let successCount = 0
     let match = false
     let resultType = ""
@@ -514,11 +533,40 @@ export class ItemRollManager {
       resultType = "miss"
     }
 
-    // Mostrar NV aplicado se diferente de 0
+    // Mostrar NV aplicado com detalhamento das origens
     let nvText = "";
     if (advantageLevel !== undefined && advantageLevel !== 0) {
-      const nvSign = advantageLevel > 0 ? "+" : "";
-      nvText = `NV: ${nvSign}${advantageLevel}`;
+      const nvParts = [];
+
+      // Adicionar NV base do personagem (se houver e for diferente de zero)
+      if (baseAdvantageLevel !== undefined && baseAdvantageLevel !== 0) {
+        const baseSign = baseAdvantageLevel > 0 ? "+" : "";
+        nvParts.push(`${baseSign}${baseAdvantageLevel} (base)`);
+      }
+
+      // Adicionar ajuste manual do diálogo (se houver e for diferente de zero)
+      if (manualAdjustment !== undefined && manualAdjustment !== 0) {
+        const manualSign = manualAdjustment > 0 ? "+" : "";
+        nvParts.push(`${manualSign}${manualAdjustment} (manual)`);
+      }
+
+      // Adicionar NVs das condições
+      if (conditionsNVInfo && conditionsNVInfo.length > 0) {
+        conditionsNVInfo.forEach(condition => {
+          const conditionSign = condition.totalNV > 0 ? "+" : "";
+          nvParts.push(`${conditionSign}${condition.totalNV} (${condition.name})`);
+        });
+      }
+
+      // Sempre mostrar detalhamento se houver informações disponíveis
+      if (nvParts.length > 0) {
+        const nvSign = advantageLevel > 0 ? "+" : "";
+        nvText = `NV: ${nvSign}${advantageLevel} [${nvParts.join(", ")}]`;
+      } else {
+        // Fallback: mostrar apenas o total se não houver detalhamento disponível
+        const nvSign = advantageLevel > 0 ? "+" : "";
+        nvText = `NV: ${nvSign}${advantageLevel}`;
+      }
     }
 
     let attributeText
