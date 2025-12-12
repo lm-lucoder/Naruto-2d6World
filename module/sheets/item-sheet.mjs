@@ -280,7 +280,18 @@ class ScrollAPI {
 				id: itemToUse.id
 			})
 		}
-		scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } })
+		await scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } });
+
+		// Criar mensagem de chat
+		const scrollParent = scroll.parent;
+		const speaker = scrollParent ? ChatMessage.getSpeaker({ actor: scrollParent }) : ChatMessage.getSpeaker();
+		ChatMessage.create({
+			speaker: speaker,
+			flavor: `${scrollParent ? scrollParent.name : "Alguém"} selou um item no pergaminho: "${scroll.name}"`,
+			content: `<span>O seguinte item foi selado:</span> 
+			<p style="display:flex; align-items:center"><img src="${itemToUse.img}" style="max-width: 35px; border: none"> ${itemToUse.name} (${itemQuantity})</p>
+			`
+		});
 	}
 	static changeItemQt(scroll, itemId, sum) {
 		console.log(scroll)

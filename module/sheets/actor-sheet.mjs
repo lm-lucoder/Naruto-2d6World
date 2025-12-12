@@ -38,7 +38,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 	get template() {
 		return `systems/naruto2d6world/templates/actor/actor-${this.actor.type}-sheet.html`;
 	}
-	_onDropItem(e, data) {
+	async _onDropItem(e, data) {
 		// Verificar se o drop está acontecendo em uma região de scroll do item-sheet
 		// Se sim, não processar aqui (deixar o item-sheet tratar)
 		const scrollList = e.target?.closest?.(".scroll-items-list");
@@ -54,7 +54,44 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const itemScrollList = e.target?.closest?.(".item-scroll-items-list");
 		if (itemScrollList) {
 			// Esta é a região de scroll dentro da descrição do item no actor-sheet
-			// Não processar aqui
+			// Processar o drop para adicionar ao pergaminho
+			if (data.type === "Item") {
+				// Encontrar qual pergaminho está aberto
+				// Primeiro tenta pegar de um scroll-item-card existente
+				let scrollId = null;
+				const scrollItemCard = itemScrollList.querySelector(".scroll-item-card");
+				if (scrollItemCard) {
+					scrollId = scrollItemCard.getAttribute('data-scroll-id');
+				} else {
+					// Se não houver scroll-item-card (lista vazia), pega do elemento pai que contém o item
+					const scrollItemElement = itemScrollList.closest("li.item");
+					if (scrollItemElement) {
+						scrollId = scrollItemElement.getAttribute('data-item-id');
+					}
+				}
+
+				if (scrollId) {
+					const scroll = this.object.items.get(scrollId);
+					if (scroll && scroll.system.scroll.isScroll) {
+						// Usar fromDropData para funcionar tanto com world items quanto owned items
+						const item = await Item.fromDropData(data);
+						if (item && item.type === "item") {
+							// Prevenir o comportamento padrão do drop
+							e.preventDefault();
+							e.stopPropagation();
+							// Adicionar ao scroll usando a mesma lógica do item-sheet
+							await this._addItemToScroll(item, scroll);
+							// Recarregar a janela de descrição para atualizar a lista
+							const scrollItemElement = itemScrollList.closest("li.item");
+							if (scrollItemElement) {
+								const event = new Event('click');
+								scrollItemElement.querySelector('.show-item-description-window-btn').dispatchEvent(event);
+							}
+							return false;
+						}
+					}
+				}
+			}
 			return false;
 		}
 
@@ -485,8 +522,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const speaker = ChatMessage.getSpeaker({ actor: this.object });
 			ChatMessage.create({
 				speaker: speaker,
-				flavor: `${this.object.name} removeu os itens selados de dentro do pergaminho: "${scroll.name}"`,
-				content: `<span>Ele conseguiu os seguintes itens:</span> 
+				flavor: `${this.object.name} liberou todos os itens do pergaminho: "${scroll.name}"`,
+				content: `<span>Os seguintes itens foram liberados:</span> 
 				${scrollItems.map(item => `<p style="display:flex; align-items:center"><img src="${item.img}" style="max-width: 35px; border: none"> ${item.name} (${item.system.quantity})</p>`).join("")} 
 				`
 			});
@@ -690,17 +727,17 @@ export class BoilerplateActorSheet extends ActorSheet {
 				<div class="item-scroll-items">
 					<h3>Itens Selados:</h3>
 					<ul class="item-scroll-items-list">
-						${item.system.scroll.scrollItemsComplete.map(item => {
+						${item.system.scroll.scrollItemsComplete.map(scrollItem => {
 					return `
-							<li class="scroll-item-card" data-item-id="{{item.data.id}}">
+							<li class="scroll-item-card" data-item-id="${scrollItem.data.id}" data-scroll-id="${itemId}">
 								<div class="info">
-									<img src="${item.data.img}">
-									<span>${item.data.name}</span>
+									<img src="${scrollItem.data.img}">
+									<span>${scrollItem.data.name}</span>
 									<div class="scroll-item-attributes">
-										<i class="fa-solid fa-sack"></i> (${item.quantity})
+										<i class="fa-solid fa-sack"></i> (${scrollItem.quantity})
 										<span class="slots">
 											<i class="fa-solid fa-weight-hanging"></i> (${(() => {
-							const result = item.data.system.slots * item.quantity
+							const result = scrollItem.data.system.slots * scrollItem.quantity
 							const roundedResult = Math.round(result * 100) / 100;
 							return roundedResult
 						})()
@@ -708,12 +745,79 @@ export class BoilerplateActorSheet extends ActorSheet {
 										</span>
 									</div>
 								</div>
+								<div class="control">
+									<a class="scroll-item-unseal-btn"><i class="fa-solid fa-unlock"></i> Liberar</a>
+								</div>
 							</li>
 							`
 				}).join("")}
 					</ul>
 				</div>
 				`
+				// Adicionar listener para os botões Unseal criados dinamicamente
+				windowElement.querySelectorAll('.scroll-item-unseal-btn').forEach(btn => {
+					btn.addEventListener('click', async (e) => {
+						const scrollItemCard = e.target.closest(".scroll-item-card");
+						const scrollItemId = scrollItemCard.getAttribute('data-item-id');
+						const scrollId = scrollItemCard.getAttribute('data-scroll-id');
+						const scroll = this.object.items.get(scrollId);
+
+						if (!scroll || !scrollItemId) return;
+
+						// Encontrar o item no pergaminho
+						const scrollItems = scroll.system.scroll.scrollItems;
+						const scrollItemIndex = scrollItems.findIndex(item => item.id === scrollItemId);
+
+						if (scrollItemIndex === -1) return;
+
+						const scrollItem = scrollItems[scrollItemIndex];
+						const worldItem = Item.get(scrollItemId);
+
+						if (!worldItem) {
+							return ui.notifications.error("Item não encontrado no mundo!");
+						}
+
+						// Criar uma cópia do item para o ator
+						const itemData = worldItem.toObject();
+						delete itemData._id;
+						itemData.system.quantity = scrollItem.quantity;
+
+						// Verificar se o ator já tem um item com o mesmo nome
+						const existingItem = this.object.items.find(item => item.name === worldItem.name);
+
+						if (existingItem) {
+							// Se já existe, apenas aumentar a quantidade
+							const newQuantity = existingItem.system.quantity + scrollItem.quantity;
+							await existingItem.update({ system: { quantity: newQuantity } });
+						} else {
+							// Se não existe, criar novo item
+							await Item.create(itemData, { parent: this.object });
+						}
+
+						// Remover do pergaminho
+						scrollItems.splice(scrollItemIndex, 1);
+						await scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } });
+
+						// Criar mensagem de chat
+						const speaker = ChatMessage.getSpeaker({ actor: this.object });
+						ChatMessage.create({
+							speaker: speaker,
+							flavor: `${this.object.name} liberou um item do pergaminho: "${scroll.name}"`,
+							content: `<span>O seguinte item foi liberado:</span> 
+							<p style="display:flex; align-items:center"><img src="${worldItem.img}" style="max-width: 35px; border: none"> ${worldItem.name} (${scrollItem.quantity})</p>
+							`
+						});
+
+						// Recarregar a janela de descrição
+						const scrollItemElement = scrollItemCard.closest("li.item");
+						if (scrollItemElement) {
+							const event = new Event('click');
+							scrollItemElement.querySelector('.show-item-description-window-btn').dispatchEvent(event);
+						}
+
+						ui.notifications.info(`${worldItem.name} foi removido do pergaminho e adicionado ao inventário!`);
+					});
+				});
 			}
 			;
 		} else {
@@ -721,6 +825,65 @@ export class BoilerplateActorSheet extends ActorSheet {
 			windowElement.innerHTML = "";
 		}
 	}
+
+	/**
+	 * Adiciona um item ao pergaminho (similar ao ScrollAPI.add do item-sheet)
+	 * @param {Item} item - O item a ser adicionado
+	 * @param {Item} scroll - O pergaminho onde o item será adicionado
+	 */
+	async _addItemToScroll(item, scroll) {
+		const scrollItems = scroll.system.scroll.scrollItems;
+
+		// Se o item pertence a um ator, capturar a quantidade antes de processar
+		const itemParent = item.parent;
+		const isOwnedItem = itemParent && itemParent instanceof Actor;
+		const itemQuantity = isOwnedItem ? (item.system.quantity || 1) : 1;
+
+		const itemSlotsWeight = item.system.slots;
+		const totalSlotsNeeded = itemSlotsWeight * itemQuantity;
+		const canAdd = (scroll.system.scroll.scrollUsedSlots + totalSlotsNeeded) <= scroll.system.scroll.scrollMaxSlots
+		if (!canAdd) {
+			ui.notifications.info(`Não é possível adicionar! Isso iria extrapolar o limite de espaço do pergaminho`);
+			return;
+		}
+
+		let itemToUse = item;
+
+		if (isOwnedItem) {
+			// Criar uma cópia do item como world item
+			const itemData = item.toObject();
+			// Remover o _id para criar um novo item
+			delete itemData._id;
+			// Criar o item como world item (sem parent)
+			const worldItem = await Item.create(itemData);
+			itemToUse = worldItem;
+
+			// Remover o item owned do ator
+			await item.delete();
+		}
+
+		const itemAlreadyExists = scrollItems.find(scrollItem => scrollItem.id == itemToUse.id)
+		if (itemAlreadyExists) {
+			itemAlreadyExists.quantity += itemQuantity
+		} else {
+			scrollItems.push({
+				quantity: itemQuantity,
+				id: itemToUse.id
+			})
+		}
+		await scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } });
+
+		// Criar mensagem de chat
+		const speaker = ChatMessage.getSpeaker({ actor: this.object });
+		ChatMessage.create({
+			speaker: speaker,
+			flavor: `${this.object.name} selou um item no pergaminho: "${scroll.name}"`,
+			content: `<span>O seguinte item foi selado:</span> 
+			<p style="display:flex; align-items:center"><img src="${itemToUse.img}" style="max-width: 35px; border: none"> ${itemToUse.name} (${itemQuantity})</p>
+			`
+		});
+	}
+
 	_toggleMoveDescriptionWindow(event) {
 		const itemId = event.target.closest("li").getAttribute("data-item-id");
 		const windowElement = event.target
