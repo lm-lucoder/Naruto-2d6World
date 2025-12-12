@@ -477,6 +477,23 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const move = this.object.items.get(moveId);
 			move.reloadNPCMoveUses(e.shiftKey);
 		})
+		html.find('.iniciativa-checkbox').change(e => {
+			const isChecked = e.target.checked;
+			this.object.update({ "system.iniciativa": isChecked });
+			if (isChecked) {
+				const speaker = ChatMessage.getSpeaker({ actor: this.object }).alias;
+				ChatMessage.create({
+					speaker: speaker,
+					content: `${this.object.name} declarou iniciativa!`,
+				});
+			} else {
+				const speaker = ChatMessage.getSpeaker({ actor: this.object }).alias;
+				ChatMessage.create({
+					speaker: speaker,
+					content: `${this.object.name} perdeu a iniciativa!`,
+				});
+			}
+		})
 		html.find('.btn-increase-advantage-level').click(e => {
 			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual + 1 })
 		})

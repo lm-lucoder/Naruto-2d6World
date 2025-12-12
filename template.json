@@ -24,6 +24,7 @@
 		},
 		"character": {
 			"templates": ["base"],
+			"iniciativa": false,
 			"advantageLevel": {
 				"actual": 0,
 				"min": -4,
