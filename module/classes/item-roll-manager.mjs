@@ -162,11 +162,14 @@ export class ItemRollManager {
 
     if (isUpdate && rerollMode == "adjustment") {
       // Para ajustes manuais, não recalcular condições - usar valores opcionais
+      // Mas ainda considerar o NV global do mestre
+      const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
       const label = ItemRollManager.getMoveLabelRollTemplate({
         move: item,
         advantageLevel,
         baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : advantageLevel,
         manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0,
+        masterGlobalNV: masterGlobalNV,
         conditionsNVInfo: [], // Não recalcular em ajustes
         attribute,
         rollModifier,
@@ -269,7 +272,10 @@ export class ItemRollManager {
     const baseAndManual = (baseAdvantageLevel !== undefined && manualAdjustment !== undefined)
       ? (baseAdvantageLevel || 0) + (manualAdjustment || 0)
       : (advantageLevel || 0);
-    const nvValue = baseAndManual + attributeNV;
+
+    // Adicionar NV global do mestre
+    const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
+    const nvValue = baseAndManual + attributeNV + masterGlobalNV;
     const modifiedDice = ItemRollManager.applyAdvantageLevelToChallengeDice(
       nvValue,
       originalChallengeDiceOne,
@@ -282,9 +288,10 @@ export class ItemRollManager {
 
     const label = ItemRollManager.getMoveLabelRollTemplate({
       move: item,
-      advantageLevel: nvValue, // Total: base + manual + condições
+      advantageLevel: nvValue, // Total: base + manual + condições + mestre
       baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : (advantageLevel || 0), // NV base do personagem
       manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0, // Ajuste manual do diálogo
+      masterGlobalNV: masterGlobalNV, // NV global do mestre
       conditionsNVInfo: conditionsNVInfo, // Informações detalhadas das condições
       attribute,
       rollModifier,
@@ -496,7 +503,7 @@ export class ItemRollManager {
    * @param {Object} params - Template parameters
    * @returns {string} HTML template string
    */
-  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, manualAdjustment, conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
+  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, manualAdjustment, masterGlobalNV, conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
     let successCount = 0
     let match = false
     let resultType = ""
@@ -548,6 +555,12 @@ export class ItemRollManager {
       if (manualAdjustment !== undefined && manualAdjustment !== 0) {
         const manualSign = manualAdjustment > 0 ? "+" : "";
         nvParts.push(`${manualSign}${manualAdjustment} (manual)`);
+      }
+
+      // Adicionar NV global do mestre (se houver e for diferente de zero)
+      if (masterGlobalNV !== undefined && masterGlobalNV !== 0) {
+        const masterSign = masterGlobalNV > 0 ? "+" : "";
+        nvParts.push(`${masterSign}${masterGlobalNV} (Mestre)`);
       }
 
       // Adicionar NVs das condições

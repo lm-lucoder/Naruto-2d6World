@@ -1,0 +1,41 @@
+// Estilos para os controles de NV Global do Mestre no chat
+.global-nv-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 3px;
+
+
+
+  .global-nv-label {
+    font-weight: bold;
+  }
+
+  .global-nv-button {
+    padding: 3px 6px;
+    border: 1px solid #b5b3a4;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #f0f0e0;
+    background-color: transparent;
+
+    &:hover {
+      filter: brightness(1.5);
+      background-color: transparent;
+    }
+
+    &:active {
+      filter: brightness(0.8);
+    }
+  }
+
+  .global-nv-value {
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+  }
+}
+

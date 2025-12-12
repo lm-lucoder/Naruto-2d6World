@@ -38,6 +38,15 @@ class GameSettings {
       default: false,
     });
 
+    game.settings.register("naruto2d6world", "master-global-nv", {
+      name: "NV Global do Mestre",
+      hint: "Modificador de NV global controlado pelo mestre, aplicado a todas as rolagens de movimentos.",
+      scope: "world",
+      config: false, // Não aparece nas configurações, é controlado pelos botões
+      type: Number,
+      default: 0,
+    });
+
   }
 
   static getNVThresholds() {

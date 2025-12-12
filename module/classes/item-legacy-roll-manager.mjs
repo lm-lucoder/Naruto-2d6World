@@ -123,8 +123,9 @@ export class ItemLegacyRollManager {
 		}
 		
 		// Calculate mode from advantage level if not provided (for rerolls, mode is passed directly)
-		// Somar o NV adicional das condições ao advantageLevel antes de calcular o modo
-		const totalAdvantageLevel = (advantageLevel || 0) + attributeNV;
+		// Somar o NV adicional das condições e do mestre ao advantageLevel antes de calcular o modo
+		const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
+		const totalAdvantageLevel = (advantageLevel || 0) + attributeNV + masterGlobalNV;
 		const calculatedMode = mode || ItemLegacyRollManager.calculateModeByValue(totalAdvantageLevel);
 		
 		if (isUpdate && rerollMode == "adjustment") {
