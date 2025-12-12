@@ -1,4 +1,4 @@
-const gameAbilities = game.items.filter(item => item.type == "ability")
+/* const gameAbilities = game.items.filter(item => item.type == "ability")
 
 game.actors.contents.filter(actor => (actor.type == "character" || actor.type == "npc")).forEach(actor => {
   const abilities = actor.collections.items.contents.filter(item => item.type == "ability")
@@ -17,4 +17,11 @@ game.actors.contents.filter(actor => (actor.type == "character" || actor.type ==
     ability.update({ ['system.levelDescriptions']: matchingAbility.system.levelDescriptions })
   })
 })
-ui.notifications.info("Habilidades atualizadas!")
+ui.notifications.info("Habilidades atualizadas!") */
+
+/////////////
+
+game.actors.contents.filter(actor => (actor.type == "character")).forEach(actor => {
+  actor.update({ ['system.iniciativa']: false })
+})
+ui.notifications.info("Iniciativas resetadas!")
