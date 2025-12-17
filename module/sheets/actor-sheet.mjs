@@ -13,6 +13,15 @@ import { ItemResourceManager } from "../classes/item-resource-manager.mjs";
  * @extends {ActorSheet}
  */
 export class BoilerplateActorSheet extends ActorSheet {
+	constructor(...args) {
+		super(...args);
+
+		// Sets para rastrear quais elementos têm descrições expandidas
+		this._expandedItems = new Set();
+		this._expandedAbilities = new Set();
+		this._expandedMoves = new Set();
+	}
+
 	/** @override */
 	static get defaultOptions() {
 		return mergeObject(super.defaultOptions, {
@@ -269,6 +278,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 	}
 
 	/* -------------------------------------------- */
+
+	/** @override */
+	async _render(force, options) {
+		await super._render(force, options);
+		// Restaurar estado das descrições expandidas após renderização
+		this._restoreExpandedDescriptions();
+	}
 
 	/** @override */
 	activateListeners(html) {
@@ -700,6 +716,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const itemIsScroll = item.system.scroll.isScroll
 		//if (windowElement.innerHTML.trim() === "") {
 		if (windowElement.innerHTML.trim() === "") {
+			// Adicionar ao Set de itens expandidos
+			this._expandedItems.add(itemId);
+
 			windowElement.classList.add("description-window-opened");
 			windowElement.innerHTML = `
 				<ul class="item-attributes-list">
@@ -830,6 +849,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 			}
 			;
 		} else {
+			// Remover do Set de itens expandidos
+			this._expandedItems.delete(itemId);
+
 			windowElement.classList.remove("description-window-opened");
 			windowElement.innerHTML = "";
 		}
@@ -900,12 +922,18 @@ export class BoilerplateActorSheet extends ActorSheet {
 			.querySelector(".description-window");
 		const move = this.actor.items.get(itemId);
 		if (windowElement.innerHTML.trim() === "") {
+			// Adicionar ao Set de moves expandidos
+			this._expandedMoves.add(itemId);
+
 			windowElement.innerHTML = `
 				<div class="item-description">
 					${move.system.description}
 				</div>
 			`;
 		} else {
+			// Remover do Set de moves expandidos
+			this._expandedMoves.delete(itemId);
+
 			windowElement.innerHTML = "";
 		}
 	}
@@ -917,6 +945,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const ability = this.actor.items.get(itemId);
 		const abilityResources = ability.system.resources;
 		if (windowElement.innerHTML.trim() === "") {
+			// Adicionar ao Set de abilities expandidas
+			this._expandedAbilities.add(itemId);
+
 			windowElement.innerHTML = `
 				<ul class="ability-resources-description-list">
 					${abilityResources.map(resource => {
@@ -935,6 +966,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 			`
 				;
 		} else {
+			// Remover do Set de abilities expandidas
+			this._expandedAbilities.delete(itemId);
+
 			windowElement.innerHTML = "";
 		}
 	}
@@ -1039,6 +1073,66 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Restaura o estado das descrições expandidas após a re-renderização
+	 * @private
+	 */
+	_restoreExpandedDescriptions() {
+		if (!this.element || !this.element.length) return;
+
+		// Restaurar itens expandidos
+		this._expandedItems.forEach(itemId => {
+			// Verificar se o item ainda existe no ator
+			if (!this.actor.items.get(itemId)) {
+				this._expandedItems.delete(itemId);
+				return;
+			}
+
+			const itemElement = this.element.find(`li.item[data-item-id="${itemId}"]`);
+			if (itemElement.length) {
+				const btn = itemElement.find('.show-item-description-window-btn');
+				if (btn.length) {
+					// Simular clique para abrir a descrição
+					btn[0].click();
+				}
+			}
+		});
+
+		// Restaurar abilities expandidas
+		this._expandedAbilities.forEach(abilityId => {
+			// Verificar se a ability ainda existe no ator
+			if (!this.actor.items.get(abilityId)) {
+				this._expandedAbilities.delete(abilityId);
+				return;
+			}
+
+			const abilityElement = this.element.find(`li.item[data-item-id="${abilityId}"]`);
+			if (abilityElement.length) {
+				const btn = abilityElement.find('.show-ability-description-window-btn');
+				if (btn.length) {
+					btn[0].click();
+				}
+			}
+		});
+
+		// Restaurar moves expandidos
+		this._expandedMoves.forEach(moveId => {
+			// Verificar se o move ainda existe no ator
+			if (!this.actor.items.get(moveId)) {
+				this._expandedMoves.delete(moveId);
+				return;
+			}
+
+			const moveElement = this.element.find(`li.item[data-item-id="${moveId}"]`);
+			if (moveElement.length) {
+				const btn = moveElement.find('.show-move-description-window-btn');
+				if (btn.length) {
+					btn[0].click();
+				}
+			}
+		});
 	}
 
 }
