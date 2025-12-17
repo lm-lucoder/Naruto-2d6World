@@ -721,12 +721,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 				</div>
 			`
 			if (itemIsScroll) {
-				windowElement.innerHTML += `
+				const hasScrollItems = item.system.scroll.scrollItemsComplete && item.system.scroll.scrollItemsComplete.length > 0;
+
+				if (hasScrollItems) {
+					windowElement.innerHTML += `
 				<div class="item-scroll-items">
 					<h3>Itens Selados:</h3>
 					<ul class="item-scroll-items-list">
 						${item.system.scroll.scrollItemsComplete.map(scrollItem => {
-					return `
+						return `
 							<li class="scroll-item-card" data-item-id="${scrollItem.data.id}" data-scroll-id="${itemId}">
 								<div class="info">
 									<img src="${scrollItem.data.img}">
@@ -735,11 +738,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 										<i class="fa-solid fa-sack"></i> (${scrollItem.quantity})
 										<span class="slots">
 											<i class="fa-solid fa-weight-hanging"></i> (${(() => {
-							const result = scrollItem.data.system.slots * scrollItem.quantity
-							const roundedResult = Math.round(result * 100) / 100;
-							return roundedResult
-						})()
-						})
+								const result = scrollItem.data.system.slots * scrollItem.quantity
+								const roundedResult = Math.round(result * 100) / 100;
+								return roundedResult
+							})()
+							})
 										</span>
 									</div>
 								</div>
@@ -748,74 +751,82 @@ export class BoilerplateActorSheet extends ActorSheet {
 								</div>
 							</li>
 							`
-				}).join("")}
+					}).join("")}
 					</ul>
 				</div>
 				`
-				// Adicionar listener para os botões Unseal criados dinamicamente
-				windowElement.querySelectorAll('.scroll-item-unseal-btn').forEach(btn => {
-					btn.addEventListener('click', async (e) => {
-						const scrollItemCard = e.target.closest(".scroll-item-card");
-						const scrollItemId = scrollItemCard.getAttribute('data-item-id');
-						const scrollId = scrollItemCard.getAttribute('data-scroll-id');
-						const scroll = this.object.items.get(scrollId);
+					// Adicionar listener para os botões Unseal criados dinamicamente
+					windowElement.querySelectorAll('.scroll-item-unseal-btn').forEach(btn => {
+						btn.addEventListener('click', async (e) => {
+							const scrollItemCard = e.target.closest(".scroll-item-card");
+							const scrollItemId = scrollItemCard.getAttribute('data-item-id');
+							const scrollId = scrollItemCard.getAttribute('data-scroll-id');
+							const scroll = this.object.items.get(scrollId);
 
-						if (!scroll || !scrollItemId) return;
+							if (!scroll || !scrollItemId) return;
 
-						// Encontrar o item no pergaminho
-						const scrollItems = scroll.system.scroll.scrollItems;
-						const scrollItemIndex = scrollItems.findIndex(item => item.id === scrollItemId);
+							// Encontrar o item no pergaminho
+							const scrollItems = scroll.system.scroll.scrollItems;
+							const scrollItemIndex = scrollItems.findIndex(item => item.id === scrollItemId);
 
-						if (scrollItemIndex === -1) return;
+							if (scrollItemIndex === -1) return;
 
-						const scrollItem = scrollItems[scrollItemIndex];
-						const worldItem = Item.get(scrollItemId);
+							const scrollItem = scrollItems[scrollItemIndex];
+							const worldItem = Item.get(scrollItemId);
 
-						if (!worldItem) {
-							return ui.notifications.error("Item não encontrado no mundo!");
-						}
+							if (!worldItem) {
+								return ui.notifications.error("Item não encontrado no mundo!");
+							}
 
-						// Criar uma cópia do item para o ator
-						const itemData = worldItem.toObject();
-						delete itemData._id;
-						itemData.system.quantity = scrollItem.quantity;
+							// Criar uma cópia do item para o ator
+							const itemData = worldItem.toObject();
+							delete itemData._id;
+							itemData.system.quantity = scrollItem.quantity;
 
-						// Verificar se o ator já tem um item com o mesmo nome
-						const existingItem = this.object.items.find(item => item.name === worldItem.name);
+							// Verificar se o ator já tem um item com o mesmo nome
+							const existingItem = this.object.items.find(item => item.name === worldItem.name);
 
-						if (existingItem) {
-							// Se já existe, apenas aumentar a quantidade
-							const newQuantity = existingItem.system.quantity + scrollItem.quantity;
-							await existingItem.update({ system: { quantity: newQuantity } });
-						} else {
-							// Se não existe, criar novo item
-							await Item.create(itemData, { parent: this.object });
-						}
+							if (existingItem) {
+								// Se já existe, apenas aumentar a quantidade
+								const newQuantity = existingItem.system.quantity + scrollItem.quantity;
+								await existingItem.update({ system: { quantity: newQuantity } });
+							} else {
+								// Se não existe, criar novo item
+								await Item.create(itemData, { parent: this.object });
+							}
 
-						// Remover do pergaminho
-						scrollItems.splice(scrollItemIndex, 1);
-						await scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } });
+							// Remover do pergaminho
+							scrollItems.splice(scrollItemIndex, 1);
+							await scroll.update({ system: { scroll: { scrollItems: [...scrollItems] } } });
 
-						// Criar mensagem de chat
-						const speaker = ChatMessage.getSpeaker({ actor: this.object });
-						ChatMessage.create({
-							speaker: speaker,
-							flavor: `${this.object.name} liberou um item do pergaminho: "${scroll.name}"`,
-							content: `<span>O seguinte item foi liberado:</span> 
+							// Criar mensagem de chat
+							const speaker = ChatMessage.getSpeaker({ actor: this.object });
+							ChatMessage.create({
+								speaker: speaker,
+								flavor: `${this.object.name} liberou um item do pergaminho: "${scroll.name}"`,
+								content: `<span>O seguinte item foi liberado:</span> 
 							<p style="display:flex; align-items:center"><img src="${worldItem.img}" style="max-width: 35px; border: none"> ${worldItem.name} (${scrollItem.quantity})</p>
 							`
+							});
+
+							// Recarregar a janela de descrição
+							const scrollItemElement = scrollItemCard.closest("li.item");
+							if (scrollItemElement) {
+								const event = new Event('click');
+								scrollItemElement.querySelector('.show-item-description-window-btn').dispatchEvent(event);
+							}
+
+							ui.notifications.info(`${worldItem.name} foi removido do pergaminho e adicionado ao inventário!`);
 						});
-
-						// Recarregar a janela de descrição
-						const scrollItemElement = scrollItemCard.closest("li.item");
-						if (scrollItemElement) {
-							const event = new Event('click');
-							scrollItemElement.querySelector('.show-item-description-window-btn').dispatchEvent(event);
-						}
-
-						ui.notifications.info(`${worldItem.name} foi removido do pergaminho e adicionado ao inventário!`);
 					});
-				});
+				} else {
+					windowElement.innerHTML += `
+				<div class="item-scroll-items">
+					<h3>Itens Selados:</h3>
+					<p class="empty-scroll-message item-scroll-items-list">Ainda não há itens neste pergaminho. Arraste aqui um item da sua ficha para selar dentro do pergaminho.</p>
+				</div>
+				`
+				}
 			}
 			;
 		} else {

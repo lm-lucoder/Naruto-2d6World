@@ -656,43 +656,58 @@
 				.description-window{
 					background-color: #0000001e;
 					border-radius: 3px;
-					.item-scroll-items{
-						h3{
-							border-bottom: 0;
-							font-size: 16px;
-						}
-						.item-scroll-items-list{
-							margin: 0;
-							.scroll-item-card{
-								padding: 3px 0;
+				.item-scroll-items{
+					h3{
+						border-bottom: 0;
+						font-size: 16px;
+					}
+					.empty-scroll-message{
+						margin: 0;
+						padding: 15px;
+						border: 1px dashed $c-beige;
+						border-radius: 5px;
+						text-align: center;
+						background-color: #0000000a;
+						color: inherit;
+						opacity: 0.8;
+						font-size: 0.9em;
+						line-height: 1.4;
+					}
+					.item-scroll-items-list{
+						margin: 0;
+						padding: 5px;
+						border: 1px solid $c-beige;
+						border-radius: 5px;
+						.scroll-item-card{
+							padding: 3px 0;
+							display: flex;
+							justify-content: space-between;
+							align-items: center;
+							border-top: 1px solid $c-beige;
+							.info{
 								display: flex;
-								justify-content: space-between;
 								align-items: center;
-								border-top: 1px solid $c-beige;
-								.info{
+								img{
+									width: 25px;
+									border: none;
+								}
+								.scroll-item-attributes{
 									display: flex;
 									align-items: center;
-									img{
-										width: 25px;
-										border: none;
+									gap: 5px;
+									margin-left: 10px;
+									font-size: 0.8em;
+									.quantity{
+										cursor: pointer;
 									}
-									.scroll-item-attributes{
-										display: flex;
-										align-items: center;
-										gap: 5px;
-										margin-left: 10px;
-										font-size: 0.8em;
-										.quantity{
-											cursor: pointer;
-										}
-										.quantity:hover{
-											filter: brightness(1.5);
-										}
+									.quantity:hover{
+										filter: brightness(1.5);
 									}
 								}
 							}
 						}
 					}
+				}
 				}
 				
 			}

@@ -25,3 +25,20 @@ game.actors.contents.filter(actor => (actor.type == "character")).forEach(actor 
   actor.update({ ['system.iniciativa']: false })
 })
 ui.notifications.info("Iniciativas resetadas!")
+
+////
+
+const gameMoves = game.items.filter(item => item.type == "move")
+
+game.actors.contents.filter(actor => (actor.type == "character" || actor.type == "npc")).forEach(actor => {
+  const movements = actor.collections.items.contents.filter(item => item.type == "move")
+  movements.forEach(move => {
+    const matchingMove = gameMoves.find(gameMove => gameMove.name == move.name)
+    if (matchingMove) {
+      move.update({ ['system.description']: matchingMove.system.description })
+      move.update({ ['system.category']: matchingMove.system.category })
+      move.update({ ['system.results']: matchingMove.system.results })
+    }
+  })
+})
+ui.notifications.info("Movimentos atualizados!")
