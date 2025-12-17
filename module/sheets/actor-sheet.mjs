@@ -881,13 +881,21 @@ export class BoilerplateActorSheet extends ActorSheet {
 		let itemToUse = item;
 
 		if (isOwnedItem) {
-			// Criar uma cópia do item como world item
-			const itemData = item.toObject();
-			// Remover o _id para criar um novo item
-			delete itemData._id;
-			// Criar o item como world item (sem parent)
-			const worldItem = await Item.create(itemData);
-			itemToUse = worldItem;
+			// Verificar se já existe um item com o mesmo nome no mundo
+			const existingWorldItem = game.items.find(worldItem => worldItem.name === item.name && worldItem.type === item.type);
+
+			if (existingWorldItem) {
+				// Usar o item existente do mundo
+				itemToUse = existingWorldItem;
+			} else {
+				// Criar uma cópia do item como world item
+				const itemData = item.toObject();
+				// Remover o _id para criar um novo item
+				delete itemData._id;
+				// Criar o item como world item (sem parent)
+				const worldItem = await Item.create(itemData);
+				itemToUse = worldItem;
+			}
 
 			// Remover o item owned do ator
 			await item.delete();
