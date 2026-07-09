@@ -54,9 +54,19 @@ class UpgradeNPCMoveDialog extends Dialog {
     // ─── Criação do dialog ───────────────────────────────────────────────────
 
     static async create({ actor }) {
+        // Obter as tags do ator (separadas por ";", removendo espaços)
+        const actorTags = (actor.system.leveling?.tags || "").split(";").map(t => t.trim());
+
+        // Helper para verificar interseção de tags
+        const _hasMatchingTag = (sys) => {
+            const moveTags = (sys?.npcMoveUpgrades?.tags || "").split(";").map(t => t.trim());
+            // Retorna true se houver pelo menos uma tag em comum (mesmo que seja a string vazia "")
+            return moveTags.some(tag => actorTags.includes(tag));
+        };
+
         // 1. Movimentos que o NPC já tem e podem receber upgrade
         const upgradableMoves = actor.items.filter(
-            (item) => item.type === "move" && UpgradeNPCMoveDialog._hasAnyUpgrade(item)
+            (item) => item.type === "move" && UpgradeNPCMoveDialog._hasAnyUpgrade(item) && _hasMatchingTag(item.system)
         );
 
         // 2. Movimentos do sistema (World + Compendiums) que podem ser adquiridos
@@ -70,6 +80,7 @@ class UpgradeNPCMoveDialog extends Dialog {
             const upgrades = sys?.npcMoveUpgrades;
             if (!upgrades?.canBeNPCAcquired) return false;
             if (upgrades.canBePlayerAcquired === false && !isGMOrAssistant) return false;
+            if (!_hasMatchingTag(sys)) return false;
             return true;
         };
 

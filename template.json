@@ -85,7 +85,8 @@
 			"clan": "",
 			"leveling": {
 				"xp": 0,
-				"warnsLeveling": false
+				"warnsLeveling": false,
+				"tags": "geral"
 			}
 		}
 	},
@@ -167,13 +168,14 @@
 				"value": 0
 			},
 			"npcMoveUpgrades": {
-				"isUpgradable": false,
+				"isUpgradable": true,
 				"Maxlevel": 0,
 				"MaxmoveUses": 3,
 				"levelUpgradeCost": 1,
 				"moveUseUpgradeCost": 1,
-				"canBeNPCAcquired": false,
-				"canBePlayerAcquired": false
+				"canBeNPCAcquired": true,
+				"canBePlayerAcquired": false,
+				"tags": "geral"
 			}
 		},
 		"skill": {

@@ -131,6 +131,11 @@
             <input type="checkbox" name="system.npcMoveUpgrades.canBePlayerAcquired" {{checked
               system.npcMoveUpgrades.canBePlayerAcquired}} />
           </div>
+          <div style="display: flex; gap: 15px;">
+            <label class="resource-label">Tags</label>
+            <input type="text" name="system.npcMoveUpgrades.tags" value="{{system.npcMoveUpgrades.tags}}"
+              data-dtype="String" />
+          </div>
           {{/if}}
         </div>
         {{/if}}
