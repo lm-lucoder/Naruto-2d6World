@@ -483,12 +483,14 @@ class UpgradeNPCMoveDialog extends Dialog {
         const newXP = currentXP - cost;
         await actor.update({ "system.leveling.xp": newXP });
 
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ actor }),
-            content: `<p><strong>Upgrade de Movimento!</strong></p>
-                <p>Movimento <strong>${move.name}</strong> do NPC <strong>${actor.name}</strong> recebeu um upgrade: <em>${upgradeLabel}</em>.</p>
-                <p><small>Custo: ${cost} XP | XP restante: ${newXP}</small></p>`
-        });
+        if (actor.system.leveling?.warnsLeveling) {
+            ChatMessage.create({
+                speaker: ChatMessage.getSpeaker({ actor }),
+                content: `<p><strong>Upgrade de Movimento!</strong></p>
+                    <p>Movimento <strong>${move.name}</strong> do NPC <strong>${actor.name}</strong> recebeu um upgrade: <em>${upgradeLabel}</em>.</p>
+                    <p><small>Custo: ${cost} XP | XP restante: ${newXP}</small></p>`
+            });
+        }
 
         ui.notifications.info(`${move.name} recebeu upgrade: ${upgradeLabel}. Custo: ${cost} XP. XP restante: ${newXP}.`);
 
@@ -542,12 +544,14 @@ class UpgradeNPCMoveDialog extends Dialog {
         const newXP = currentXP - cost;
         await actor.update({ "system.leveling.xp": newXP });
 
-        ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ actor }),
-            content: `<p><strong>Novo Movimento Adquirido!</strong></p>
-                <p>O NPC <strong>${actor.name}</strong> adquiriu o movimento <strong>${move.name}</strong>.</p>
-                <p><small>Custo: ${cost} XP | XP restante: ${newXP}</small></p>`
-        });
+        if (actor.system.leveling?.warnsLeveling) {
+            ChatMessage.create({
+                speaker: ChatMessage.getSpeaker({ actor }),
+                content: `<p><strong>Novo Movimento Adquirido!</strong></p>
+                    <p>O NPC <strong>${actor.name}</strong> adquiriu o movimento <strong>${move.name}</strong>.</p>
+                    <p><small>Custo: ${cost} XP | XP restante: ${newXP}</small></p>`
+            });
+        }
 
         ui.notifications.info(`${move.name} adquirido! Custo: ${cost} XP. XP restante: ${newXP}.`);
 
