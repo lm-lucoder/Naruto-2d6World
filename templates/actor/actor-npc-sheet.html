@@ -187,6 +187,7 @@
     {{!-- Config Tab --}}
     {{#unless limited}}
     <div class="tab config" data-group="primary" data-tab="config">
+      {{#if user.isGM}}
       <div class="resource-card">
         <h3 class="conditions-title">Configurações de NPC</h3>
         <div style="display: flex; gap: 15px; margin-top: 10px;">
@@ -195,6 +196,7 @@
           <input type="checkbox" name="system.leveling.warnsLeveling" {{checked system.leveling.warnsLeveling}} />
         </div>
       </div>
+      {{/if}}
       <div class="resource-card tags-card">
         <label for="system.leveling.tags">Tags:</label>
         <textarea type="text" name="system.leveling.tags" cols="30" rows="10">{{system.leveling.tags}}</textarea>

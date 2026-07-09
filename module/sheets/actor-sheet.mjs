@@ -145,6 +145,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 		context.system = actorData.system;
 		context.flags = actorData.flags;
+		context.user = game.user
 
 		if (actorData.type == "character") {
 			this._prepareCharacterItems(context);
