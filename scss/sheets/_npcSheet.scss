@@ -127,4 +127,16 @@
         }
     }
 
+    .tab.config {
+        .tags-card {
+            display: flex;
+            flex-direction: column;
+
+
+            textarea {
+                width: 100%;
+            }
+        }
+    }
+
 }
