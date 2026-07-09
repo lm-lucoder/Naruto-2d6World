@@ -79,7 +79,7 @@ class UpgradeNPCMoveDialog extends Dialog {
         const _canAcquireMove = (sys) => {
 
             const upgrades = sys?.npcMoveUpgrades;
-            if (!upgrades?.canBeNPCAcquired) return false;
+            if (!upgrades?.canBeNPCAcquired || !sys?.isNpcMove) return false;
             if (upgrades.canBePlayerAcquired === false && !isGMOrAssistant) return false;
             if (!_hasMatchingTag(sys)) return false;
             return true;
