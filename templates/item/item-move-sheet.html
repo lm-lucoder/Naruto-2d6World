@@ -121,6 +121,16 @@
             <input type="number" name="system.npcMoveUpgrades.moveUseUpgradeCost"
               value="{{system.npcMoveUpgrades.moveUseUpgradeCost}}" data-dtype="String" />
           </div>
+          <div style="display: flex; gap: 15px;">
+            <label class="resource-label">Can Be Acquired as NPC</label>
+            <input type="checkbox" name="system.npcMoveUpgrades.canBeNPCAcquired" {{checked
+              system.npcMoveUpgrades.canBeNPCAcquired}} />
+          </div>
+          <div style="display: flex; gap: 15px;">
+            <label class="resource-label">Can Be Acquired by Players</label>
+            <input type="checkbox" name="system.npcMoveUpgrades.canBePlayerAcquired" {{checked
+              system.npcMoveUpgrades.canBePlayerAcquired}} />
+          </div>
           {{/if}}
         </div>
         {{/if}}

@@ -169,9 +169,11 @@
 			"npcMoveUpgrades": {
 				"isUpgradable": false,
 				"Maxlevel": 0,
-				"MaxmoveUses": 0,
-				"levelUpgradeCost": 0,
-				"moveUseUpgradeCost": 0
+				"MaxmoveUses": 3,
+				"levelUpgradeCost": 1,
+				"moveUseUpgradeCost": 1,
+				"canBeNPCAcquired": false,
+				"canBePlayerAcquired": false
 			}
 		},
 		"skill": {

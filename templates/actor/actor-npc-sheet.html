@@ -34,9 +34,11 @@
         <label for="system.leveling.xp">XP:</label>
         <input type="text" name="system.leveling.xp" value="{{system.leveling.xp}}" data-dtype="Number" style="width: 40px; text-align: center;">
       </div>
+      {{#if owner}}
       <button type="button" id="btn-upgrade-npc-moves">
         <i class="fa-solid fa-arrow-up"></i> Upgrade
       </button>
+      {{/if}}
     </div>
   </header>
 

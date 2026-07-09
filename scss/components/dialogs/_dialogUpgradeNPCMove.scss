@@ -27,7 +27,7 @@
 
     // ── Left panel — move list ───────────────────────────────────────────────
     .upgrade-move-list-panel {
-        flex: 0 0 200px;
+        flex: 0 0 300px;
         display: flex;
         flex-direction: column;
         border: 1px solid $c-beige;
@@ -66,10 +66,6 @@
                 justify-content: space-between;
             }
 
-            &:hover {
-                filter: brightness(1.3);
-            }
-
             &.selected {
                 border-left: 3px solid $c-beige;
                 font-weight: bold;
@@ -84,7 +80,8 @@
             text-overflow: ellipsis;
         }
 
-        .upgrade-move-btn {
+        .upgrade-move-btn,
+        .acquire-move-btn {
             flex-shrink: 0;
             padding: 2px 7px;
             font-size: 0.75em;
@@ -93,12 +90,19 @@
             cursor: pointer;
             transition: filter 0.15s;
 
-            &:hover {
-                filter: brightness(1.4);
-            }
-
             i {
                 margin-right: 2px;
+            }
+        }
+
+        .empty {
+            justify-content: center;
+            opacity: 0.6;
+            font-style: italic;
+            cursor: default;
+
+            &:hover {
+                filter: none;
             }
         }
     }
@@ -198,6 +202,12 @@
             border-bottom: 1px solid $c-beige;
             padding-bottom: 6px;
         }
+
+        .acquire-desc {
+            margin: 0;
+            font-size: 0.9em;
+            line-height: 1.3;
+        }
     }
 
     .upgrade-choice-options {
@@ -215,10 +225,6 @@
         border-radius: 4px;
         cursor: pointer;
         transition: filter 0.15s;
-
-        &:hover {
-            filter: brightness(1.3);
-        }
 
         input[type="radio"] {
             cursor: pointer;
@@ -246,10 +252,6 @@
             cursor: pointer;
             font-size: 0.88em;
             transition: filter 0.15s;
-
-            &:hover {
-                filter: brightness(1.4);
-            }
         }
     }
 }
