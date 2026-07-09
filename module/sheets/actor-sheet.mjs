@@ -2,6 +2,7 @@ import ManageAbilityChakraDialog from "../dialogs/manageAbilityChakraDialog.mjs"
 import ManageAbilityResourceDialog from "../dialogs/manageAbilityResourceDialog.mjs";
 import ManageItemQuantityDialog from "../dialogs/manageItemQuantityDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
+import UpgradeNPCMoveDialog from "../dialogs/upgradeNPCMoveDialog.mjs";
 import {
 	onManageActiveEffect,
 	prepareActiveEffectCategories,
@@ -603,6 +604,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find('.btn-decrease-advantage-level').click(e => {
 			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual - 1 })
 		})
+		// Botão de upgrade de movimentos de NPC
+		html.find('#btn-upgrade-npc-moves').click((e) => {
+			e.preventDefault();
+			UpgradeNPCMoveDialog.create({ actor: this.actor });
+		});
 		// Drag events for macros.
 		if (this.actor.isOwner) {
 			let handler = (ev) => this._onDragStart(ev);

@@ -82,7 +82,11 @@
 			"rank": "",
 			"village": "",
 			"age": "",
-			"clan": ""
+			"clan": "",
+			"leveling": {
+				"xp": 0,
+				"warnsLeveling": false
+			}
 		}
 	},
 	"Item": {

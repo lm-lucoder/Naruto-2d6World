@@ -2,31 +2,41 @@
 
   {{!-- Sheet Header --}}
   <header class="sheet-header">
-    <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+    <img class="large-profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100"
+      width="100" />
     <div class="header-fields">
-      <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+      <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name" /></h1>
       {{#unless limited}}
       <div class="grid grid-2col">
         <div class="resource-content flexrow flex-center">
           <label for="system.params.village">Aldeia:</label>
-          <input type="text" name="system.params.village" value="{{system.params.village}}" >
+          <input type="text" name="system.params.village" value="{{system.params.village}}">
         </div>
         <div class="resource-content flexrow flex-center">
-            <label for="system.params.clan">Clã:</label>
-            <input type="text" name="system.params.clan" value="{{system.params.clan}}" >
+          <label for="system.params.clan">Clã:</label>
+          <input type="text" name="system.params.clan" value="{{system.params.clan}}">
         </div>
       </div>
       <div class="grid grid-2col">
         <div class="resource-content flexrow flex-center">
-            <label for="system.params.age">Idade:</label>
-            <input type="text" name="system.params.age" value="{{system.params.age}}" >
+          <label for="system.params.age">Idade:</label>
+          <input type="text" name="system.params.age" value="{{system.params.age}}">
         </div>
         <div class="resource-content flexrow flex-center">
-            <label for="system.params.age">Rank:</label>
-            <input type="text" name="system.params.rank" value="{{system.params.rank}}" >
+          <label for="system.params.age">Rank:</label>
+          <input type="text" name="system.params.rank" value="{{system.params.rank}}">
         </div>
       </div>
       {{/unless}}
+    </div>
+    <div class="npc-header-controls">
+      <div class="resource-content flexrow flex-center">
+        <label for="system.leveling.xp">XP:</label>
+        <input type="text" name="system.leveling.xp" value="{{system.leveling.xp}}" data-dtype="Number" style="width: 40px; text-align: center;">
+      </div>
+      <button type="button" id="btn-upgrade-npc-moves">
+        <i class="fa-solid fa-arrow-up"></i> Upgrade
+      </button>
     </div>
   </header>
 
@@ -41,71 +51,74 @@
     {{!-- Biography Tab --}}
     {{#unless limited}}
     <div class="tab biography" data-group="primary" data-tab="description">
-    <!-- <div class="biography"> -->
-      {{!-- If you want TinyMCE editors to output inline rolls when rendered, you need to pass the actor's roll data to the rollData property. --}}
+      <!-- <div class="biography"> -->
+      {{!-- If you want TinyMCE editors to output inline rolls when rendered, you need to pass the actor's roll data to
+      the rollData property. --}}
       <!-- {{> "systems/naruto2d6world/templates/actor/parts/actor-description-npc.html"}}
        -->
-       <div class="resources grid grid-2col">
-          <div class="resource-card">
-            <label for="system.health.value" class="resource-label">Ferimentos</label>
-            <div class="resource-content flexrow flex-center flex-between">
-              <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number"/>
-              <span>/</span>
-              <input type="text" name="system.wounds.max" value="{{system.wounds.max}}" data-dtype="Number"/>
-            </div>
-          </div>
-          <div class="resource-card">
-            <label for="system.armor.value" class="resource-label">Armadura</label>
-            <div class="resource-content flexrow flex-center flex-between">
-              <input type="text" name="system.armor.value" value="{{system.armor.value}}" data-dtype="Number"/>
-              <span>/</span>
-              <input type="text" name="system.armor.max" value="{{system.armor.max}}" data-dtype="Number"/>
-            </div>
-          </div>
-          <div class="resource-card">
-            <label for="system.health.value" class="resource-label">Chakra</label>
-            <div class="resource-content flexrow flex-center flex-between">
-              <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number"/>
-              <span>/</span>
-              <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number"/>
-            </div>
+      <div class="resources grid grid-2col">
+        <div class="resource-card">
+          <label for="system.health.value" class="resource-label">Ferimentos</label>
+          <div class="resource-content flexrow flex-center flex-between">
+            <input type="text" name="system.wounds.value" value="{{system.wounds.value}}" data-dtype="Number" />
+            <span>/</span>
+            <input type="text" name="system.wounds.max" value="{{system.wounds.max}}" data-dtype="Number" />
           </div>
         </div>
+        <div class="resource-card">
+          <label for="system.armor.value" class="resource-label">Armadura</label>
+          <div class="resource-content flexrow flex-center flex-between">
+            <input type="text" name="system.armor.value" value="{{system.armor.value}}" data-dtype="Number" />
+            <span>/</span>
+            <input type="text" name="system.armor.max" value="{{system.armor.max}}" data-dtype="Number" />
+          </div>
+        </div>
+        <div class="resource-card">
+          <label for="system.health.value" class="resource-label">Chakra</label>
+          <div class="resource-content flexrow flex-center flex-between">
+            <input type="text" name="system.chakra.value" value="{{system.chakra.value}}" data-dtype="Number" />
+            <span>/</span>
+            <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number" />
+          </div>
+        </div>
+      </div>
       <div class="conditions-container" data-group="secondary" data-tab="conditions">
         <h3 class="conditions-title">Condições</h3>
         <div class="section-buttons">
-            <a class="item-create" data-type="condition"><i class="fa-solid fa-plus"></i>Adicionar condição</a>
+          <a class="item-create" data-type="condition"><i class="fa-solid fa-plus"></i>Adicionar condição</a>
         </div>
         <ul class="conditions-list">
-            {{#each conditions as |condition|}}
-                <li class="condition-card item" data-item-id="{{condition._id}}">
-                    <div class="condition-info">
-                        <span class="title">{{condition.name}}</span>
-                        {{#if condition.effects}}
-                        <div class="condition-effects">
-                            {{#each condition.effects as |effect|}}
-                                <span class="effect-tag">
-                                    {{effect.name}}:
-                                    {{#if effect.mod}}<span class="mod-value">{{#if (greaterThan effect.mod 0)}}+{{/if}}{{effect.mod}}</span>{{/if}}
-                                    {{#if effect.nv}}<span class="nv-value">{{#if (greaterThan effect.nv 0)}}+{{/if}}{{effect.nv}}NV</span>{{/if}}
-                                </span>
-                            {{/each}}
-                        </div>
-                        {{/if}}
-                    </div>
-                    <div class="controls">
-                        <a class="item-send rollable"  data-roll-type="item"><i class="fa-solid fa-comment"></i></a>
-                        <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
-                    </div>
-                </li>
-            {{/each}}
+          {{#each conditions as |condition|}}
+          <li class="condition-card item" data-item-id="{{condition._id}}">
+            <div class="condition-info">
+              <span class="title">{{condition.name}}</span>
+              {{#if condition.effects}}
+              <div class="condition-effects">
+                {{#each condition.effects as |effect|}}
+                <span class="effect-tag">
+                  {{effect.name}}:
+                  {{#if effect.mod}}<span class="mod-value">{{#if (greaterThan effect.mod
+                    0)}}+{{/if}}{{effect.mod}}</span>{{/if}}
+                  {{#if effect.nv}}<span class="nv-value">{{#if (greaterThan effect.nv
+                    0)}}+{{/if}}{{effect.nv}}NV</span>{{/if}}
+                </span>
+                {{/each}}
+              </div>
+              {{/if}}
+            </div>
+            <div class="controls">
+              <a class="item-send rollable" data-roll-type="item"><i class="fa-solid fa-comment"></i></a>
+              <a class="item-edit"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a class="item-delete"><i class="fa-solid fa-trash"></i></a>
+            </div>
+          </li>
+          {{/each}}
         </ul>
       </div>
-      <div class="moves-container" >
+      <div class="moves-container">
         <h3 class="conditions-title">Movimentos</h3>
         <div class="section-buttons">
-            <a class="item-create" data-type="move"><i class="fa-solid fa-plus"></i>Adicionar movimento</a>
+          <a class="item-create" data-type="move"><i class="fa-solid fa-plus"></i>Adicionar movimento</a>
         </div>
         <ul class="npc-categories-list" style="
           display: flex; 
@@ -114,49 +127,54 @@
           list-style: none;
         ">
           {{#each movesByCategory as |category|}}
-            <li class="move-category">
-              <h4><b>{{category.name}}</b></h4>
-              <ul class="moves-list">
-                {{#each category.items as |move|}}
-                    <li class="move-card item" data-item-id="{{move._id}}" data-tooltip="{{move.system.moveDescription}}" data-tooltip-direction="LEFT">
-                        <span class="title">{{move.name}}
-                          {{#if move.system.isNpcMove}}
-      
-                            {{#if move.system.npcMoveLevel.on}} 
-                              (Nv: <span class="move-card-number-change" data-number-reference="npcMoveLevel.value">{{move.system.npcMoveLevel.value}}</span>) 
-                            {{/if}}
-      
-                            {{#if move.system.npcUses.on}} 
-                              (Uses: <span class="move-card-number-change" data-number-reference="npcUses.min">{{move.system.npcUses.min}}</span> / <span class="move-card-number-change" data-number-reference="npcUses.max">{{move.system.npcUses.max}}</span>) 
-                            {{/if}}
-      
-                          {{/if}}
-                        </span>
-                        <div class="controls">
-                          {{#if move.system.npcUses.on}}
-                            <a class="item-npc-movement-reload-uses" title="Recarregar">
-                            <i class="fa-solid fa-rotate-right" {{#if move.system.npcUses.consumesNPCChakraOnReload.on}}style="color: #7CACF8;"{{/if}}></i>
-                            </a>
-                          {{/if}}
-                          <a class="rollableWithDialog" data-roll-type="item" title="Enviar para o chat">
-                            <i class="fa-solid fa-comment"
-                            {{#if move.system.npcMoveConsumesNPCChakraOnUse.on}}style="color: #7CACF8;"{{/if}}>
-                            </i>
-                          </a>
-                          <a class="item-edit" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
-                          <a class="item-delete" title="Excluir"><i class="fa-solid fa-trash"></i></a>
-                        </div>
-                    </li>
-                {{/each}}
+          <li class="move-category">
+            <h4><b>{{category.name}}</b></h4>
+            <ul class="moves-list">
+              {{#each category.items as |move|}}
+              <li class="move-card item" data-item-id="{{move._id}}" data-tooltip="{{move.system.moveDescription}}"
+                data-tooltip-direction="LEFT">
+                <span class="title">{{move.name}}
+                  {{#if move.system.isNpcMove}}
 
-              </ul>
-          {{/each}}
+                  {{#if move.system.npcMoveLevel.on}}
+                  (Nv: <span class="move-card-number-change"
+                    data-number-reference="npcMoveLevel.value">{{move.system.npcMoveLevel.value}}</span>)
+                  {{/if}}
+
+                  {{#if move.system.npcUses.on}}
+                  (Uses: <span class="move-card-number-change"
+                    data-number-reference="npcUses.min">{{move.system.npcUses.min}}</span> / <span
+                    class="move-card-number-change"
+                    data-number-reference="npcUses.max">{{move.system.npcUses.max}}</span>)
+                  {{/if}}
+
+                  {{/if}}
+                </span>
+                <div class="controls">
+                  {{#if move.system.npcUses.on}}
+                  <a class="item-npc-movement-reload-uses" title="Recarregar">
+                    <i class="fa-solid fa-rotate-right" {{#if
+                      move.system.npcUses.consumesNPCChakraOnReload.on}}style="color: #7CACF8;" {{/if}}></i>
+                  </a>
+                  {{/if}}
+                  <a class="rollableWithDialog" data-roll-type="item" title="Enviar para o chat">
+                    <i class="fa-solid fa-comment" {{#if
+                      move.system.npcMoveConsumesNPCChakraOnUse.on}}style="color: #7CACF8;" {{/if}}>
+                    </i>
+                  </a>
+                  <a class="item-edit" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
+                  <a class="item-delete" title="Excluir"><i class="fa-solid fa-trash"></i></a>
+                </div>
+              </li>
+              {{/each}}
+
+            </ul>
+            {{/each}}
         </ul>
       </div>
-       <h3>Biografia</h3>
-        {{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}
+      <h3>Biografia</h3>
+      {{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}
     </div>
     {{/unless}}
   </section>
 </form>
-
