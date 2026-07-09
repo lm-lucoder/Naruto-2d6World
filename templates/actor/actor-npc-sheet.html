@@ -35,9 +35,11 @@
             <input type="text" name="system.leveling.xp" value="{{system.leveling.xp}}" data-dtype="Number"
               style="width: 40px; text-align: center;">
           </div>
-          <button type="button" id="btn-upgrade-npc-moves">
+
+          <button type="button" id="btn-upgrade-npc-moves" {{#unless system.leveling.xp}}style="opacity: 0" {{/unless}}>
             <i class="fa-solid fa-arrow-up"></i> Upgrade
           </button>
+
           {{/if}}
         </div>
       </div>
