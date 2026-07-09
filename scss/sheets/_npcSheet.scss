@@ -1,12 +1,35 @@
-.npc{
+.npc {
+    .leveling-content {
+        gap: 5px;
+        display: flex;
+
+        .xp-content {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+
+            input {
+                flex: 1
+            }
+        }
+
+        button {
+            flex: 1
+        }
+
+    }
+
     .conditions-container {
         width: 100%;
         margin-bottom: 20px;
         padding-bottom: 20px;
         border-bottom: 1px solid $c-beige;
-        .section-buttons{
+
+        .section-buttons {
             margin: 10px 0;
         }
+
         .conditions-list {
             list-style: none;
             display: flex;
@@ -14,6 +37,7 @@
             gap: 10px;
             padding: 0;
             margin: 0;
+
             .condition-card {
                 padding: 5px 10px;
                 margin: 0;
@@ -23,29 +47,34 @@
                 gap: 10px;
                 border: 1px solid $c-beige;
                 border-radius: 3px;
-                
+
                 .condition-info {
                     display: flex;
                     flex-direction: column;
                     gap: 2px;
                     flex: 1;
+
                     .title {
                         font-weight: 500;
                     }
+
                     .condition-effects {
                         display: flex;
                         flex-wrap: wrap;
                         gap: 4px;
                         font-size: 11px;
                         opacity: 0.8;
+
                         .effect-tag {
                             display: inline-flex;
                             align-items: center;
                             gap: 2px;
+
                             .mod-value {
                                 color: #4a90e2;
                                 font-weight: 500;
                             }
+
                             .nv-value {
                                 color: #7b68ee;
                                 font-weight: 500;
@@ -53,36 +82,42 @@
                         }
                     }
                 }
-                
-                .controls{
+
+                .controls {
                     display: flex;
                     align-items: center;
                     gap: 5px;
                 }
             }
         }
-        
+
     }
-    .moves-container{
+
+    .moves-container {
         width: 100%;
         margin-bottom: 20px;
         padding-bottom: 20px;
         border-bottom: 1px solid $c-beige;
-        .section-buttons{
+
+        .section-buttons {
             margin: 10px 0;
         }
-        .npc-categories-list{
+
+        .npc-categories-list {
             padding: 0;
+
             .moves-list {
                 list-style: none;
                 padding: 0;
                 margin: 0;
+
                 .move-card {
                     border-bottom: 1px solid $c-beige;
                     padding: 4px 0;
                     display: flex;
                     justify-content: space-between;
-                    .controls{
+
+                    .controls {
                         display: flex;
                         align-items: center;
                         gap: 5px;

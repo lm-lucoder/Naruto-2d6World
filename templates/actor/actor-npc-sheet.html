@@ -27,20 +27,24 @@
           <input type="text" name="system.params.rank" value="{{system.params.rank}}">
         </div>
       </div>
+      <div class="grid grid-2col">
+        <div class="resource-content leveling-content">
+          {{#if owner}}
+          <div class="xp-content">
+            <label for="system.leveling.xp">XP:</label>
+            <input type="text" name="system.leveling.xp" value="{{system.leveling.xp}}" data-dtype="Number"
+              style="width: 40px; text-align: center;">
+          </div>
+          <button type="button" id="btn-upgrade-npc-moves">
+            <i class="fa-solid fa-arrow-up"></i> Upgrade
+          </button>
+          {{/if}}
+        </div>
+      </div>
       {{/unless}}
     </div>
-    <div class="npc-header-controls">
-      <div class="resource-content flexrow flex-center">
-        <label for="system.leveling.xp">XP:</label>
-        <input type="text" name="system.leveling.xp" value="{{system.leveling.xp}}" data-dtype="Number" style="width: 40px; text-align: center;">
-      </div>
-      {{#if owner}}
-      <button type="button" id="btn-upgrade-npc-moves">
-        <i class="fa-solid fa-arrow-up"></i> Upgrade
-      </button>
-      {{/if}}
-    </div>
   </header>
+
 
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
