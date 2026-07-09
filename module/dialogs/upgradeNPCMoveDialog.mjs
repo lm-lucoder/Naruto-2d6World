@@ -77,6 +77,7 @@ class UpgradeNPCMoveDialog extends Dialog {
 
         // Regra: se não for GM/Assistant e o move tiver canBePlayerAcquired = false, não pode adquirir
         const _canAcquireMove = (sys) => {
+
             const upgrades = sys?.npcMoveUpgrades;
             if (!upgrades?.canBeNPCAcquired) return false;
             if (upgrades.canBePlayerAcquired === false && !isGMOrAssistant) return false;

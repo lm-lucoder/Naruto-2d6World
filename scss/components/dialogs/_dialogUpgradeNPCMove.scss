@@ -49,7 +49,6 @@
         margin: 0;
         padding: 4px 0;
         overflow-y: auto;
-        flex: 1;
 
         .upgrade-move-item {
             display: flex;
@@ -173,7 +172,7 @@
 
     // ── Upgrade choice overlay ───────────────────────────────────────────────
     .upgrade-choice-overlay {
-        position: absolute;
+        position: fixed;
         inset: 0;
         display: flex;
         align-items: center;
@@ -244,6 +243,15 @@
         display: flex;
         gap: 8px;
         justify-content: flex-end;
+
+        .acquire-confirm-btn {
+            flex: 2
+        }
+
+        .acquire-cancel-btn {
+            flex: 1
+        }
+
 
         button {
             padding: 5px 14px;
