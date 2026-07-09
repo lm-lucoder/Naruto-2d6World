@@ -1,6 +1,9 @@
 {
 	"Actor": {
-		"types": ["character", "npc"],
+		"types": [
+			"character",
+			"npc"
+		],
 		"templates": {
 			"base": {
 				"wounds": {
@@ -23,7 +26,9 @@
 			}
 		},
 		"character": {
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"iniciativa": false,
 			"advantageLevel": {
 				"actual": 0,
@@ -71,7 +76,9 @@
 			}
 		},
 		"npc": {
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"rank": "",
 			"village": "",
 			"age": "",
@@ -79,15 +86,25 @@
 		}
 	},
 	"Item": {
-		"types": ["move", "skill", "condition", "ability", "item"],
+		"types": [
+			"move",
+			"skill",
+			"condition",
+			"ability",
+			"item"
+		],
 		"templates": {
 			"base": {
 				"description": "",
-				"htmlFields": ["description"]
+				"htmlFields": [
+					"description"
+				]
 			}
 		},
 		"move": {
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"category": "Normal",
 			"attributes": {
 				"bod": {
@@ -116,15 +133,15 @@
 					"ref": "cun"
 				}
 			},
-			"results" : {
-				"strong" : "",
-				"weak" : "",
-				"miss" : ""
+			"results": {
+				"strong": "",
+				"weak": "",
+				"miss": ""
 			},
-			"rollMode" : "normal",
-			"isNpcMove" : false,
+			"rollMode": "normal",
+			"isNpcMove": false,
 			"npcUses": {
-				"on":false,
+				"on": false,
 				"min": 0,
 				"max": 0,
 				"consumesOnChatSending": true,
@@ -133,28 +150,38 @@
 					"value": 0
 				}
 			},
-			"npcMoveLevel" : {
-				"value" : 0,
+			"npcMoveLevel": {
+				"value": 0,
 				"on": false
 			},
-			"npcMoveRoll" : {
-				"on" : false,
-				"value" : 0
+			"npcMoveRoll": {
+				"on": false,
+				"value": 0
 			},
 			"npcMoveConsumesNPCChakraOnUse": {
 				"on": false,
 				"value": 0
+			},
+			"npcMoveUpgrades": {
+				"isUpgradable": false,
+				"Maxlevel": 0,
+				"MaxmoveUses": 0,
+				"levelUpgradeCost": 0,
+				"moveUseUpgradeCost": 0
 			}
 		},
 		"skill": {
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"rank": {
 				"value": "0"
 			}
 		},
-
 		"condition": {
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"isActive": false,
 			"globalMod": 0,
 			"globalNV": 0,
@@ -191,14 +218,15 @@
 				}
 			}
 		},
-
 		"ability": {
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"category": "Normal",
 			"level": 1,
 			"maxLevel": 0,
-			"showMaxLevel" : true,
-			"chakra":{
+			"showMaxLevel": true,
+			"chakra": {
 				"useChakraPoints": true,
 				"chakraPoints": 0,
 				"chakraPointsPerLevel": 1,
@@ -214,7 +242,9 @@
 				"scrollMaxSlots": 0,
 				"scrollItems": []
 			},
-			"templates": ["base"],
+			"templates": [
+				"base"
+			],
 			"category": "Normal",
 			"cost": 0,
 			"quantity": 0,
@@ -222,7 +252,7 @@
 			"slots_bonus": 0,
 			"considerSlots": true,
 			"onHand": false,
-			"attributes" : []
+			"attributes": []
 		}
 	}
 }
