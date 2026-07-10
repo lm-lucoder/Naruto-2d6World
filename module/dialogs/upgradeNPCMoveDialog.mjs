@@ -60,6 +60,12 @@ class UpgradeNPCMoveDialog extends Dialog {
         // Helper para verificar interseção de tags
         const _hasMatchingTag = (sys) => {
             const moveTags = (sys?.npcMoveUpgrades?.tags || "").split(";").map(t => t.trim());
+
+            const importantTags = moveTags.filter(tag => tag.includes("!"));
+            if (importantTags) {
+                const actorHasAllImportantTags = importantTags.every(tag => actorTags.includes(tag));
+                if (!actorHasAllImportantTags) return false
+            }
             // Retorna true se houver pelo menos uma tag em comum (mesmo que seja a string vazia "")
             return moveTags.some(tag => actorTags.includes(tag));
         };
