@@ -3,66 +3,71 @@
         <div class="grid grid-2col">
             <div class="resource">
                 <label for="system.params.ryos">Ryos:</label>
-                <input type="number" name="system.params.ryos" value="{{system.params.ryos}}" >
+                <input type="number" name="system.params.ryos" value="{{system.params.ryos}}">
             </div>
             <div class="resource">
                 <label for="system.params.space">Capacidade de Espaço:</label>
-                <input type="number" name="system.params.space" value="{{system.params.space}}" >
+                <input type="number" name="system.params.space" value="{{system.params.space}}">
             </div>
         </div>
     </div>
-    <h3>Iventário: <span class="{{#if space.isAboveSpace}}above-space{{/if}}">{{space.usedSpace}} | {{space.maxSpace}}</span></h3>
+    <h3>Inventário: <span class="{{#if space.isAboveSpace}}above-space{{/if}}">{{space.usedSpace}} |
+            {{space.maxSpace}}</span></h3>
     <div class="section-buttons">
         <a class="add-item-btn item-create" data-type="item"><i class="fa-solid fa-plus"></i> Adicionar novo item</a>
     </div>
     <div class="iventory-container">
         {{#each gearByCategory as |category|}}
-            <h4 class="category-title">{{category.name}}</h4>
-            <ol class="iventory-list item-list">
-                {{#each category.items as |item id|}}
-                    <li class="item-card item" data-item-id="{{item._id}}">
-                            <div class="content">
-                                <div class="info">
-                                    <img class="img" src="{{item.img}}"> 
-                                    <span class="title"><a class="show-item-description-window-btn">
-                                        {{#if item.system.onHand}}
-                                            <i class="fa-solid fa-hand"></i>
-                                        {{/if}}
-                                        {{item.name}}
-                                    </a></span>
-                                    <div class="item-attributes">
-                                            <span class="quantity item-attribute-quantity"><i class="fa-solid fa-sack"></i> ({{item.system.quantity}})</span>
-                                        {{#if item.system.slots}}
-                                            <span class="slots"><i class="fa-solid fa-weight-hanging"></i> ({{multiplyWithTwoDecimalsMax item.system.slots item.system.quantity}})</span>
-                                        {{/if}}
-                                        {{#if item.system.slots_bonus}}
-                                            <span class="slots_bonus"><i class="fa-solid fa-square-plus"></i> ({{multiplyWithTwoDecimalsMax item.system.slots_bonus item.system.quantity}})</span>
-                                        {{/if}}
-                                        {{#each item.system.attributes as |attribute|}}
-                                            <div class="item-card-attribute-tag" data-attribute-id="{{attribute.id}}">
-                                                <span class="name">{{attribute.name}}</span>
-                                                <span class="data">{{attribute.value}} / {{attribute.maxValue}}</span>
-                                            </div>
-                                        {{/each}}
-                                    </div>
-                                </div>
-                                <div class="item-card-buttons">
-                                    {{#if item.system.scroll.isScroll}}
-                                        <span class="item-scroll-unseal-btn">
-                                            <a>Liberar</a>
-                                        </span>
-                                    {{/if}}
-                                    <span class="item-quantity-manage-btn"><a><i class="fa-solid fa-sack"></i></a></span>
-                                    <span class="item-send-log-btn rollable" data-roll-type="item"><a><i class="fa-solid fa-comment"></i></a></span>
-                                    <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
-                                    <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
-                                </div>
+        <h4 class="category-title">{{category.name}}</h4>
+        <ol class="iventory-list item-list">
+            {{#each category.items as |item id|}}
+            <li class="item-card item" data-item-id="{{item._id}}">
+                <div class="content">
+                    <div class="info">
+                        <img class="img" src="{{item.img}}">
+                        <span class="title"><a class="show-item-description-window-btn">
+                                {{#if item.system.onHand}}
+                                <i class="fa-solid fa-hand"></i>
+                                {{/if}}
+                                {{item.name}}
+                            </a></span>
+                        <div class="item-attributes">
+                            <span class="quantity item-attribute-quantity"><i class="fa-solid fa-sack"></i>
+                                ({{item.system.quantity}})</span>
+                            {{#if item.system.slots}}
+                            <span class="slots"><i class="fa-solid fa-weight-hanging"></i> ({{multiplyWithTwoDecimalsMax
+                                item.system.slots item.system.quantity}})</span>
+                            {{/if}}
+                            {{#if item.system.slots_bonus}}
+                            <span class="slots_bonus"><i class="fa-solid fa-square-plus"></i>
+                                ({{multiplyWithTwoDecimalsMax item.system.slots_bonus item.system.quantity}})</span>
+                            {{/if}}
+                            {{#each item.system.attributes as |attribute|}}
+                            <div class="item-card-attribute-tag" data-attribute-id="{{attribute.id}}">
+                                <span class="name">{{attribute.name}}</span>
+                                <span class="data">{{attribute.value}} / {{attribute.maxValue}}</span>
                             </div>
-                        <div class="description-window">
+                            {{/each}}
                         </div>
-                    </li>
-                {{/each}}
-            </ol>
+                    </div>
+                    <div class="item-card-buttons">
+                        {{#if item.system.scroll.isScroll}}
+                        <span class="item-scroll-unseal-btn">
+                            <a>Liberar</a>
+                        </span>
+                        {{/if}}
+                        <span class="item-quantity-manage-btn"><a><i class="fa-solid fa-sack"></i></a></span>
+                        <span class="item-send-log-btn rollable" data-roll-type="item"><a><i
+                                    class="fa-solid fa-comment"></i></a></span>
+                        <span class="item-edit-btn item-edit"><a><i class="fa-solid fa-pen-to-square"></i></a></span>
+                        <span class="item-delete-btn item-delete"><a><i class="fa-solid fa-trash"></i></a></span>
+                    </div>
+                </div>
+                <div class="description-window">
+                </div>
+            </li>
+            {{/each}}
+        </ol>
         {{/each}}
     </div>
 </div>
