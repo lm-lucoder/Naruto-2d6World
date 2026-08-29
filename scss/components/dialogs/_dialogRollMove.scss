@@ -66,6 +66,37 @@
                 font-weight: bold;
             }
         }
+        .nv-breakdown{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 4px;
+            .nv-breakdown-tag{
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 4px 8px;
+                border: 1px solid $c-beige;
+                border-radius: 3px;
+                background-color: #00000012;
+                .label{
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .value{
+                    font-weight: bold;
+                    white-space: nowrap;
+                }
+            }
+            .positive .value{
+                color: #218838;
+            }
+            .negative .value{
+                color: #b40309;
+            }
+        }
         .bad{
             background-color: #d85c6070;
         }

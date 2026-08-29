@@ -48,14 +48,12 @@ class RollMoveDialog extends Dialog {
 						<div class="advantage-level-container">
 							<div class="panel ${RollMoveDialog._getAdvantageLevelClass(advantageLevel.value)}">
 									<span class="nv">${RollMoveDialog._getAdvantageLevelText(advantageLevel.value)}</span>
-									<span class="val">
-										<span class="actual">${advantageLevel.value} NV</span>
-										<span class="changing"></span>
-									</span>
+									<span class="val actual">${advantageLevel.value} NV</span>
 							</div>
+							<div class="nv-breakdown" aria-label="Composição do Nível de Vantagem"></div>
 							<div class="controls">
-									<button class="btn-decrease-advantage-level"> < </button>
-									<button class="btn-increase-advantage-level"> > </button>
+									<button type="button" class="btn-decrease-advantage-level"> < </button>
+									<button type="button" class="btn-increase-advantage-level"> > </button>
 							</div>
 						</div>
 						<button class="default-roll-button">Rolar</button>
@@ -212,8 +210,10 @@ class RollMoveDialog extends Dialog {
 		// Calcular NV total das condições
 		const totalConditionNV = conditionsInfo.reduce((sum, condition) => sum + condition.totalNV, 0);
 
-		// Calcular NV total final
-		const totalNV = baseNV + totalConditionNV + manualAdjustment;
+		const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
+
+		// Calcular NV total final. Deve espelhar o cálculo aplicado pelo motor de rolagem.
+		const totalNV = baseNV + totalConditionNV + manualAdjustment + masterGlobalNV;
 
 		const panel = e.target.closest('.dialog-content')?.querySelector('.panel') ||
 			e.target.closest('.window-content')?.querySelector('.panel');
@@ -224,30 +224,44 @@ class RollMoveDialog extends Dialog {
 		const newClass = RollMoveDialog._getAdvantageLevelClass(totalNV);
 		panel.classList.add(newClass);
 
-		const actualSpan = panel.querySelector('.actual');
-		const changingSpan = panel.querySelector('.changing');
+		panel.querySelector('.actual').innerText = `${totalNV > 0 ? "+" : ""}${totalNV} NV`;
 
-		// Mostrar o NV base
-		actualSpan.innerText = `${baseNV} NV`;
-
-		// Mostrar cada condição com seu total (global + específico somados)
-		let changingText = "";
-
-		// Mostrar cada condição
-		conditionsInfo.forEach((condition, index) => {
-			if (index > 0) changingText += " | ";
-			changingText += condition.totalNV > 0 ? ` +${condition.totalNV}` : ` ${condition.totalNV}`;
-			changingText += ` (${condition.name})`;
+		const breakdown = panel.parentElement.querySelector('.nv-breakdown');
+		this._renderNVBreakdown(breakdown, {
+			baseNV,
+			conditionsInfo,
+			manualAdjustment,
+			masterGlobalNV
 		});
+	}
 
-		// Mostrar ajustes manuais
-		if (manualAdjustment !== 0) {
-			if (changingText) changingText += " | ";
-			changingText += manualAdjustment > 0 ? ` +${manualAdjustment}` : ` ${manualAdjustment}`;
-			changingText += " (manual)";
+	/** Renderiza uma tag vertical para cada origem que compõe o NV total. */
+	_renderNVBreakdown(container, { baseNV, conditionsInfo, manualAdjustment, masterGlobalNV }) {
+		if (!container) return;
+		container.replaceChildren();
+
+		const entries = [
+			{ label: "NV base", value: baseNV },
+			...conditionsInfo.map((condition) => ({ label: condition.name, value: condition.totalNV })),
+			...(manualAdjustment !== 0 ? [{ label: "Ajuste manual", value: manualAdjustment }] : []),
+			...(masterGlobalNV !== 0 ? [{ label: "NV Mestre", value: masterGlobalNV }] : [])
+		];
+
+		for (const entry of entries) {
+			const tag = document.createElement('div');
+			tag.classList.add('nv-breakdown-tag', entry.value > 0 ? 'positive' : entry.value < 0 ? 'negative' : 'neutral');
+
+			const label = document.createElement('span');
+			label.classList.add('label');
+			label.textContent = entry.label;
+
+			const value = document.createElement('span');
+			value.classList.add('value');
+			value.textContent = `${entry.value > 0 ? '+' : ''}${entry.value} NV`;
+
+			tag.append(label, value);
+			container.append(tag);
 		}
-
-		changingSpan.innerText = changingText;
 	}
 
 	static _getAdvantageLevelClass(paramValue) {
