@@ -1,0 +1,119 @@
+.character-tracker-content {
+  padding: 4px;
+}
+
+.character-tracker-root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+
+  .character-tracker-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .character-tracker-title {
+    font-weight: bold;
+  }
+
+  .character-tracker-toolbar-actions {
+    display: flex;
+    gap: 3px;
+  }
+
+  .character-tracker-add,
+  .character-tracker-clear {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid $c-beige;
+    border-radius: 3px;
+  }
+
+  .character-tracker-clear {
+    color: #73590d;
+  }
+
+  .character-tracker-remove {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    color: #b40309;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .character-tracker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .character-tracker-entry {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px;
+    border: 1px solid $c-beige;
+    border-radius: 3px;
+    background: #00000012;
+  }
+
+  .character-tracker-portrait {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 3px;
+    object-fit: cover;
+  }
+
+  .character-tracker-data {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .character-tracker-name {
+    display: block;
+    overflow: hidden;
+    font-weight: bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .character-tracker-resources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 6px;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
+
+    img {
+      width: 13px;
+      height: 13px;
+      border: 0;
+      object-fit: contain;
+    }
+  }
+
+  .character-tracker-nv {
+    font-weight: bold;
+  }
+
+  .character-tracker-empty {
+    padding: 8px;
+    color: #6b6b6b;
+    text-align: center;
+  }
+}

@@ -9,6 +9,7 @@ import { preloadHandlebarsTemplates } from "./helpers/templates.mjs";
 import { BOILERPLATE } from "./helpers/config.mjs";
 import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
 import { GameSettings } from "./settings/settings.mjs";
+import { CharacterTrackerService } from "./services/character-tracker-service.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -24,6 +25,9 @@ Hooks.once('init', async function () {
     BoilerplateActor,
     BoilerplateItem,
     rollItemMacro
+  };
+  game.naruto2d6world = {
+    characterTracker: CharacterTrackerService
   };
 
   // Add custom constants for configuration.
@@ -391,6 +395,13 @@ Hooks.once("ready", async function () {
       });
     });
   }); */
+
+  // Registre todos os hooks da UI do Foundry antes de abrir qualquer janela
+  // automática. Isso evita perder a primeira renderização do chat e, com ela,
+  // a inserção dos controles de NV do Mestre.
+  if (game.settings.get("naruto2d6world", CharacterTrackerService.AUTO_OPEN_SETTING_KEY)) {
+    await CharacterTrackerService.open();
+  }
 });
 
 

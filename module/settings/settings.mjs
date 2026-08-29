@@ -1,3 +1,5 @@
+import { CharacterTrackerService } from "../services/character-tracker-service.mjs";
+
 class GameSettings {
   static start() {
     game.settings.register("naruto2d6world", "great-advantage-threshold", {
@@ -46,6 +48,8 @@ class GameSettings {
       type: Number,
       default: 0,
     });
+
+    CharacterTrackerService.registerSettings();
 
   }
 
