@@ -1,4 +1,5 @@
 import { CharacterTrackerService } from "../services/character-tracker-service.mjs";
+import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -15,7 +16,10 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     actions: {
       addSelected: () => CharacterTrackerService.addControlledTokens(),
       removeTracked: (event, target) => CharacterTrackerService.removeTrackedActor(target.dataset.actorUuid),
-      clearAll: () => CharacterTrackerService.clearAll()
+      clearAll: () => CharacterTrackerService.clearAll(),
+      addMasterGlobal: () => this._addMasterGlobalModifier(),
+      removeMasterGlobal: (event, target) => MasterNVModifierService.removeGlobalModifier(target.dataset.modifierId),
+      clearMasterGlobal: () => MasterNVModifierService.clearGlobalModifiers()
     },
     position: {
       width: 260,
@@ -70,6 +74,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     return {
       canAdd: game.user.isGM,
       canManage: game.user.isGM,
+      masterGlobalModifiers: MasterNVModifierService.getGlobalModifiers(),
       actors: orderedActors.map((actor) => this._prepareActorContext(actor))
     };
   }
@@ -106,5 +111,25 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
 
   _onEntryDrop(event) {
     // Reserved for future native internal DragDrop behavior.
+  }
+
+  static async _addMasterGlobalModifier() {
+    const result = await foundry.applications.api.DialogV2.prompt({
+      window: { title: "Adicionar NV global do Mestre" },
+      content: `<form class="standard-form"><div class="form-group"><label>Nome</label><input name="name" type="text" required autofocus></div><div class="form-group"><label>Valor</label><input name="value" type="number" value="0" step="1" required></div></form>`,
+      ok: {
+        label: "Adicionar",
+        callback: (event, button) => {
+          const form = button.form ?? button.closest("form");
+          return { name: form.elements.name.value, value: form.elements.value.value };
+        }
+      }
+    });
+    if (!result) return;
+    try {
+      await MasterNVModifierService.addGlobalModifier(result);
+    } catch (error) {
+      ui.notifications.warn(error.message);
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+
 class ManageNVModifiersDialog extends Dialog {
   static async create({ actor }) {
     const dialog = new this({
@@ -37,6 +39,10 @@ class ManageNVModifiersDialog extends Dialog {
           rows.push(`<li class="nv-modifier-row fixed"><span>${escapeHTML(condition.name)} — ${escapeHTML(attribute.name)}</span><strong>${this._formatValue(attributeNV)}</strong></li>`);
         }
       }
+    }
+
+    for (const modifier of MasterNVModifierService.getModifiers(actor)) {
+      rows.push(`<li class="nv-modifier-row fixed"><span>${escapeHTML(modifier.label)}</span><strong>${this._formatValue(modifier.value)}</strong></li>`);
     }
 
     const customModifiers = actor.system.nvModifiers ?? [];

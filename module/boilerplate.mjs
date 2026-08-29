@@ -10,6 +10,7 @@ import { BOILERPLATE } from "./helpers/config.mjs";
 import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
 import { GameSettings } from "./settings/settings.mjs";
 import { CharacterTrackerService } from "./services/character-tracker-service.mjs";
+import { MasterNVModifierService } from "./services/master-nv-modifier-service.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -27,7 +28,8 @@ Hooks.once('init', async function () {
     rollItemMacro
   };
   game.naruto2d6world = {
-    characterTracker: CharacterTrackerService
+    characterTracker: CharacterTrackerService,
+    masterNVModifiers: MasterNVModifierService
   };
 
   // Add custom constants for configuration.
@@ -139,118 +141,7 @@ Hooks.once("ready", async function () {
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on("hotbarDrop", (bar, data, slot) => createItemMacro(data, slot));
 
-  // Função auxiliar global para atualizar o display do NV Mestre
-  // Esta função será chamada tanto localmente quanto via hook de settings
-  function updateMasterNVDisplay() {
-    try {
-      const currentNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
-
-      const valueElements = document.querySelectorAll(".global-nv-value");
-      if (valueElements && valueElements.length > 0) {
-        valueElements.forEach(el => {
-          el.textContent = currentNV;
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao atualizar exibição do NV:", error);
-    }
-  }
-
-  // Hook para atualizar o display quando a setting for alterada (sincroniza todos os clientes)
-  // O hook updateSetting dispara para todos os clientes quando uma setting world é alterada
-  Hooks.on("updateSetting", (setting, value, options, userId) => {
-    // O formato do setting é "moduleName.settingKey"
-
-    if (setting.key === "naruto2d6world.master-global-nv") {
-      updateMasterNVDisplay();
-    }
-  });
-
-  // Adicionar controles de NV global do mestre no chat-form
-  // Usar renderApplication para garantir que o chat esteja renderizado
-  Hooks.on("renderApplication", (app, html, data) => {
-    // Verificar se é o ChatLog (MobileMenu no Foundry v13)
-    if (app.constructor.name !== "MobileMenu") return;
-
-    // Aguardar um pouco para garantir que o DOM esteja pronto
-    setTimeout(() => {
-      const chatForm = document.querySelector(".chat-form");
-      if (!chatForm) return;
-
-      let globalNVControls = chatForm.querySelector(".global-nv-controls");
-
-      // Se não existir, criar os controles
-      if (!globalNVControls) {
-        globalNVControls = document.createElement("div");
-        globalNVControls.classList.add("global-nv-controls");
-        const currentNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
-        const isGM = game.user.isGM;
-
-        // Montar HTML baseado se é GM ou não
-        let buttonsHTML = "";
-        if (isGM) {
-          buttonsHTML = `
-            <button class="global-nv-button global-nv-decrease" type="button">-1NV</button>
-            <span class="global-nv-value">${currentNV}</span>
-            <button class="global-nv-button global-nv-increase" type="button">+1NV</button>
-          `;
-        } else {
-          buttonsHTML = `<span class="global-nv-value">${currentNV}</span>`;
-        }
-
-        globalNVControls.innerHTML = `
-          <span class="global-nv-label">NV Mestre:</span>
-          ${buttonsHTML}
-        `;
-        chatForm.insertBefore(globalNVControls, chatForm.firstChild);
-
-        // Event listeners para os botões (apenas se for GM)
-        if (isGM) {
-          const increaseBtn = globalNVControls.querySelector(".global-nv-increase");
-          const decreaseBtn = globalNVControls.querySelector(".global-nv-decrease");
-
-          if (increaseBtn) {
-            increaseBtn.addEventListener("click", async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              try {
-                const currentNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
-                await game.settings.set("naruto2d6world", "master-global-nv", currentNV + 1);
-                // O hook updateSetting irá atualizar o display automaticamente para todos os clientes
-              } catch (error) {
-                console.error("Erro ao aumentar NV global:", error);
-              }
-              return false;
-            });
-          }
-
-          if (decreaseBtn) {
-            decreaseBtn.addEventListener("click", async (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              try {
-                const currentNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
-                await game.settings.set("naruto2d6world", "master-global-nv", currentNV - 1);
-                // O hook updateSetting irá atualizar o display automaticamente para todos os clientes
-              } catch (error) {
-                console.error("Erro ao diminuir NV global:", error);
-              }
-              return false;
-            });
-          }
-        }
-      } else {
-        // Se já existir, apenas atualizar o valor
-        const valueElement = globalNVControls.querySelector(".global-nv-value");
-        if (valueElement) {
-          const currentNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
-          valueElement.textContent = currentNV;
-        }
-      }
-    }, 100);
-  });
+  await MasterNVModifierService.migrateLegacySetting();
 
   // Chat Move Message card Reroll event
   window.addEventListener("click", async (event) => {

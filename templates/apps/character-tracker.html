@@ -1,3 +1,26 @@
+<div class="character-tracker-panel">
+<section class="character-tracker-master-nv">
+  <header class="character-tracker-toolbar">
+    <span class="character-tracker-title">NVs Globais do Mestre</span>
+    {{#if canManage}}
+      <div class="character-tracker-toolbar-actions">
+        <button type="button" class="character-tracker-add" data-action="addMasterGlobal" data-tooltip="Adicionar NV global"><i class="fa-solid fa-plus"></i></button>
+        <button type="button" class="character-tracker-clear" data-action="clearMasterGlobal" data-tooltip="Remover todos os NVs globais"><i class="fa-solid fa-broom"></i></button>
+      </div>
+    {{/if}}
+  </header>
+  <ol class="character-tracker-master-list">
+    {{#each masterGlobalModifiers}}
+      <li class="character-tracker-master-entry">
+        <span>{{name}}</span><strong>{{#if (greaterThan value 0)}}+{{/if}}{{value}} NV</strong>
+        {{#if ../canManage}}<button type="button" class="character-tracker-remove" data-action="removeMasterGlobal" data-modifier-id="{{id}}" data-tooltip="Remover modificador"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+      </li>
+    {{else}}
+      <li class="character-tracker-master-empty">Nenhum NV global ativo.</li>
+    {{/each}}
+  </ol>
+</section>
+
 <div class="character-tracker-root">
   <header class="character-tracker-toolbar">
     <span class="character-tracker-title">Personagens</span>
@@ -40,4 +63,5 @@
       <li class="character-tracker-empty">Nenhum personagem adicionado.</li>
     {{/each}}
   </ol>
+</div>
 </div>

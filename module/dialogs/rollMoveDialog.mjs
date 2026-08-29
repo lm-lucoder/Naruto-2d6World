@@ -1,5 +1,6 @@
 import { GameSettings } from "../settings/settings.mjs";
 import { AdvantageLevelApi } from "../sheets/actor-sheet.mjs";
+import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 
 class RollMoveDialog extends Dialog {
 	constructor(dialogData = {}, options = {}) {
@@ -138,6 +139,7 @@ class RollMoveDialog extends Dialog {
 			baseAdvantageLevel, // NV base do personagem
 			manualAdjustment, // Ajuste manual do diálogo
 			baseNVInfo: this._advantageLevel.reasons,
+			masterNVInfo: MasterNVModifierService.getModifiers(this._currentItem.actor),
 			attribute: chosenAttribute,
 			rollModifier
 		});
@@ -211,10 +213,11 @@ class RollMoveDialog extends Dialog {
 		// Calcular NV total das condições
 		const totalConditionNV = conditionsInfo.reduce((sum, condition) => sum + condition.totalNV, 0);
 
-		const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
+		const masterNVInfo = MasterNVModifierService.getModifiers(this._currentItem.actor);
+		const masterNV = masterNVInfo.reduce((sum, modifier) => sum + modifier.value, 0);
 
 		// Calcular NV total final. Deve espelhar o cálculo aplicado pelo motor de rolagem.
-		const totalNV = baseNV + totalConditionNV + manualAdjustment + masterGlobalNV;
+		const totalNV = baseNV + totalConditionNV + manualAdjustment + masterNV;
 
 		const panel = e.target.closest('.dialog-content')?.querySelector('.panel') ||
 			e.target.closest('.window-content')?.querySelector('.panel');
@@ -232,12 +235,12 @@ class RollMoveDialog extends Dialog {
 			baseNVInfo: this._advantageLevel.reasons,
 			conditionsInfo,
 			manualAdjustment,
-			masterGlobalNV
+			masterNVInfo
 		});
 	}
 
 	/** Renderiza uma tag vertical para cada origem que compõe o NV total. */
-	_renderNVBreakdown(container, { baseNVInfo, conditionsInfo, manualAdjustment, masterGlobalNV }) {
+	_renderNVBreakdown(container, { baseNVInfo, conditionsInfo, manualAdjustment, masterNVInfo }) {
 		if (!container) return;
 		container.replaceChildren();
 
@@ -245,7 +248,7 @@ class RollMoveDialog extends Dialog {
 			...baseNVInfo.map((entry) => ({ label: entry.reason === "Base" ? "NV base" : entry.reason, value: entry.value })),
 			...conditionsInfo.map((condition) => ({ label: condition.name, value: condition.totalNV })),
 			...(manualAdjustment !== 0 ? [{ label: "Ajuste manual", value: manualAdjustment }] : []),
-			...(masterGlobalNV !== 0 ? [{ label: "NV Mestre", value: masterGlobalNV }] : [])
+			...masterNVInfo.filter((modifier) => modifier.value !== 0).map((modifier) => ({ label: modifier.label, value: modifier.value }))
 		];
 
 		for (const entry of entries) {

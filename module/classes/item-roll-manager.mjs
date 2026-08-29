@@ -1,6 +1,8 @@
 /**
  * Classe para gerenciar rolagens de itens
  */
+import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+
 export class ItemRollManager {
   /**
    * Apply advantage level (NV) modifications to challenge dice
@@ -158,19 +160,19 @@ export class ItemRollManager {
    * @param {Object} params - Roll parameters
    */
   static async moveRoll(item, params) {
-    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
+    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo: suppliedMasterNVInfo, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
 
     if (isUpdate && rerollMode == "adjustment") {
       // Para ajustes manuais, não recalcular condições - usar valores opcionais
-      // Mas ainda considerar o NV global do mestre
-      const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
+      // Mas ainda considerar os modificadores do mestre.
+      const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getModifiers(item.actor);
       const label = ItemRollManager.getMoveLabelRollTemplate({
         move: item,
         advantageLevel,
         baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : advantageLevel,
         baseNVInfo,
         manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0,
-        masterGlobalNV: masterGlobalNV,
+        masterNVInfo,
         conditionsNVInfo: [], // Não recalcular em ajustes
         attribute,
         rollModifier,
@@ -274,9 +276,10 @@ export class ItemRollManager {
       ? (baseAdvantageLevel || 0) + (manualAdjustment || 0)
       : (advantageLevel || 0);
 
-    // Adicionar NV global do mestre
-    const masterGlobalNV = game.settings.get("naruto2d6world", "master-global-nv") || 0;
-    const nvValue = baseAndManual + attributeNV + masterGlobalNV;
+    // Adicionar modificadores globais e locais do mestre.
+    const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getModifiers(actor);
+    const masterNV = masterNVInfo.reduce((total, modifier) => total + modifier.value, 0);
+    const nvValue = baseAndManual + attributeNV + masterNV;
     const modifiedDice = ItemRollManager.applyAdvantageLevelToChallengeDice(
       nvValue,
       originalChallengeDiceOne,
@@ -293,7 +296,7 @@ export class ItemRollManager {
       baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : (advantageLevel || 0), // NV base do personagem
       baseNVInfo,
       manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0, // Ajuste manual do diálogo
-      masterGlobalNV: masterGlobalNV, // NV global do mestre
+      masterNVInfo,
       conditionsNVInfo: conditionsNVInfo, // Informações detalhadas das condições
       attribute,
       rollModifier,
@@ -505,7 +508,7 @@ export class ItemRollManager {
    * @param {Object} params - Template parameters
    * @returns {string} HTML template string
    */
-  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterGlobalNV, conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
+  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo = [], conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
     let successCount = 0
     let match = false
     let resultType = ""
@@ -565,11 +568,11 @@ export class ItemRollManager {
         nvParts.push(`${manualSign}${manualAdjustment} (manual)`);
       }
 
-      // Adicionar NV global do mestre (se houver e for diferente de zero)
-      if (masterGlobalNV !== undefined && masterGlobalNV !== 0) {
-        const masterSign = masterGlobalNV > 0 ? "+" : "";
-        nvParts.push(`${masterSign}${masterGlobalNV} (Mestre)`);
-      }
+      // Adicionar cada modificador do mestre individualmente.
+      masterNVInfo.filter((modifier) => modifier.value !== 0).forEach((modifier) => {
+        const masterSign = modifier.value > 0 ? "+" : "";
+        nvParts.push(`${masterSign}${modifier.value} (${modifier.label})`);
+      });
 
       // Adicionar NVs das condições
       if (conditionsNVInfo && conditionsNVInfo.length > 0) {

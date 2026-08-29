@@ -24,6 +24,10 @@ export class CharacterTrackerService {
       if (!this._application?.rendered || !this.trackedActorUuids.includes(actor.uuid)) return;
       this._application.render();
     });
+    Hooks.on("updateSetting", (setting) => {
+      if (setting.key !== "naruto2d6world.master-global-nv-modifiers" || !this._application?.rendered) return;
+      this._application.render();
+    });
   }
 
   static get trackedActorUuids() {

@@ -1,4 +1,5 @@
 import { CharacterTrackerService } from "../services/character-tracker-service.mjs";
+import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 
 class GameSettings {
   static start() {
@@ -50,6 +51,7 @@ class GameSettings {
     });
 
     CharacterTrackerService.registerSettings();
+    MasterNVModifierService.registerSettings();
 
   }
 

@@ -1,0 +1,98 @@
+/** Manages the GM-owned NV modifiers applied globally or to one actor. */
+export class MasterNVModifierService {
+  static GLOBAL_SETTING_KEY = "master-global-nv-modifiers";
+  static LEGACY_SETTING_KEY = "master-global-nv";
+  static LOCAL_FLAG_KEY = "master-local-nv-modifiers";
+
+  static registerSettings() {
+    game.settings.register("naruto2d6world", this.GLOBAL_SETTING_KEY, {
+      name: "Modificadores globais de NV do Mestre",
+      scope: "world",
+      config: false,
+      type: Array,
+      default: []
+    });
+  }
+
+  static getGlobalModifiers() {
+    return (game.settings.get("naruto2d6world", this.GLOBAL_SETTING_KEY) ?? [])
+      .map((modifier) => this._normalize(modifier));
+  }
+
+  static getLocalModifiers(actor) {
+    if (!actor) return [];
+    return (actor.getFlag("naruto2d6world", this.LOCAL_FLAG_KEY) ?? [])
+      .map((modifier) => this._normalize(modifier));
+  }
+
+  static getModifiers(actor) {
+    return [
+      ...this.getGlobalModifiers().map((modifier) => ({ ...modifier, scope: "Global", label: `Mestre Global — ${modifier.name}` })),
+      ...this.getLocalModifiers(actor).map((modifier) => ({ ...modifier, scope: "Local", label: `Mestre Local — ${modifier.name}` }))
+    ];
+  }
+
+  static getTotal(actor) {
+    return this.getModifiers(actor).reduce((total, modifier) => total + modifier.value, 0);
+  }
+
+  static async addGlobalModifier({ name, value }) {
+    this._requireGM();
+    const modifier = this._createModifier(name, value);
+    await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, [...this.getGlobalModifiers(), modifier]);
+    return modifier;
+  }
+
+  static async removeGlobalModifier(id) {
+    this._requireGM();
+    await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, this.getGlobalModifiers().filter((modifier) => modifier.id !== id));
+  }
+
+  static async clearGlobalModifiers() {
+    this._requireGM();
+    await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, []);
+  }
+
+  static async addLocalModifier(actor, { name, value }) {
+    this._requireGM();
+    if (!actor) throw new Error("Um personagem é obrigatório para criar um modificador local.");
+    const modifier = this._createModifier(name, value);
+    await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, [...this.getLocalModifiers(actor), modifier]);
+    return modifier;
+  }
+
+  static async removeLocalModifier(actor, id) {
+    this._requireGM();
+    await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, this.getLocalModifiers(actor).filter((modifier) => modifier.id !== id));
+  }
+
+  static async clearLocalModifiers(actor) {
+    this._requireGM();
+    await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, []);
+  }
+
+  /** Converts the retired scalar setting once, without losing existing worlds' value. */
+  static async migrateLegacySetting() {
+    if (!game.user.isGM || this.getGlobalModifiers().length) return;
+    const legacyValue = Number(game.settings.get("naruto2d6world", this.LEGACY_SETTING_KEY)) || 0;
+    if (!legacyValue) return;
+    await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, [this._createModifier("NV Mestre (legado)", legacyValue)]);
+    await game.settings.set("naruto2d6world", this.LEGACY_SETTING_KEY, 0);
+  }
+
+  static _createModifier(name, value) {
+    const numericValue = Number(value);
+    if (!String(name ?? "").trim() || !Number.isFinite(numericValue)) {
+      throw new Error("Informe um nome e um valor numérico para o modificador.");
+    }
+    return { id: randomID(), name: String(name).trim(), value: numericValue };
+  }
+
+  static _normalize(modifier) {
+    return { id: modifier.id, name: modifier.name || "Modificador do Mestre", value: Number(modifier.value) || 0 };
+  }
+
+  static _requireGM() {
+    if (!game.user.isGM) throw new Error("Somente o Mestre pode alterar modificadores de NV.");
+  }
+}
