@@ -605,6 +605,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find('.btn-decrease-advantage-level').click(e => {
 			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual - 1 })
 		})
+		html.find('.btn-increase-speed-level').click(e => {
+			this.object.update({ "system.speed_level": (this.object.system.speed_level ?? 0) + 1 })
+		})
+		html.find('.btn-decrease-speed-level').click(e => {
+			this.object.update({ "system.speed_level": (this.object.system.speed_level ?? 0) - 1 })
+		})
 		// Botão de upgrade de movimentos de NPC
 		html.find('#btn-upgrade-npc-moves').click((e) => {
 			e.preventDefault();

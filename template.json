@@ -30,6 +30,7 @@
 				"base"
 			],
 			"iniciativa": false,
+			"speed_level": 0,
 			"advantageLevel": {
 				"actual": 0,
 				"min": -4,
