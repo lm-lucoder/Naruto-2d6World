@@ -24,10 +24,11 @@
         <div class="advantage-level-container">
             <h3>Nível de Vantagem</h3>
             <div class="
-            panel
+            panel advantage-level-display
             {{renderNvClass actualAdvantageLevel.value}}
             "
-             data-tooltip="{{actualAdvantageLevel.finalReason}}" data-tooltip-direction="LEFT">
+             data-tooltip="{{actualAdvantageLevel.finalReason}}" data-tooltip-direction="LEFT"
+             role="button" tabindex="0" aria-label="Gerenciar modificadores de nível de vantagem">
                 <span class="nv">
                     {{renderNvText actualAdvantageLevel.value}}
                 </span>

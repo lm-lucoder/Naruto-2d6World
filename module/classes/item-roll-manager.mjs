@@ -158,7 +158,7 @@ export class ItemRollManager {
    * @param {Object} params - Roll parameters
    */
   static async moveRoll(item, params) {
-    const { advantageLevel, baseAdvantageLevel, manualAdjustment, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
+    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
 
     if (isUpdate && rerollMode == "adjustment") {
       // Para ajustes manuais, não recalcular condições - usar valores opcionais
@@ -168,6 +168,7 @@ export class ItemRollManager {
         move: item,
         advantageLevel,
         baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : advantageLevel,
+        baseNVInfo,
         manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0,
         masterGlobalNV: masterGlobalNV,
         conditionsNVInfo: [], // Não recalcular em ajustes
@@ -290,6 +291,7 @@ export class ItemRollManager {
       move: item,
       advantageLevel: nvValue, // Total: base + manual + condições + mestre
       baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : (advantageLevel || 0), // NV base do personagem
+      baseNVInfo,
       manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0, // Ajuste manual do diálogo
       masterGlobalNV: masterGlobalNV, // NV global do mestre
       conditionsNVInfo: conditionsNVInfo, // Informações detalhadas das condições
@@ -503,7 +505,7 @@ export class ItemRollManager {
    * @param {Object} params - Template parameters
    * @returns {string} HTML template string
    */
-  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, manualAdjustment, masterGlobalNV, conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
+  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterGlobalNV, conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
     let successCount = 0
     let match = false
     let resultType = ""
@@ -545,8 +547,14 @@ export class ItemRollManager {
     if (advantageLevel !== undefined && advantageLevel !== 0) {
       const nvParts = [];
 
-      // Adicionar NV base do personagem (se houver e for diferente de zero)
-      if (baseAdvantageLevel !== undefined && baseAdvantageLevel !== 0) {
+      // Adicionar NV base e os modificadores personalizados, quando disponíveis.
+      if (baseNVInfo?.length) {
+        baseNVInfo.forEach((modifier) => {
+          if (modifier.value === 0) return;
+          const sign = modifier.value > 0 ? "+" : "";
+          nvParts.push(`${sign}${modifier.value} (${modifier.reason})`);
+        });
+      } else if (baseAdvantageLevel !== undefined && baseAdvantageLevel !== 0) {
         const baseSign = baseAdvantageLevel > 0 ? "+" : "";
         nvParts.push(`${baseSign}${baseAdvantageLevel} (base)`);
       }

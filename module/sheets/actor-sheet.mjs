@@ -1,6 +1,7 @@
 import ManageAbilityChakraDialog from "../dialogs/manageAbilityChakraDialog.mjs";
 import ManageAbilityResourceDialog from "../dialogs/manageAbilityResourceDialog.mjs";
 import ManageItemQuantityDialog from "../dialogs/manageItemQuantityDialog.mjs";
+import ManageNVModifiersDialog from "../dialogs/manageNVModifiersDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
 import UpgradeNPCMoveDialog from "../dialogs/upgradeNPCMoveDialog.mjs";
 import {
@@ -605,6 +606,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 		html.find('.btn-decrease-advantage-level').click(e => {
 			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual - 1 })
 		})
+		html.find('.advantage-level-display').on('click keydown', (event) => {
+			if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+			event.preventDefault();
+			ManageNVModifiersDialog.create({ actor: this.actor });
+		})
 		html.find('.btn-increase-speed-level').click(e => {
 			this.object.update({ "system.speed_level": (this.object.system.speed_level ?? 0) + 1 })
 		})
@@ -1166,6 +1172,9 @@ export class AdvantageLevelApi {
 			reasons: []
 		}
 		this.addAdvantageLevelContext(context, baseLevel, "Base")
+		for (const modifier of context.actor.system.nvModifiers ?? []) {
+			this.addAdvantageLevelContext(context, Number(modifier.value) || 0, modifier.name || "Modificador personalizado")
+		}
 
 		context.actualAdvantageLevel.finalReason = context.actualAdvantageLevel.reasons.map(reasonObj => {
 			return `${reasonObj.reason} (${reasonObj.value > 0 ? "+" : ""}${reasonObj.value})`
@@ -1180,11 +1189,15 @@ export class AdvantageLevelApi {
 	static buildAdvantageLevel(actor) {
 		const baseLevel = actor.system.advantageLevel.actual;
 		const data = {
-			value: baseLevel,
+			value: 0,
 			reasons: [
 				{ value: baseLevel, reason: "Base" }
 			]
 		}
+		for (const modifier of actor.system.nvModifiers ?? []) {
+			data.reasons.push({ value: Number(modifier.value) || 0, reason: modifier.name || "Modificador personalizado" })
+		}
+		data.value = data.reasons.reduce((total, reason) => total + reason.value, 0)
 		return data
 	}
 

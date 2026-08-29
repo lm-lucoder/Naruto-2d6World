@@ -137,6 +137,7 @@ class RollMoveDialog extends Dialog {
 			advantageLevel,
 			baseAdvantageLevel, // NV base do personagem
 			manualAdjustment, // Ajuste manual do diálogo
+			baseNVInfo: this._advantageLevel.reasons,
 			attribute: chosenAttribute,
 			rollModifier
 		});
@@ -228,7 +229,7 @@ class RollMoveDialog extends Dialog {
 
 		const breakdown = panel.parentElement.querySelector('.nv-breakdown');
 		this._renderNVBreakdown(breakdown, {
-			baseNV,
+			baseNVInfo: this._advantageLevel.reasons,
 			conditionsInfo,
 			manualAdjustment,
 			masterGlobalNV
@@ -236,12 +237,12 @@ class RollMoveDialog extends Dialog {
 	}
 
 	/** Renderiza uma tag vertical para cada origem que compõe o NV total. */
-	_renderNVBreakdown(container, { baseNV, conditionsInfo, manualAdjustment, masterGlobalNV }) {
+	_renderNVBreakdown(container, { baseNVInfo, conditionsInfo, manualAdjustment, masterGlobalNV }) {
 		if (!container) return;
 		container.replaceChildren();
 
 		const entries = [
-			{ label: "NV base", value: baseNV },
+			...baseNVInfo.map((entry) => ({ label: entry.reason === "Base" ? "NV base" : entry.reason, value: entry.value })),
 			...conditionsInfo.map((condition) => ({ label: condition.name, value: condition.totalNV })),
 			...(manualAdjustment !== 0 ? [{ label: "Ajuste manual", value: manualAdjustment }] : []),
 			...(masterGlobalNV !== 0 ? [{ label: "NV Mestre", value: masterGlobalNV }] : [])
