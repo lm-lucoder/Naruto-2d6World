@@ -73,6 +73,10 @@ export class CharacterTrackerService {
   }
 
   static async open() {
+    if (!game.user.isGM) {
+      return ui.notifications.warn("O rastreador de personagens é exclusivo do Mestre.");
+    }
+
     if (!this._application) {
       const { CharacterTrackerApplication } = await import("../apps/character-tracker-app.mjs");
       this._application = new CharacterTrackerApplication();

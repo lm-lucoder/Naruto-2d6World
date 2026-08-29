@@ -56,6 +56,11 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     });
   }
 
+  _canRender(options) {
+    if (!game.user.isGM) return false;
+    return super._canRender(options);
+  }
+
   async _prepareContext() {
     const actors = await CharacterTrackerService.getTrackedActors();
     const orderedActors = [

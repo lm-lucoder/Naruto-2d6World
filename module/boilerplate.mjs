@@ -396,10 +396,42 @@ Hooks.once("ready", async function () {
     });
   }); */
 
+  /** Add the GM-only tracker launcher immediately before the sidebar collapse control. */
+  function addCharacterTrackerSidebarButton(root = document) {
+    if (!game.user.isGM) return;
+
+    const element = root instanceof HTMLElement ? root : root?.[0] ?? document;
+    const sidebarTabs = element.matches?.(".sidebar-tabs, #sidebar-tabs")
+      ? element
+      : element.querySelector?.(".sidebar-tabs, #sidebar-tabs");
+    if (!sidebarTabs || sidebarTabs.querySelector(".character-tracker-sidebar-button")) return;
+
+    const button = document.createElement("a");
+    button.classList.add("item", "character-tracker-sidebar-button");
+    button.dataset.tooltip = "Abrir rastreador de personagens";
+    button.dataset.tooltipDirection = "LEFT";
+    button.setAttribute("role", "button");
+    button.setAttribute("aria-label", "Abrir rastreador de personagens");
+    button.innerHTML = '<i class="fa-solid fa-users"></i>';
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      CharacterTrackerService.open();
+    });
+
+    const collapseButton = sidebarTabs.querySelector(".collapse, [data-action='toggleState'], [data-action='collapse']");
+    if (collapseButton) collapseButton.before(button);
+    else sidebarTabs.append(button);
+  }
+
+  Hooks.on("renderApplication", (app, html) => {
+    if (app.constructor.name === "Sidebar") addCharacterTrackerSidebarButton(html);
+  });
+  addCharacterTrackerSidebarButton();
+
   // Registre todos os hooks da UI do Foundry antes de abrir qualquer janela
   // automática. Isso evita perder a primeira renderização do chat e, com ela,
   // a inserção dos controles de NV do Mestre.
-  if (game.settings.get("naruto2d6world", CharacterTrackerService.AUTO_OPEN_SETTING_KEY)) {
+  if (game.user.isGM && game.settings.get("naruto2d6world", CharacterTrackerService.AUTO_OPEN_SETTING_KEY)) {
     await CharacterTrackerService.open();
   }
 });
