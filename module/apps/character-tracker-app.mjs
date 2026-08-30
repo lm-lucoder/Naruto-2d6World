@@ -26,7 +26,8 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       clearMasterLocalFromTracked: () => this._runAndRefresh(() => this._clearMasterLocalFromTracked()),
       removeMasterLocal: (event, target) => this._runAndRefresh(() => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId)),
       openActorSheet: (event, target) => this._runAndRefresh(() => this._openActorSheet(target.dataset.actorUuid)),
-      openNVModifiers: (event, target) => this._runAndRefresh(() => this._openNVModifiers(target.dataset.actorUuid))
+      openNVModifiers: (event, target) => this._runAndRefresh(() => this._openNVModifiers(target.dataset.actorUuid)),
+      toggleCondition: (event, target) => this._runAndRefresh(() => this._toggleCondition(target.dataset.actorUuid, target.dataset.conditionId))
     },
     position: {
       width: 360,
@@ -91,6 +92,10 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     const system = actor.system;
     const isCharacter = actor.type === "character";
     const customNV = (system.nvModifiers ?? []).reduce((total, modifier) => total + (Number(modifier.value) || 0), 0);
+    const activeConditions = actor.items.filter((item) => item.type === "condition" && item.system.isActive);
+    const activeGlobalConditionNV = activeConditions.reduce((total, condition) => total + (Number(condition.system.globalNV) || 0), 0);
+    const baseNV = Number(system.advantageLevel?.actual) || 0;
+    const masterNV = isCharacter ? MasterNVModifierService.getTotal(actor) : 0;
 
     return {
       id: actor.id,
@@ -104,11 +109,17 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       armor: system.armor?.value ?? 0,
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
-      nv: (Number(system.advantageLevel?.actual) || 0) + customNV,
+      nv: baseNV + customNV + masterNV + activeGlobalConditionNV,
+      baseNV,
       masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor) : [],
       conditions: actor.items
         .filter((item) => item.type === "condition")
-        .map((condition) => ({ name: condition.name, isActive: Boolean(condition.system.isActive) })),
+        .map((condition) => ({
+          id: condition.id,
+          name: condition.name,
+          isActive: Boolean(condition.system.isActive),
+          description: this._formatTooltip(condition.system.description) || "Sem descrição."
+        })),
       attributeNVs: isCharacter ? this._prepareAttributeNVs(actor, customNV) : [],
       nvModifiers: isCharacter ? [
         ...(system.nvModifiers ?? []).map((modifier) => ({ name: modifier.name || "Modificador da ficha", value: Number(modifier.value) || 0, source: "Ficha" })),
@@ -133,15 +144,22 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       + activeConditions.reduce((total, condition) => total + (Number(condition.system.globalNV) || 0), 0);
 
     return Object.entries(actor.system.attributes ?? {}).map(([key, attribute]) => {
-      const conditionNV = activeConditions.reduce((total, condition) => (
-        total + (Number(condition.system.attributes?.[key]?.nv) || 0)
+      const conditionNV = activeConditions.reduce((total, condition) => total + (Number(condition.system.attributes?.[key]?.nv) || 0), 0);
+      const conditionModifierTotal = activeConditions.reduce((total, condition) => (
+        total
+        + (Number(condition.system.globalNV) || 0)
+        + (Number(condition.system.attributes?.[key]?.nv) || 0)
       ), 0);
       return {
         name: attribute.name || attributeNames[key] || key,
         value: commonNV + conditionNV,
-        conditionNV
+        conditionModifierTotal
       };
     });
+  }
+
+  _formatTooltip(value) {
+    return String(value ?? "").replace(/"/g, "&quot;").replace(/\r?\n/g, " ").trim();
   }
 
   _onRender(context, options) {
@@ -242,6 +260,13 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     if (!actor) return;
     const { default: ManageNVModifiersDialog } = await import("../dialogs/manageNVModifiersDialog.mjs");
     ManageNVModifiersDialog.create({ actor });
+  }
+
+  static async _toggleCondition(actorUuid, conditionId) {
+    const actor = await fromUuid(actorUuid);
+    const condition = actor?.items.get(conditionId);
+    if (!condition?.isOwner) return;
+    await condition.update({ "system.isActive": !condition.system.isActive });
   }
 
   _adjustMasterGlobalModifier(event, modifierId, direction) {

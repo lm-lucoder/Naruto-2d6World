@@ -50,7 +50,12 @@
       <li class="character-tracker-entry" data-actor-id="{{id}}" data-actor-uuid="{{uuid}}">
         <button type="button" class="character-tracker-portrait" data-action="openActorSheet" data-actor-uuid="{{uuid}}" data-tooltip="Abrir ficha de {{name}}"><img src="{{img}}" alt="{{name}}"></button>
         <div class="character-tracker-data">
-          <span class="character-tracker-name">{{name}}</span>
+          <div class="character-tracker-name-row">
+            <span class="character-tracker-name">{{name}}</span>
+            {{#if ../canManage}}
+              <button type="button" class="character-tracker-remove" data-action="removeTracked" data-actor-uuid="{{uuid}}" data-tooltip="Remover do rastreador"><i class="fa-solid fa-xmark"></i></button>
+            {{/if}}
+          </div>
           <div class="character-tracker-resources">
             {{#if isCharacter}}
               <button type="button" class="character-tracker-nv" data-action="openNVModifiers" data-actor-uuid="{{uuid}}" data-tooltip="Abrir modificadores de NV">NV {{nv}}</button>
@@ -69,30 +74,28 @@
               <div class="character-tracker-detail-section character-tracker-attribute-nv" aria-label="NV por atributo">
                 <span class="character-tracker-detail-label">NV por atributo</span>
                 <div class="character-tracker-detail-tags">
-                  {{#each attributeNVs}}<span class="character-tracker-attribute-nv-tag" data-tooltip="Inclui condições ativas globais e específicas deste atributo">{{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}{{#if conditionNV}} <em>({{#if (greaterThan conditionNV 0)}}+{{/if}}{{conditionNV}} cond.)</em>{{/if}}</span>{{/each}}
+                  {{#each attributeNVs}}<span class="character-tracker-attribute-nv-tag {{#if (greaterThan conditionModifierTotal 0)}}condition-positive{{/if}}{{#if (lowerThan conditionModifierTotal 0)}}condition-negative{{/if}}" data-tooltip="Inclui condições ativas globais e específicas deste atributo">{{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
                 </div>
               </div>
+              <div class="character-tracker-detail-divider" aria-hidden="true"></div>
             {{/if}}
             <div class="character-tracker-detail-section character-tracker-conditions" aria-label="Condições">
               <span class="character-tracker-detail-label">Condições</span>
               <div class="character-tracker-detail-tags">
-                {{#each conditions}}<span class="character-tracker-condition {{#if isActive}}active{{/if}}">{{name}}</span>{{else}}<span class="character-tracker-detail-empty">Nenhuma</span>{{/each}}
+                {{#each conditions}}<button type="button" class="character-tracker-condition {{#if isActive}}active{{/if}}" data-action="toggleCondition" data-actor-uuid="{{../uuid}}" data-condition-id="{{id}}" data-tooltip="{{{description}}}">{{name}}</button>{{else}}<span class="character-tracker-detail-empty">Nenhuma</span>{{/each}}
               </div>
             </div>
+            <div class="character-tracker-detail-divider" aria-hidden="true"></div>
             <div class="character-tracker-detail-section character-tracker-nv-modifiers" aria-label="Modificadores de NV">
               <span class="character-tracker-detail-label">NV</span>
               <div class="character-tracker-detail-tags">
+                {{#if baseNV}}<span class="character-tracker-nv-modifier">NV Base: {{#if (greaterThan baseNV 0)}}+{{/if}}{{baseNV}}</span>{{/if}}
                 {{#each nvModifiers}}<span class="character-tracker-nv-modifier">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
                 {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier" data-tooltip="NV local do Mestre"><span>Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span><button type="button" data-action="removeMasterLocal" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-tooltip="Remover NV local"><i class="fa-solid fa-xmark"></i></button></span>{{/each}}
               </div>
             </div>
           {{/if}}
         </div>
-        {{#if ../canManage}}
-          <button type="button" class="character-tracker-remove" data-action="removeTracked" data-actor-uuid="{{uuid}}" data-tooltip="Remover do rastreador">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        {{/if}}
       </li>
     {{else}}
       <li class="character-tracker-empty">Nenhum personagem adicionado.</li>
