@@ -169,6 +169,16 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       entry.addEventListener("click", (event) => this._adjustMasterGlobalModifier(event, entry.dataset.modifierId, 1));
       entry.addEventListener("contextmenu", (event) => this._adjustMasterGlobalModifier(event, entry.dataset.modifierId, -1));
     }
+    for (const condition of this.element.querySelectorAll(".character-tracker-condition")) {
+      condition.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        CharacterTrackerApplication._runAndRefresh(() => CharacterTrackerApplication._removeCondition(
+          condition.dataset.actorUuid,
+          condition.dataset.conditionId,
+          event.shiftKey
+        ));
+      });
+    }
   }
 
   _onEntryDragStart(event) {
@@ -267,6 +277,24 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     const condition = actor?.items.get(conditionId);
     if (!condition?.isOwner) return;
     await condition.update({ "system.isActive": !condition.system.isActive });
+  }
+
+  static async _removeCondition(actorUuid, conditionId, skipConfirmation = false) {
+    const actor = await fromUuid(actorUuid);
+    const condition = actor?.items.get(conditionId);
+    if (!condition?.isOwner) return;
+
+    if (!skipConfirmation) {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: "Remover condição" },
+        content: `<p>Deseja remover a condição <strong>${foundry.utils.escapeHTML(condition.name)}</strong>?</p>`,
+        yes: { label: "Remover", icon: "fa-solid fa-trash" },
+        no: { label: "Cancelar" }
+      });
+      if (!confirmed) return;
+    }
+
+    await condition.delete();
   }
 
   _adjustMasterGlobalModifier(event, modifierId, direction) {

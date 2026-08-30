@@ -51,7 +51,7 @@
         <button type="button" class="character-tracker-portrait" data-action="openActorSheet" data-actor-uuid="{{uuid}}" data-tooltip="Abrir ficha de {{name}}"><img src="{{img}}" alt="{{name}}"></button>
         <div class="character-tracker-data">
           <div class="character-tracker-name-row">
-            <span class="character-tracker-name">{{name}}</span>
+            <button type="button" class="character-tracker-name" data-action="openActorSheet" data-actor-uuid="{{uuid}}" data-tooltip="Abrir ficha de {{name}}">{{name}}</button>
             {{#if ../canManage}}
               <button type="button" class="character-tracker-remove" data-action="removeTracked" data-actor-uuid="{{uuid}}" data-tooltip="Remover do rastreador"><i class="fa-solid fa-xmark"></i></button>
             {{/if}}

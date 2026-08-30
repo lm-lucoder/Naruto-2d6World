@@ -111,6 +111,13 @@
 
   .character-tracker-name {
     display: block;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
     overflow: hidden;
     font-weight: bold;
     text-overflow: ellipsis;
