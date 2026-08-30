@@ -29,9 +29,17 @@ export class CharacterTrackerService {
     });
 
     Hooks.on("updateActor", (actor) => {
-      if (!this._application?.rendered || !this.trackedActorUuids.includes(actor.uuid)) return;
-      this._application.render();
+      // Foundry broadcasts Actor document updates to every connected client.
+      // Only the GM with an already open tracker needs to react to them.
+      this._refreshForTrackedActor(actor);
     });
+    for (const hookName of ["updateItem", "createItem", "deleteItem"]) {
+      Hooks.on(hookName, (item) => {
+        // Conditions and other embedded Items do not require a custom socket:
+        // their updates are synchronized by Foundry before these hooks run.
+        this._refreshForTrackedActor(item.actor ?? item.parent);
+      });
+    }
     Hooks.on("updateSetting", (setting) => {
       const rerenderKeys = [
         "naruto2d6world.master-global-nv-modifiers",
@@ -115,5 +123,10 @@ export class CharacterTrackerService {
   static async refresh() {
     if (!game.user.isGM || !this._application?.rendered) return;
     await this._application.render({ force: true });
+  }
+
+  static _refreshForTrackedActor(actor) {
+    if (!game.user.isGM || !actor || !this._application?.rendered || !this.trackedActorUuids.includes(actor.uuid)) return;
+    this.refresh().catch((error) => console.error("Não foi possível atualizar o rastreador de personagens:", error));
   }
 }
