@@ -90,8 +90,8 @@
               <span class="character-tracker-detail-label">NV</span>
               <div class="character-tracker-detail-tags">
                 {{#if baseNV}}<span class="character-tracker-nv-modifier">NV Base: {{#if (greaterThan baseNV 0)}}+{{/if}}{{baseNV}}</span>{{/if}}
-                {{#each nvModifiers}}<span class="character-tracker-nv-modifier">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
-                {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier" data-tooltip="NV local do Mestre"><span>Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span><button type="button" data-action="removeMasterLocal" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-tooltip="Remover NV local"><i class="fa-solid fa-xmark"></i></button></span>{{/each}}
+                {{#each nvModifiers}}{{#if canDelete}}<span class="character-tracker-nv-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="{{modifierType}}" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-nv-modifier">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/if}}{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
+                {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="master-local" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
               </div>
             </div>
           {{/if}}

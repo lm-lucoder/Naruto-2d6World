@@ -122,8 +122,8 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
         })),
       attributeNVs: isCharacter ? this._prepareAttributeNVs(actor, customNV) : [],
       nvModifiers: isCharacter ? [
-        ...(system.nvModifiers ?? []).map((modifier) => ({ name: modifier.name || "Modificador da ficha", value: Number(modifier.value) || 0, source: "Ficha" })),
-        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ name: modifier.name, value: modifier.value, source: "Mestre Global" }))
+        ...(system.nvModifiers ?? []).map((modifier) => ({ id: modifier.id, name: modifier.name || "Modificador da ficha", value: Number(modifier.value) || 0, source: "Ficha", canDelete: true, modifierType: "actor" })),
+        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ id: modifier.id, name: modifier.name, value: modifier.value, source: "Mestre Global", canDelete: false }))
       ] : []
     };
   }
@@ -175,6 +175,17 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
         CharacterTrackerApplication._runAndRefresh(() => CharacterTrackerApplication._removeCondition(
           condition.dataset.actorUuid,
           condition.dataset.conditionId,
+          event.shiftKey
+        ));
+      });
+    }
+    for (const modifier of this.element.querySelectorAll(".character-tracker-deletable-nv")) {
+      modifier.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        CharacterTrackerApplication._runAndRefresh(() => CharacterTrackerApplication._removeNVModifier(
+          modifier.dataset.actorUuid,
+          modifier.dataset.modifierType,
+          modifier.dataset.modifierId,
           event.shiftKey
         ));
       });
@@ -295,6 +306,32 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     }
 
     await condition.delete();
+  }
+
+  static async _removeNVModifier(actorUuid, modifierType, modifierId, skipConfirmation = false) {
+    const actor = await fromUuid(actorUuid);
+    if (!actor) return;
+
+    const modifier = modifierType === "master-local"
+      ? MasterNVModifierService.getLocalModifiers(actor).find((entry) => entry.id === modifierId)
+      : (actor.system.nvModifiers ?? []).find((entry) => entry.id === modifierId);
+    if (!modifier) return;
+
+    if (!skipConfirmation) {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: "Remover modificador de NV" },
+        content: `<p>Deseja remover o modificador <strong>${foundry.utils.escapeHTML(modifier.name)}</strong>?</p>`,
+        yes: { label: "Remover", icon: "fa-solid fa-trash" },
+        no: { label: "Cancelar" }
+      });
+      if (!confirmed) return;
+    }
+
+    if (modifierType === "master-local") {
+      await MasterNVModifierService.removeLocalModifier(actor, modifierId);
+      return;
+    }
+    await actor.update({ "system.nvModifiers": (actor.system.nvModifiers ?? []).filter((entry) => entry.id !== modifierId) });
   }
 
   _adjustMasterGlobalModifier(event, modifierId, direction) {

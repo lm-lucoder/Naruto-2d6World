@@ -173,6 +173,7 @@
   .character-tracker-detail-divider { height: 1px; margin: 3px 0 1px; background: #00000020; }
   .character-tracker-condition, .character-tracker-nv-modifier { display: inline-flex; align-items: center; min-height: 0; padding: 1px 3px; border: 0; border-radius: 2px; color: #606060; background: #00000012; cursor: pointer; font: inherit; font-size: inherit; line-height: 1.2; white-space: nowrap; }
   .character-tracker-nv-modifier { cursor: default; }
+  .character-tracker-deletable-nv { cursor: context-menu; }
   .character-tracker-condition.active { color: #155f85; background: #bfe4f7; }
   .character-tracker-attribute-nv-tag { display: inline-flex; align-items: center; gap: 2px; padding: 1px 3px; border-radius: 2px; color: #606060; background: #00000012; white-space: nowrap; }
   .character-tracker-attribute-nv-tag.condition-positive { color: #155f85; background: #bfe4f7; }
