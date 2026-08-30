@@ -162,6 +162,8 @@
   .character-tracker-detail-empty { color: #777; font-style: italic; }
   .character-tracker-condition, .character-tracker-nv-modifier { display: inline-flex; align-items: center; padding: 1px 3px; border-radius: 2px; color: #606060; background: #00000012; white-space: nowrap; }
   .character-tracker-condition.active { color: #155f85; background: #bfe4f7; }
+  .character-tracker-attribute-nv-tag { display: inline-flex; align-items: center; gap: 2px; padding: 1px 3px; border-radius: 2px; color: #3a4b5a; background: #d9e8ef; white-space: nowrap; }
+  .character-tracker-attribute-nv-tag em { color: #23739a; font-style: normal; }
   .character-tracker-local-modifiers { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 2px; }
   .character-tracker-local-modifier { display: inline-flex; align-items: center; gap: 2px; padding: 1px 3px; border-radius: 2px; color: #5d3e0b; background: #e9bd6040; font-size: 10px; white-space: nowrap; }
   .character-tracker-local-modifier button { width: 13px; height: 13px; padding: 0; border: 0; color: #b40309; background: transparent; cursor: pointer; font-size: 10px; }

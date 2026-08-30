@@ -109,11 +109,39 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       conditions: actor.items
         .filter((item) => item.type === "condition")
         .map((condition) => ({ name: condition.name, isActive: Boolean(condition.system.isActive) })),
+      attributeNVs: isCharacter ? this._prepareAttributeNVs(actor, customNV) : [],
       nvModifiers: isCharacter ? [
         ...(system.nvModifiers ?? []).map((modifier) => ({ name: modifier.name || "Modificador da ficha", value: Number(modifier.value) || 0, source: "Ficha" })),
         ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ name: modifier.name, value: modifier.value, source: "Mestre Global" }))
       ] : []
     };
+  }
+
+  /** Mirrors the NV calculation used for moves, including active condition effects per attribute. */
+  _prepareAttributeNVs(actor, customNV) {
+    const attributeNames = {
+      bod: "Físico",
+      agl: "Agilidade",
+      hrt: "Coração",
+      cun: "Astúcia",
+      shd: "Sombra"
+    };
+    const activeConditions = actor.items.filter((item) => item.type === "condition" && item.system.isActive);
+    const commonNV = (Number(actor.system.advantageLevel?.actual) || 0)
+      + customNV
+      + MasterNVModifierService.getTotal(actor)
+      + activeConditions.reduce((total, condition) => total + (Number(condition.system.globalNV) || 0), 0);
+
+    return Object.entries(actor.system.attributes ?? {}).map(([key, attribute]) => {
+      const conditionNV = activeConditions.reduce((total, condition) => (
+        total + (Number(condition.system.attributes?.[key]?.nv) || 0)
+      ), 0);
+      return {
+        name: attribute.name || attributeNames[key] || key,
+        value: commonNV + conditionNV,
+        conditionNV
+      };
+    });
   }
 
   _onRender(context, options) {
