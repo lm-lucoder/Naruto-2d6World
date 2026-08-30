@@ -48,6 +48,23 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, this.getGlobalModifiers().filter((modifier) => modifier.id !== id));
   }
 
+  static async updateGlobalModifier(id, { name, value }) {
+    this._requireGM();
+    const updatedModifier = this._createModifier(name, value);
+    const modifiers = this.getGlobalModifiers().map((modifier) => (
+      modifier.id === id ? { ...updatedModifier, id } : modifier
+    ));
+    await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, modifiers);
+  }
+
+  static async adjustGlobalModifier(id, amount) {
+    this._requireGM();
+    const modifiers = this.getGlobalModifiers().map((modifier) => (
+      modifier.id === id ? { ...modifier, value: modifier.value + Number(amount) } : modifier
+    ));
+    await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, modifiers);
+  }
+
   static async clearGlobalModifiers() {
     this._requireGM();
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, []);

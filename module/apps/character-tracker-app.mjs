@@ -19,10 +19,16 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       clearAll: () => CharacterTrackerService.clearAll(),
       addMasterGlobal: () => this._addMasterGlobalModifier(),
       removeMasterGlobal: (event, target) => MasterNVModifierService.removeGlobalModifier(target.dataset.modifierId),
-      clearMasterGlobal: () => MasterNVModifierService.clearGlobalModifiers()
+      clearMasterGlobal: () => MasterNVModifierService.clearGlobalModifiers(),
+      editMasterGlobal: (event, target) => this._editMasterGlobalModifier(target.dataset.modifierId),
+      addMasterLocalToTracked: () => this._addMasterLocalToTracked(),
+      clearMasterLocalFromTracked: () => this._clearMasterLocalFromTracked(),
+      removeMasterLocal: (event, target) => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId),
+      openActorSheet: (event, target) => this._openActorSheet(target.dataset.actorUuid),
+      openNVModifiers: (event, target) => this._openNVModifiers(target.dataset.actorUuid)
     },
     position: {
-      width: 260,
+      width: 360,
       height: "auto"
     },
     window: {
@@ -96,13 +102,18 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       armor: system.armor?.value ?? 0,
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
-      nv: (Number(system.advantageLevel?.actual) || 0) + customNV
+      nv: (Number(system.advantageLevel?.actual) || 0) + customNV,
+      masterLocalModifiers: MasterNVModifierService.getLocalModifiers(actor)
     };
   }
 
   _onRender(context, options) {
     super._onRender(context, options);
     this._dragDrop.bind(this.element);
+    for (const entry of this.element.querySelectorAll(".character-tracker-master-entry")) {
+      entry.addEventListener("click", (event) => this._adjustMasterGlobalModifier(event, entry.dataset.modifierId, 1));
+      entry.addEventListener("contextmenu", (event) => this._adjustMasterGlobalModifier(event, entry.dataset.modifierId, -1));
+    }
   }
 
   _onEntryDragStart(event) {
@@ -131,5 +142,89 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     } catch (error) {
       ui.notifications.warn(error.message);
     }
+  }
+
+  static async _editMasterGlobalModifier(id) {
+    const modifier = MasterNVModifierService.getGlobalModifiers().find((entry) => entry.id === id);
+    if (!modifier) return;
+    const result = await this._promptMasterGlobalModifier("Editar NV global do Mestre", modifier);
+    if (!result) return;
+    try {
+      await MasterNVModifierService.updateGlobalModifier(id, result);
+    } catch (error) {
+      ui.notifications.warn(error.message);
+    }
+  }
+
+  static async _addMasterLocalToTracked() {
+    const actors = await CharacterTrackerService.getTrackedActors();
+    if (!actors.length) return ui.notifications.warn("Adicione personagens ao rastreador antes de aplicar um NV local.");
+    const result = await this._promptMasterGlobalModifier("Adicionar NV local do Mestre para o rastreador");
+    if (!result) return;
+    try {
+      await Promise.all(actors.map((actor) => MasterNVModifierService.addLocalModifier(actor, result)));
+    } catch (error) {
+      ui.notifications.warn(error.message);
+    }
+  }
+
+  static async _clearMasterLocalFromTracked() {
+    const actors = await CharacterTrackerService.getTrackedActors();
+    if (!actors.length) return;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Limpar NVs locais do Mestre" },
+      content: "<p>Remover todos os modificadores locais do Mestre dos personagens deste rastreador?</p>",
+      yes: { label: "Limpar", icon: "fa-solid fa-broom" },
+      no: { label: "Cancelar" }
+    });
+    if (!confirmed) return;
+    await Promise.all(actors.map((actor) => MasterNVModifierService.clearLocalModifiers(actor)));
+  }
+
+  static async _removeMasterLocalModifier(actorUuid, modifierId) {
+    const actor = await fromUuid(actorUuid);
+    if (!actor) return;
+    const modifier = MasterNVModifierService.getLocalModifiers(actor).find((entry) => entry.id === modifierId);
+    if (!modifier) return;
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Remover NV local do Mestre" },
+      content: `<p>Remover <strong>${foundry.utils.escapeHTML(modifier.name)}</strong> deste personagem?</p>`,
+      yes: { label: "Remover", icon: "fa-solid fa-trash" },
+      no: { label: "Cancelar" }
+    });
+    if (confirmed) await MasterNVModifierService.removeLocalModifier(actor, modifierId);
+  }
+
+  static async _openActorSheet(actorUuid) {
+    const actor = await fromUuid(actorUuid);
+    actor?.sheet.render(true);
+  }
+
+  static async _openNVModifiers(actorUuid) {
+    const actor = await fromUuid(actorUuid);
+    if (!actor) return;
+    const { default: ManageNVModifiersDialog } = await import("../dialogs/manageNVModifiersDialog.mjs");
+    ManageNVModifiersDialog.create({ actor });
+  }
+
+  _adjustMasterGlobalModifier(event, modifierId, direction) {
+    if (event.target.closest("button")) return;
+    event.preventDefault();
+    const amount = direction * (event.shiftKey ? 5 : 1);
+    MasterNVModifierService.adjustGlobalModifier(modifierId, amount).catch((error) => ui.notifications.warn(error.message));
+  }
+
+  static async _promptMasterGlobalModifier(title, modifier = {}) {
+    return foundry.applications.api.DialogV2.prompt({
+      window: { title },
+      content: `<form class="standard-form"><div class="form-group"><label>Nome</label><input name="name" type="text" value="${foundry.utils.escapeHTML(modifier.name ?? "")}" required autofocus></div><div class="form-group"><label>Valor</label><input name="value" type="number" value="${Number(modifier.value) || 0}" step="1" required></div></form>`,
+      ok: {
+        label: modifier.id ? "Salvar" : "Adicionar",
+        callback: (event, button) => {
+          const form = button.form ?? button.closest("form");
+          return { name: form.elements.name.value, value: form.elements.value.value };
+        }
+      }
+    });
   }
 }

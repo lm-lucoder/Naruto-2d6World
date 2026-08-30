@@ -64,6 +64,7 @@ class ManageNVModifiersDialog extends Dialog {
     return `
       <div class="manage-nv-modifiers-dialog">
         <button type="button" class="add-nv-modifier">Adicionar novo modificador</button>
+        ${game.user.isGM ? '<button type="button" class="add-master-local-nv-modifier">Adicionar novo modificador do mestre</button>' : ""}
         <p class="hint">Condições são exibidas para consulta. Apenas modificadores criados aqui podem ser removidos.</p>
         <ul class="nv-modifiers-list">${rows.join("")}</ul>
       </div>
@@ -73,6 +74,7 @@ class ManageNVModifiersDialog extends Dialog {
   activateListeners(html) {
     super.activateListeners(html);
     html.find('.add-nv-modifier').on('click', () => this._openAddDialog());
+    html.find('.add-master-local-nv-modifier').on('click', () => this._openAddMasterLocalDialog());
     html.find('.remove-nv-modifier').on('click', (event) => this._removeModifier(event.currentTarget.dataset.modifierId));
   }
 
@@ -99,6 +101,33 @@ class ManageNVModifiersDialog extends Dialog {
             await actor.update({ "system.nvModifiers": modifiers });
             this.close();
             ManageNVModifiersDialog.create({ actor });
+          }
+        },
+        cancel: { label: "Cancelar" }
+      },
+      default: "add"
+    }).render(true);
+  }
+
+  _openAddMasterLocalDialog() {
+    const actor = this._actor;
+    new Dialog({
+      title: "Adicionar modificador local do Mestre",
+      content: `<div class="add-nv-modifier-dialog"><div><label>Nome <input type="text" name="name" required autofocus></label></div><div><label>Valor <input type="number" name="value" value="0" step="1" required></label></div></div>`,
+      buttons: {
+        add: {
+          label: "Adicionar",
+          callback: async (html) => {
+            try {
+              await MasterNVModifierService.addLocalModifier(actor, {
+                name: html.find('[name="name"]').val().trim(),
+                value: Number(html.find('[name="value"]').val())
+              });
+              this.close();
+              ManageNVModifiersDialog.create({ actor });
+            } catch (error) {
+              ui.notifications.warn(error.message);
+            }
           }
         },
         cancel: { label: "Cancelar" }
