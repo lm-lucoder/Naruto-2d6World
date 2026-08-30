@@ -297,11 +297,15 @@ Hooks.once("ready", async function () {
       : element.querySelector?.(".sidebar-tabs, #sidebar-tabs");
     if (!sidebarTabs || sidebarTabs.querySelector(".character-tracker-sidebar-button")) return;
 
-    const button = document.createElement("a");
-    button.classList.add("item", "character-tracker-sidebar-button");
+    // Sidebar controls in Foundry V13 are native `.ui-control` buttons. Using
+    // the same element and class keeps the launcher aligned with the tabs and
+    // collapse control across both light and dark Foundry themes.
+    const button = document.createElement("button");
+    button.type = "button";
+    button.classList.add("ui-control", "character-tracker-sidebar-button");
+    button.style.marginBottom = "0.5rem";
     button.dataset.tooltip = "Abrir rastreador de personagens";
     button.dataset.tooltipDirection = "LEFT";
-    button.setAttribute("role", "button");
     button.setAttribute("aria-label", "Abrir rastreador de personagens");
     button.innerHTML = '<i class="fa-solid fa-users"></i>';
     button.addEventListener("click", (event) => {

@@ -255,12 +255,22 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.movesByCategory = movesByCategory;
 		context.skills = skills;
 		context.conditions = conditions;
+		context.sheetConditionTags = conditions.map((condition) => ({
+			id: condition._id ?? condition.id,
+			name: condition.name,
+			isActive: Boolean(condition.system.isActive),
+			description: this._formatConditionTooltip(condition.system.description) || "Sem descrição."
+		}));
 		context.abilities = abilities;
 		context.abilitiesByCategory = abilitiesByCategory;
 		context.gear = gear;
 		context.gearByCategory = gearByCategory;
 
 		console.log(context);
+	}
+
+	_formatConditionTooltip(value) {
+		return String(value ?? "").replace(/"/g, "&quot;").replace(/\r?\n/g, " ").trim();
 	}
 	_prepareNPCItems(context) {
 		const conditions = [];
@@ -350,6 +360,29 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const condition = this.actor.items.get(conditionId);
 			condition.update({
 				system: { isActive: !condition.system.isActive },
+			});
+		});
+
+		html.find(".sheet-condition-tag").on("click", async (event) => {
+			event.preventDefault();
+			const condition = this.actor.items.get(event.currentTarget.dataset.itemId);
+			if (!condition) return;
+			await condition.update({ "system.isActive": !condition.system.isActive });
+		});
+
+		html.find(".sheet-condition-tag").on("contextmenu", async (event) => {
+			event.preventDefault();
+			const condition = this.actor.items.get(event.currentTarget.dataset.itemId);
+			if (!condition) return;
+			if (event.shiftKey) {
+				await condition.delete();
+				return;
+			}
+			await Dialog.confirm({
+				title: "Remover condição",
+				content: `<p>Deseja remover a condição <strong>${foundry.utils.escapeHTML(condition.name)}</strong>?</p>`,
+				yes: () => condition.delete(),
+				defaultYes: false
 			});
 		});
 

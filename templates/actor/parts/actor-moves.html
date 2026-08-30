@@ -4,6 +4,13 @@
         <span>Iniciativa</span>
     </label>
 </div>
+{{#if sheetConditionTags.length}}
+<div class="sheet-condition-tags" aria-label="Condições do personagem">
+    {{#each sheetConditionTags}}
+        <button type="button" class="sheet-condition-tag {{#if isActive}}active{{/if}}" data-item-id="{{id}}" data-tooltip="{{{description}}}">{{name}}</button>
+    {{/each}}
+</div>
+{{/if}}
 <div class="momentum-block sheet-block">
     <h3 class="sheet-block-title">Momentum <img class="icon-image" src="systems/naruto2d6world/assets/icons/momentumIcon.png" name="MomentumImage"></h3>
     <div class="block-range-part">
