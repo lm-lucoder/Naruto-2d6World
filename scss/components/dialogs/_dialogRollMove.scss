@@ -89,6 +89,18 @@
                     font-weight: bold;
                     white-space: nowrap;
                 }
+                .remove-roll-nv-modifier{
+                    width: 20px;
+                    height: 20px;
+                    padding: 0;
+                    border: 0;
+                    color: #b40309;
+                    background: transparent;
+                    cursor: pointer;
+                }
+                .remove-roll-nv-modifier:hover{
+                    filter: brightness(.75);
+                }
             }
             .positive .value{
                 color: #218838;

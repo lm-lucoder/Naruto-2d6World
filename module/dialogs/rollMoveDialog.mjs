@@ -10,6 +10,7 @@ class RollMoveDialog extends Dialog {
 		this._currentItem = null
 		this._advantageLevel = null
 		this._newAdvantageLevel = null
+		this._nvCalculation = null
 	}
 
 	static async create(item) {
@@ -73,6 +74,7 @@ class RollMoveDialog extends Dialog {
 			dlg._currentItem = item
 			dlg._advantageLevel = advantageLevel
 			dlg._newAdvantageLevel = newAdvantageLevel
+			dlg._initializeNVCalculation(actor)
 			dlg.render(true);
 		});
 	}
@@ -92,6 +94,11 @@ class RollMoveDialog extends Dialog {
 		html.find('.btn-decrease-advantage-level').on("click", (ev) => {
 			this._newAdvantageLevel--
 			this.updateNVPanel(ev)
+		})
+		html.on('click', '.remove-roll-nv-modifier', (ev) => {
+			const button = ev.target.closest('.remove-roll-nv-modifier');
+			this._nvCalculation.disabledModifierIds.add(button.dataset.modifierId);
+			this.updateNVPanel(ev);
 		})
 
 		// Listener para quando o atributo é selecionado
@@ -128,23 +135,72 @@ class RollMoveDialog extends Dialog {
 			.querySelector('.modifier-input')
 			.value
 
-		// Passar NV base e ajuste manual separadamente
-		// O ItemRollManager vai somar automaticamente o NV das condições ativas para o atributo escolhido
-		const baseAdvantageLevel = this._advantageLevel.value; // NV base do personagem
-		const manualAdjustment = this._newAdvantageLevel; // Ajuste manual do diálogo
-		const advantageLevel = baseAdvantageLevel + manualAdjustment; // Total para passar
+		const nvCalculation = this._buildNVCalculation(chosenAttribute);
+		const baseAdvantageLevel = nvCalculation.baseNVInfo.reduce((total, entry) => total + entry.value, 0);
+		const manualAdjustment = this._newAdvantageLevel;
+		const advantageLevel = nvCalculation.total;
 
 		this._currentItem.moveRoll({
 			advantageLevel,
 			baseAdvantageLevel, // NV base do personagem
 			manualAdjustment, // Ajuste manual do diálogo
-			baseNVInfo: this._advantageLevel.reasons,
-			masterNVInfo: MasterNVModifierService.getModifiers(this._currentItem.actor),
+			baseNVInfo: nvCalculation.baseNVInfo,
+			masterNVInfo: nvCalculation.masterNVInfo,
+			nvCalculation,
 			attribute: chosenAttribute,
 			rollModifier
 		});
 		this._currentResolve(true)
 		this.close();
+	}
+
+	/** Snapshot of NV sources for this dialog only; no actor data is ever changed. */
+	_initializeNVCalculation(actor) {
+		const actorModifiers = (actor.system.nvModifiers ?? []).map((modifier, index) => ({
+			id: `actor:${modifier.id ?? index}`,
+			label: modifier.name || "Modificador personalizado",
+			reason: modifier.name || "Modificador personalizado",
+			value: Number(modifier.value) || 0,
+			removable: true
+		}));
+		this._nvCalculation = {
+			disabledModifierIds: new Set(),
+			baseEntries: [
+				{ id: "base", label: "NV base", reason: "Base", value: Number(actor.system.advantageLevel?.actual) || 0, removable: false },
+				...actorModifiers
+			],
+			masterEntries: MasterNVModifierService.getModifiers(actor).map((modifier) => ({
+				id: `master:${modifier.scope}:${modifier.id}`,
+				label: modifier.label,
+				value: modifier.value,
+				removable: true,
+				modifier
+			}))
+		};
+	}
+
+	_buildNVCalculation(attribute) {
+		const state = this._nvCalculation;
+		const isEnabled = (entry) => !state.disabledModifierIds.has(entry.id);
+		const baseEntries = state.baseEntries.filter(isEnabled);
+		const masterEntries = state.masterEntries.filter(isEnabled);
+		const conditionEntries = this._getConditionsNVInfo(attribute)
+			.map((condition) => ({ ...condition, id: `condition:${condition.id}`, label: condition.name, value: condition.totalNV, removable: true }))
+			.filter(isEnabled);
+		const manualEntries = this._newAdvantageLevel !== 0
+			? [{ id: "manual", label: "Ajuste manual", value: this._newAdvantageLevel, removable: false }]
+			: [];
+		const entries = [...baseEntries, ...conditionEntries, ...manualEntries, ...masterEntries];
+
+		return {
+			entries,
+			baseNVInfo: baseEntries.map(({ reason, value }) => ({ reason, value })),
+			masterNVInfo: masterEntries.map((entry) => entry.modifier),
+			disabledConditionIds: [...state.disabledModifierIds]
+				.filter((id) => id.startsWith("condition:"))
+				.map((id) => id.slice("condition:".length)),
+			total: entries.reduce((total, entry) => total + entry.value, 0)
+		};
 	}
 
 	/**
@@ -180,6 +236,7 @@ class RollMoveDialog extends Dialog {
 			const totalNV = globalNV + attributeNV;
 			if (totalNV !== 0) {
 				conditionsInfo.push({
+					id: activeCondition.id,
 					name: activeCondition.name,
 					totalNV: totalNV
 				});
@@ -204,20 +261,8 @@ class RollMoveDialog extends Dialog {
 
 	updateNVPanel(e) {
 		const selectedAttribute = this._getSelectedAttribute(e.target);
-		const baseNV = this._advantageLevel.value;
-		const manualAdjustment = this._newAdvantageLevel;
-
-		// Obter informações de NV de todas as condições (global + específico do atributo somados por condição)
-		const conditionsInfo = this._getConditionsNVInfo(selectedAttribute);
-
-		// Calcular NV total das condições
-		const totalConditionNV = conditionsInfo.reduce((sum, condition) => sum + condition.totalNV, 0);
-
-		const masterNVInfo = MasterNVModifierService.getModifiers(this._currentItem.actor);
-		const masterNV = masterNVInfo.reduce((sum, modifier) => sum + modifier.value, 0);
-
-		// Calcular NV total final. Deve espelhar o cálculo aplicado pelo motor de rolagem.
-		const totalNV = baseNV + totalConditionNV + manualAdjustment + masterNV;
+		const calculation = this._buildNVCalculation(selectedAttribute);
+		const totalNV = calculation.total;
 
 		const panel = e.target.closest('.dialog-content')?.querySelector('.panel') ||
 			e.target.closest('.window-content')?.querySelector('.panel');
@@ -231,25 +276,13 @@ class RollMoveDialog extends Dialog {
 		panel.querySelector('.actual').innerText = `${totalNV > 0 ? "+" : ""}${totalNV} NV`;
 
 		const breakdown = panel.parentElement.querySelector('.nv-breakdown');
-		this._renderNVBreakdown(breakdown, {
-			baseNVInfo: this._advantageLevel.reasons,
-			conditionsInfo,
-			manualAdjustment,
-			masterNVInfo
-		});
+		this._renderNVBreakdown(breakdown, { entries: calculation.entries });
 	}
 
 	/** Renderiza uma tag vertical para cada origem que compõe o NV total. */
-	_renderNVBreakdown(container, { baseNVInfo, conditionsInfo, manualAdjustment, masterNVInfo }) {
+	_renderNVBreakdown(container, { entries }) {
 		if (!container) return;
 		container.replaceChildren();
-
-		const entries = [
-			...baseNVInfo.map((entry) => ({ label: entry.reason === "Base" ? "NV base" : entry.reason, value: entry.value })),
-			...conditionsInfo.map((condition) => ({ label: condition.name, value: condition.totalNV })),
-			...(manualAdjustment !== 0 ? [{ label: "Ajuste manual", value: manualAdjustment }] : []),
-			...masterNVInfo.filter((modifier) => modifier.value !== 0).map((modifier) => ({ label: modifier.label, value: modifier.value }))
-		];
 
 		for (const entry of entries) {
 			const tag = document.createElement('div');
@@ -264,6 +297,15 @@ class RollMoveDialog extends Dialog {
 			value.textContent = `${entry.value > 0 ? '+' : ''}${entry.value} NV`;
 
 			tag.append(label, value);
+			if (entry.removable) {
+				const removeButton = document.createElement('button');
+				removeButton.type = 'button';
+				removeButton.classList.add('remove-roll-nv-modifier');
+				removeButton.dataset.modifierId = entry.id;
+				removeButton.dataset.tooltip = 'Ignorar neste cálculo';
+				removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+				tag.append(removeButton);
+			}
 			container.append(tag);
 		}
 	}

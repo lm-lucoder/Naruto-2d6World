@@ -160,7 +160,7 @@ export class ItemRollManager {
    * @param {Object} params - Roll parameters
    */
   static async moveRoll(item, params) {
-    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo: suppliedMasterNVInfo, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
+    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo: suppliedMasterNVInfo, nvCalculation, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
 
     if (isUpdate && rerollMode == "adjustment") {
       // Para ajustes manuais, não recalcular condições - usar valores opcionais
@@ -200,6 +200,7 @@ export class ItemRollManager {
     const activeConditions = parentConditions.filter(
       (condition) => condition.system.isActive
     );
+    const disabledConditionIds = new Set(nvCalculation?.disabledConditionIds ?? []);
     for (const activeCondition of activeConditions) {
       // Coletar NV global (aplica a todos os atributos)
       const globalNV = parseInt(activeCondition.system?.globalNV) || 0;
@@ -211,7 +212,7 @@ export class ItemRollManager {
       // Calcular total de NV desta condição (global + específico)
       const conditionTotalNV = globalNV + attributeSpecificNV;
 
-      if (conditionTotalNV !== 0) {
+      if (!disabledConditionIds.has(activeCondition.id) && conditionTotalNV !== 0) {
         attributeNV += conditionTotalNV;
         conditionsNVInfo.push({
           name: activeCondition.name,
