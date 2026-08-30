@@ -42,7 +42,14 @@ class ManageNVModifiersDialog extends Dialog {
     }
 
     for (const modifier of MasterNVModifierService.getModifiers(actor)) {
-      rows.push(`<li class="nv-modifier-row fixed"><span>${escapeHTML(modifier.label)}</span><strong>${this._formatValue(modifier.value)}</strong></li>`);
+      const canRemoveMasterModifier = game.user.isGM && modifier.scope === "Local";
+      rows.push(`
+        <li class="nv-modifier-row ${canRemoveMasterModifier ? "custom" : "fixed"}">
+          <span>${escapeHTML(modifier.label)}</span>
+          <strong>${this._formatValue(modifier.value)}</strong>
+          ${canRemoveMasterModifier ? `<button type="button" class="remove-master-nv-modifier" data-modifier-id="${modifier.id}"><i class="fa-solid fa-trash"></i></button>` : ""}
+        </li>
+      `);
     }
 
     const customModifiers = actor.system.nvModifiers ?? [];
@@ -76,6 +83,7 @@ class ManageNVModifiersDialog extends Dialog {
     html.find('.add-nv-modifier').on('click', () => this._openAddDialog());
     html.find('.add-master-local-nv-modifier').on('click', () => this._openAddMasterLocalDialog());
     html.find('.remove-nv-modifier').on('click', (event) => this._removeModifier(event.currentTarget.dataset.modifierId));
+    html.find('.remove-master-nv-modifier').on('click', (event) => this._removeMasterLocalModifier(event.currentTarget.dataset.modifierId));
   }
 
   _openAddDialog() {
@@ -110,6 +118,7 @@ class ManageNVModifiersDialog extends Dialog {
   }
 
   _openAddMasterLocalDialog() {
+    if (!game.user.isGM) return ui.notifications.warn("Somente o Mestre pode adicionar modificadores locais de NV.");
     const actor = this._actor;
     new Dialog({
       title: "Adicionar modificador local do Mestre",
@@ -134,6 +143,13 @@ class ManageNVModifiersDialog extends Dialog {
       },
       default: "add"
     }).render(true);
+  }
+
+  async _removeMasterLocalModifier(modifierId) {
+    if (!game.user.isGM) return ui.notifications.warn("Somente o Mestre pode remover modificadores locais de NV.");
+    await MasterNVModifierService.removeLocalModifier(this._actor, modifierId);
+    this.close();
+    ManageNVModifiersDialog.create({ actor: this._actor });
   }
 
   async _removeModifier(modifierId) {

@@ -2,6 +2,7 @@
 export class CharacterTrackerService {
   static SETTING_KEY = "character-tracker-actors";
   static AUTO_OPEN_SETTING_KEY = "auto-open-character-tracker";
+  static DETAIL_MODE_SETTING_KEY = "character-tracker-detail-mode";
   static _application = null;
 
   static registerSettings() {
@@ -19,13 +20,24 @@ export class CharacterTrackerService {
       type: Boolean,
       default: false
     });
+    game.settings.register("naruto2d6world", this.DETAIL_MODE_SETTING_KEY, {
+      name: "Exibir detalhes no rastreador de personagens",
+      scope: "client",
+      config: false,
+      type: Boolean,
+      default: false
+    });
 
     Hooks.on("updateActor", (actor) => {
       if (!this._application?.rendered || !this.trackedActorUuids.includes(actor.uuid)) return;
       this._application.render();
     });
     Hooks.on("updateSetting", (setting) => {
-      if (setting.key !== "naruto2d6world.master-global-nv-modifiers" || !this._application?.rendered) return;
+      const rerenderKeys = [
+        "naruto2d6world.master-global-nv-modifiers",
+        `naruto2d6world.${this.DETAIL_MODE_SETTING_KEY}`
+      ];
+      if (!rerenderKeys.includes(setting.key) || !this._application?.rendered) return;
       this._application.render();
     });
   }
@@ -37,6 +49,15 @@ export class CharacterTrackerService {
   static async getTrackedActors() {
     const documents = await Promise.all(this.trackedActorUuids.map((uuid) => fromUuid(uuid)));
     return documents.filter((document) => document?.documentName === "Actor");
+  }
+
+  static get detailMode() {
+    return game.settings.get("naruto2d6world", this.DETAIL_MODE_SETTING_KEY);
+  }
+
+  static async toggleDetailMode() {
+    if (!game.user.isGM) return;
+    await game.settings.set("naruto2d6world", this.DETAIL_MODE_SETTING_KEY, !this.detailMode);
   }
 
   static async addControlledTokens() {
@@ -88,5 +109,11 @@ export class CharacterTrackerService {
     await this._application.render({ force: true });
     this._application.bringToFront();
     return this._application;
+  }
+
+  /** Force the currently open tracker to reflect any operation performed in it. */
+  static async refresh() {
+    if (!game.user.isGM || !this._application?.rendered) return;
+    await this._application.render({ force: true });
   }
 }

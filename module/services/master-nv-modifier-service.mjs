@@ -73,6 +73,7 @@ export class MasterNVModifierService {
   static async addLocalModifier(actor, { name, value }) {
     this._requireGM();
     if (!actor) throw new Error("Um personagem é obrigatório para criar um modificador local.");
+    if (actor.type !== "character") throw new Error("Apenas personagens podem receber modificadores locais de NV do Mestre.");
     const modifier = this._createModifier(name, value);
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, [...this.getLocalModifiers(actor), modifier]);
     return modifier;
@@ -80,11 +81,13 @@ export class MasterNVModifierService {
 
   static async removeLocalModifier(actor, id) {
     this._requireGM();
+    if (actor?.type !== "character") return;
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, this.getLocalModifiers(actor).filter((modifier) => modifier.id !== id));
   }
 
   static async clearLocalModifiers(actor) {
     this._requireGM();
+    if (actor?.type !== "character") return;
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, []);
   }
 

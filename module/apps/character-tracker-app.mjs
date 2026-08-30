@@ -14,18 +14,19 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     tag: "section",
     classes: ["naruto2d6world", "character-tracker"],
     actions: {
-      addSelected: () => CharacterTrackerService.addControlledTokens(),
-      removeTracked: (event, target) => CharacterTrackerService.removeTrackedActor(target.dataset.actorUuid),
-      clearAll: () => CharacterTrackerService.clearAll(),
-      addMasterGlobal: () => this._addMasterGlobalModifier(),
-      removeMasterGlobal: (event, target) => MasterNVModifierService.removeGlobalModifier(target.dataset.modifierId),
-      clearMasterGlobal: () => MasterNVModifierService.clearGlobalModifiers(),
-      editMasterGlobal: (event, target) => this._editMasterGlobalModifier(target.dataset.modifierId),
-      addMasterLocalToTracked: () => this._addMasterLocalToTracked(),
-      clearMasterLocalFromTracked: () => this._clearMasterLocalFromTracked(),
-      removeMasterLocal: (event, target) => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId),
-      openActorSheet: (event, target) => this._openActorSheet(target.dataset.actorUuid),
-      openNVModifiers: (event, target) => this._openNVModifiers(target.dataset.actorUuid)
+      addSelected: () => this._runAndRefresh(() => CharacterTrackerService.addControlledTokens()),
+      removeTracked: (event, target) => this._runAndRefresh(() => CharacterTrackerService.removeTrackedActor(target.dataset.actorUuid)),
+      clearAll: () => this._runAndRefresh(() => CharacterTrackerService.clearAll()),
+      addMasterGlobal: () => this._runAndRefresh(() => this._addMasterGlobalModifier()),
+      removeMasterGlobal: (event, target) => this._runAndRefresh(() => MasterNVModifierService.removeGlobalModifier(target.dataset.modifierId)),
+      clearMasterGlobal: () => this._runAndRefresh(() => MasterNVModifierService.clearGlobalModifiers()),
+      editMasterGlobal: (event, target) => this._runAndRefresh(() => this._editMasterGlobalModifier(target.dataset.modifierId)),
+      toggleDetails: () => this._runAndRefresh(() => CharacterTrackerService.toggleDetailMode()),
+      addMasterLocalToTracked: () => this._runAndRefresh(() => this._addMasterLocalToTracked()),
+      clearMasterLocalFromTracked: () => this._runAndRefresh(() => this._clearMasterLocalFromTracked()),
+      removeMasterLocal: (event, target) => this._runAndRefresh(() => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId)),
+      openActorSheet: (event, target) => this._runAndRefresh(() => this._openActorSheet(target.dataset.actorUuid)),
+      openNVModifiers: (event, target) => this._runAndRefresh(() => this._openNVModifiers(target.dataset.actorUuid))
     },
     position: {
       width: 360,
@@ -80,6 +81,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     return {
       canAdd: game.user.isGM,
       canManage: game.user.isGM,
+      detailMode: CharacterTrackerService.detailMode,
       masterGlobalModifiers: MasterNVModifierService.getGlobalModifiers(),
       actors: orderedActors.map((actor) => this._prepareActorContext(actor))
     };
@@ -103,7 +105,14 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
       nv: (Number(system.advantageLevel?.actual) || 0) + customNV,
-      masterLocalModifiers: MasterNVModifierService.getLocalModifiers(actor)
+      masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor) : [],
+      conditions: actor.items
+        .filter((item) => item.type === "condition")
+        .map((condition) => ({ name: condition.name, isActive: Boolean(condition.system.isActive) })),
+      nvModifiers: isCharacter ? [
+        ...(system.nvModifiers ?? []).map((modifier) => ({ name: modifier.name || "Modificador da ficha", value: Number(modifier.value) || 0, source: "Ficha" })),
+        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ name: modifier.name, value: modifier.value, source: "Mestre Global" }))
+      ] : []
     };
   }
 
@@ -157,7 +166,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   }
 
   static async _addMasterLocalToTracked() {
-    const actors = await CharacterTrackerService.getTrackedActors();
+    const actors = (await CharacterTrackerService.getTrackedActors()).filter((actor) => actor.type === "character");
     if (!actors.length) return ui.notifications.warn("Adicione personagens ao rastreador antes de aplicar um NV local.");
     const result = await this._promptMasterGlobalModifier("Adicionar NV local do Mestre para o rastreador");
     if (!result) return;
@@ -169,7 +178,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   }
 
   static async _clearMasterLocalFromTracked() {
-    const actors = await CharacterTrackerService.getTrackedActors();
+    const actors = (await CharacterTrackerService.getTrackedActors()).filter((actor) => actor.type === "character");
     if (!actors.length) return;
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: "Limpar NVs locais do Mestre" },
@@ -211,7 +220,18 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     if (event.target.closest("button")) return;
     event.preventDefault();
     const amount = direction * (event.shiftKey ? 5 : 1);
-    MasterNVModifierService.adjustGlobalModifier(modifierId, amount).catch((error) => ui.notifications.warn(error.message));
+    CharacterTrackerApplication._runAndRefresh(() => MasterNVModifierService.adjustGlobalModifier(modifierId, amount));
+  }
+
+  static async _runAndRefresh(operation) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.error("Erro em operação do rastreador de personagens:", error);
+      ui.notifications.warn(error.message ?? "Não foi possível concluir a operação no rastreador.");
+    } finally {
+      await CharacterTrackerService.refresh();
+    }
   }
 
   static async _promptMasterGlobalModifier(title, modifier = {}) {
