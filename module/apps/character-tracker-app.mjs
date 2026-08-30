@@ -92,7 +92,12 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     const system = actor.system;
     const isCharacter = actor.type === "character";
     const customNV = (system.nvModifiers ?? []).reduce((total, modifier) => total + (Number(modifier.value) || 0), 0);
-    const activeConditions = actor.items.filter((item) => item.type === "condition" && item.system.isActive);
+    // `sort` is Foundry's native Item ordering key, maintained when items are
+    // rearranged by drag-and-drop on the actor sheet.
+    const conditions = actor.items
+      .filter((item) => item.type === "condition")
+      .sort((left, right) => left.sort - right.sort);
+    const activeConditions = conditions.filter((item) => item.system.isActive);
     const activeGlobalConditionNV = activeConditions.reduce((total, condition) => total + (Number(condition.system.globalNV) || 0), 0);
     const baseNV = Number(system.advantageLevel?.actual) || 0;
     const masterNV = isCharacter ? MasterNVModifierService.getTotal(actor) : 0;
@@ -112,8 +117,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       nv: baseNV + customNV + masterNV + activeGlobalConditionNV,
       baseNV,
       masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor) : [],
-      conditions: actor.items
-        .filter((item) => item.type === "condition")
+      conditions: conditions
         .map((condition) => ({
           id: condition.id,
           name: condition.name,

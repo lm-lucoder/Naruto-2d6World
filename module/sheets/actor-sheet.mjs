@@ -250,6 +250,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 			}
 		}
+		// Foundry updates Item.sort when the player rearranges conditions by
+		// drag-and-drop. Reuse that native order in every condition view.
+		conditions.sort((left, right) => left.sort - right.sort);
 		// Assign and return
 		context.moves = moves;
 		context.movesByCategory = movesByCategory;
@@ -286,6 +289,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 				moves.push(item);
 			}
 		}
+		conditions.sort((left, right) => left.sort - right.sort);
 		context.conditions = conditions;
 		context.moves = moves;
 	}
