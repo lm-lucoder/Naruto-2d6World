@@ -72,14 +72,17 @@
             width: 100%;
             gap: 4px;
             .nv-breakdown-tag{
-                display: flex;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
                 align-items: center;
-                justify-content: space-between;
-                gap: 10px;
+                gap: 6px;
                 padding: 4px 8px;
                 border: 1px solid $c-beige;
                 border-radius: 3px;
                 background-color: #00000012;
+                &.removable{
+                    grid-template-columns: minmax(0, 1fr) auto 20px;
+                }
                 .label{
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -88,6 +91,7 @@
                 .value{
                     font-weight: bold;
                     white-space: nowrap;
+                    text-align: right;
                 }
                 .remove-roll-nv-modifier{
                     width: 20px;
@@ -172,11 +176,29 @@
         &.custom{
             background-color: #42c4541f;
         }
-        .remove-nv-modifier{
+        .remove-nv-modifier,
+        .remove-master-nv-modifier{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
             border: 0;
+            border-radius: 3px;
             color: #b40309;
             background: transparent;
             cursor: pointer;
+            line-height: 1;
+            i{
+                display: block;
+                line-height: 1;
+            }
+        }
+        .remove-nv-modifier i:hover,
+        .remove-master-nv-modifier i:hover{
+            color: #7f0000;
+            transform: scale(1.12);
         }
     }
     .nv-modifier-empty{

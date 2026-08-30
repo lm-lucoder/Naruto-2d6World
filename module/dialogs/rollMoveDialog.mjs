@@ -287,6 +287,7 @@ class RollMoveDialog extends Dialog {
 		for (const entry of entries) {
 			const tag = document.createElement('div');
 			tag.classList.add('nv-breakdown-tag', entry.value > 0 ? 'positive' : entry.value < 0 ? 'negative' : 'neutral');
+			if (entry.removable) tag.classList.add('removable');
 
 			const label = document.createElement('span');
 			label.classList.add('label');
