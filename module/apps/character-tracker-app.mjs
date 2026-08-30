@@ -6,7 +6,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 /**
  * A compact floating tracker window. ApplicationV2 owns its frame dragging,
  * positioning, focus, resize and minimize interactions. DragDrop below is
- * intentionally reserved for future drag-and-drop between tracker entries.
+ * uses native DragDrop only for external condition drops on tracker entries.
  */
 export class CharacterTrackerApplication extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
@@ -54,12 +54,12 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     super(options);
     this._dragDrop = new foundry.applications.ux.DragDrop({
       dragSelector: ".character-tracker-entry",
-      dropSelector: ".character-tracker-list",
-      // Entry reordering is deliberately not enabled yet. These hooks make
-      // future internal drag-and-drop independent from window-frame dragging.
+      dropSelector: ".character-tracker-entry",
+      // Window-frame dragging remains ApplicationV2's responsibility. Internal
+      // entry reordering stays disabled; only external Foundry Item drops work.
       permissions: {
         dragstart: () => false,
-        drop: () => false
+        drop: () => game.user.isGM
       },
       callbacks: {
         dragstart: this._onEntryDragStart.bind(this),
@@ -196,8 +196,25 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     // Reserved for future native internal DragDrop behavior.
   }
 
-  _onEntryDrop(event) {
-    // Reserved for future native internal DragDrop behavior.
+  async _onEntryDrop(event) {
+    event.preventDefault();
+    await CharacterTrackerApplication._runAndRefresh(async () => {
+      const target = event.target.closest(".character-tracker-entry");
+      const actor = await fromUuid(target?.dataset.actorUuid);
+      if (!actor?.isOwner) return;
+
+      const dropData = TextEditor.getDragEventData(event);
+      if (dropData.type !== "Item") return;
+
+      const droppedItem = dropData.uuid
+        ? await fromUuid(dropData.uuid)
+        : await Item.implementation.fromDropData(dropData);
+      if (droppedItem?.type !== "condition") return;
+
+      const conditionData = foundry.utils.deepClone(droppedItem.toObject());
+      delete conditionData._id;
+      await actor.createEmbeddedDocuments("Item", [conditionData]);
+    });
   }
 
   static async _addMasterGlobalModifier() {
