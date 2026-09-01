@@ -27,18 +27,18 @@
   <header class="character-tracker-toolbar">
     <div class="character-tracker-title-group">
       {{#if canManage}}
-        <button type="button" class="character-tracker-local-add" data-action="addMasterLocalToTracked" data-tooltip="Adicionar NV local do Mestre a todos os personagens listados"><i class="fa-solid fa-user-plus"></i></button>
-        <button type="button" class="character-tracker-local-clear" data-action="clearMasterLocalFromTracked" data-tooltip="Limpar NVs locais do Mestre de todos os personagens"><i class="fa-solid fa-user-slash"></i></button>
+        <button type="button" class="character-tracker-local-add" data-action="addSelected" data-tooltip="Adicionar tokens selecionados ao rastreador"><i class="fa-solid fa-user-plus"></i></button>
+        <button type="button" class="character-tracker-local-clear" data-action="clearAll" data-tooltip="Remover todos os personagens do rastreador"><i class="fa-solid fa-user-slash"></i></button>
         <span class="character-tracker-toolbar-separator" aria-hidden="true">|</span>
       {{/if}}
       <span class="character-tracker-title">Personagens</span>
     </div>
     {{#if canManage}}
       <div class="character-tracker-toolbar-actions">
-        <button type="button" class="character-tracker-add" data-action="addSelected" data-tooltip="Adicionar tokens selecionados">
+        <button type="button" class="character-tracker-add" data-action="addMasterLocalToTracked" data-tooltip="Adicionar NV local do Mestre a todos os personagens listados">
           <i class="fa-solid fa-plus"></i>
         </button>
-        <button type="button" class="character-tracker-clear" data-action="clearAll" data-tooltip="Limpar rastreador">
+        <button type="button" class="character-tracker-clear" data-action="clearMasterLocalFromTracked" data-tooltip="Limpar NVs locais do Mestre de todos os personagens">
           <i class="fa-solid fa-broom"></i>
         </button>
       </div>
@@ -85,15 +85,17 @@
                 {{#each conditions}}<button type="button" class="character-tracker-condition {{#if isActive}}active{{/if}}" data-action="toggleCondition" data-actor-uuid="{{../uuid}}" data-condition-id="{{id}}" data-tooltip="{{{description}}}">{{name}}</button>{{else}}<span class="character-tracker-detail-empty">Nenhuma</span>{{/each}}
               </div>
             </div>
-            <div class="character-tracker-detail-divider" aria-hidden="true"></div>
-            <div class="character-tracker-detail-section character-tracker-nv-modifiers" aria-label="Modificadores de NV">
-              <span class="character-tracker-detail-label">NV</span>
-              <div class="character-tracker-detail-tags">
-                {{#if baseNV}}<span class="character-tracker-nv-modifier" data-tooltip="NV base da ficha">NV Base: {{#if (greaterThan baseNV 0)}}+{{/if}}{{baseNV}}</span>{{/if}}
-                {{#each nvModifiers}}{{#if canDelete}}<span class="character-tracker-nv-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="{{modifierType}}" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-nv-modifier" data-tooltip="Modificador global do Mestre">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/if}}{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
-                {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="master-local" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
+            {{#if isCharacter}}
+              <div class="character-tracker-detail-divider" aria-hidden="true"></div>
+              <div class="character-tracker-detail-section character-tracker-nv-modifiers" aria-label="Modificadores de NV">
+                <span class="character-tracker-detail-label">NV</span>
+                <div class="character-tracker-detail-tags">
+                  {{#if baseNV}}<span class="character-tracker-nv-modifier" data-tooltip="NV base da ficha">NV Base: {{#if (greaterThan baseNV 0)}}+{{/if}}{{baseNV}}</span>{{/if}}
+                  {{#each nvModifiers}}{{#if canDelete}}<span class="character-tracker-nv-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="{{modifierType}}" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-nv-modifier" data-tooltip="Modificador global do Mestre">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/if}}{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
+                  {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="master-local" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
+                </div>
               </div>
-            </div>
+            {{/if}}
           {{/if}}
         </div>
       </li>
