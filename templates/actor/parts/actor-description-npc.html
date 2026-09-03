@@ -11,8 +11,22 @@
     <input type="text" name="system.params.age" value="{{system.params.age}}" >
 </div>
 <div class="resource-content flexrow flex-center">
-    <label for="system.params.age">Rank:</label>
-    <input type="text" name="system.params.rank" value="{{system.params.rank}}" >
+    <label for="system.params.rank">Rank:</label>
+    <select class="rank-select" name="system.params.rank">
+        {{#select system.params.rank}}
+        <option value="0">Academia</option>
+        <option value="1">Genin</option>
+        <option value="2">Genin Avançado</option>
+        <option value="3">Chunin</option>
+        <option value="4">Chunin Avançado</option>
+        <option value="5">Tokubetsu Jounin</option>
+        <option value="6">Jounin</option>
+        <option value="7">Jounin de Elite (Jo-nin)</option>
+        <option value="8">Kage</option>
+        <option value="9">Kage Veterano</option>
+        <option value="10">Lendário</option>
+        {{/select}}
+    </select>
 </div>
 <h3>Biografia</h3>
 {{editor system.biography target="system.biography" rollData=rollData button=true owner=owner editable=editable}}
