@@ -100,6 +100,14 @@ class RollMoveDialog extends Dialog {
 			this._nvCalculation.disabledModifierIds.add(button.dataset.modifierId);
 			this.updateNVPanel(ev);
 		})
+		html.on('click', '.nv-breakdown-tag.adjustable', async (ev) => {
+			if (ev.target.closest('.remove-roll-nv-modifier')) return;
+			await this._adjustPersistentModifier(ev.currentTarget.dataset.entryId, ev.shiftKey ? 5 : 1, ev);
+		});
+		html.on('contextmenu', '.nv-breakdown-tag.adjustable', async (ev) => {
+			ev.preventDefault();
+			await this._adjustPersistentModifier(ev.currentTarget.dataset.entryId, -1, ev);
+		});
 
 		// Listener para quando o atributo é selecionado
 		html.find('input[name="option"]').on("change", (ev) => {
@@ -161,7 +169,11 @@ class RollMoveDialog extends Dialog {
 			label: modifier.name || "Modificador personalizado",
 			reason: modifier.name || "Modificador personalizado",
 			value: Number(modifier.value) || 0,
-			removable: true
+			removable: true,
+			adjustable: game.user.isGM || actor.isOwner,
+			modifierSource: "actor",
+			modifierId: modifier.id,
+			modifierIndex: index
 		}));
 		this._nvCalculation = {
 			disabledModifierIds: new Set(),
@@ -174,9 +186,41 @@ class RollMoveDialog extends Dialog {
 				label: modifier.label,
 				value: modifier.value,
 				removable: true,
+				adjustable: game.user.isGM,
+				modifierSource: "master",
+				modifierScope: modifier.scope,
+				modifierId: modifier.id,
 				modifier
 			}))
 		};
+	}
+
+	/** Persist a click adjustment and retain this dialog's temporary roll state. */
+	async _adjustPersistentModifier(entryId, amount, event) {
+		const state = this._nvCalculation;
+		const entry = [...state.baseEntries, ...state.masterEntries].find((candidate) => candidate.id === entryId);
+		if (!entry?.adjustable) return;
+
+		try {
+			if (entry.modifierSource === "master") {
+				if (!game.user.isGM) return ui.notifications.warn("Somente o Mestre pode alterar modificadores de NV do Mestre.");
+				if (entry.modifierScope === "Global") await MasterNVModifierService.adjustGlobalModifier(entry.modifierId, amount);
+				else await MasterNVModifierService.adjustLocalModifier(this._currentItem.actor, entry.modifierId, amount);
+			} else {
+				const actor = this._currentItem.actor;
+				const modifiers = (actor.system.nvModifiers ?? []).map((modifier, index) => {
+					const isTarget = modifier.id === entry.modifierId || index === entry.modifierIndex;
+					return isTarget ? { ...modifier, value: (Number(modifier.value) || 0) + amount } : modifier;
+				});
+				await actor.update({ "system.nvModifiers": modifiers });
+			}
+
+			entry.value += amount;
+			if (entry.modifier) entry.modifier.value += amount;
+			this.updateNVPanel(event);
+		} catch (error) {
+			ui.notifications.warn(error.message || "Não foi possível alterar o modificador de NV.");
+		}
 	}
 
 	_buildNVCalculation(attribute) {
@@ -288,6 +332,11 @@ class RollMoveDialog extends Dialog {
 			const tag = document.createElement('div');
 			tag.classList.add('nv-breakdown-tag', entry.value > 0 ? 'positive' : entry.value < 0 ? 'negative' : 'neutral');
 			if (entry.removable) tag.classList.add('removable');
+			if (entry.adjustable) {
+				tag.classList.add('adjustable');
+				tag.dataset.entryId = entry.id;
+				tag.dataset.tooltip = 'Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV';
+			}
 
 			const label = document.createElement('span');
 			label.classList.add('label');

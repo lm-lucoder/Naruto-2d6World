@@ -83,6 +83,10 @@
                 &.removable{
                     grid-template-columns: minmax(0, 1fr) auto 20px;
                 }
+                &.adjustable{
+                    cursor: pointer;
+                    &:hover{ filter: brightness(.94); }
+                }
                 .label{
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -175,6 +179,10 @@
         }
         &.custom{
             background-color: #42c4541f;
+        }
+        &.adjustable{
+            cursor: pointer;
+            &:hover{ filter: brightness(.94); }
         }
         .remove-nv-modifier,
         .remove-master-nv-modifier{
