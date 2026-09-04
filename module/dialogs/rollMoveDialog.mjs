@@ -1,7 +1,7 @@
 import { GameSettings } from "../settings/settings.mjs";
 import { AdvantageLevelApi } from "../sheets/actor-sheet.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
-import { MoveRollIndicatorService } from "../services/move-roll-indicator-service.mjs";
+import { MoveRollSessionService } from "../services/move-roll-session-service.mjs";
 
 class RollMoveDialog extends Dialog {
 	constructor(dialogData = {}, options = {}) {
@@ -12,19 +12,30 @@ class RollMoveDialog extends Dialog {
 		this._advantageLevel = null
 		this._newAdvantageLevel = null
 		this._nvCalculation = null
+		this._moveRollSession = null
+		this._isRemoteSession = false
+		this._applyingSessionState = false
+		this._pendingSessionState = null
+		this._rollInProgress = false
 	}
 
-	static async create(item) {
-		MoveRollIndicatorService.start();
+	static async create(item, { session = null, isRemote = false } = {}) {
 		const actor = item.actor;
 		const advantageLevel = AdvantageLevelApi.buildAdvantageLevel(actor)
 		let newAdvantageLevel = 0
+		const validAttributes = Object.values(item.system.attributes).filter(
+			(attribute) => attribute.on === true
+		);
+		const selectedAttribute = validAttributes.length === 1 ? validAttributes[0].ref : null;
+		const moveRollSession = session ?? MoveRollSessionService.start(item, {
+			selectedAttribute,
+			rollModifier: "",
+			manualAdjustment: 0,
+			disabledModifierIds: [],
+			entryValues: {}
+		});
 
 		return new Promise((resolve) => {
-			const validAttributes = Object.values(item.system.attributes).filter(
-				(attribute) => attribute.on === true
-			);
-
 			const options = []
 
 			validAttributes.forEach((attribute) => {
@@ -70,10 +81,11 @@ class RollMoveDialog extends Dialog {
 				content,
 				buttons: {},
 				close: () => {
-					if (!dlg._moveRollResolved) {
-						MoveRollIndicatorService.stop();
-						resolve(false);
+					MoveRollSessionService.unregisterDialog(moveRollSession.id, dlg);
+					if (!dlg._moveRollResolved && !dlg._isRemoteSession) {
+						MoveRollSessionService.end(moveRollSession.id);
 					}
+					resolve(Boolean(dlg._moveRollResolved));
 				}
 			});
 
@@ -81,7 +93,11 @@ class RollMoveDialog extends Dialog {
 			dlg._currentItem = item
 			dlg._advantageLevel = advantageLevel
 			dlg._newAdvantageLevel = newAdvantageLevel
+			dlg._moveRollSession = moveRollSession
+			dlg._isRemoteSession = isRemote
+			dlg._pendingSessionState = moveRollSession.state
 			dlg._initializeNVCalculation(actor)
+			MoveRollSessionService.registerDialog(moveRollSession.id, dlg);
 			dlg.render(true);
 		});
 	}
@@ -89,11 +105,12 @@ class RollMoveDialog extends Dialog {
 	activateListeners(html) {
 		super.activateListeners(html);
 
-		html.find(".default-roll-button").on("click", (ev) => {
+		html.find(".default-roll-button").on("click", async (ev) => {
 			if (this._currentResolve) {
-				this.rollDefault(ev);
+				await this.rollDefault(ev);
 			}
 		});
+		html.find('.modifier-input').on('input', () => this._publishSessionState());
 		html.find('.btn-increase-advantage-level').on("click", (ev) => {
 			this._newAdvantageLevel++
 			this.updateNVPanel(ev)
@@ -121,40 +138,53 @@ class RollMoveDialog extends Dialog {
 			this.updateNVPanel(ev)
 		})
 
-		// Atualizar o painel inicialmente (mostra valores globais mesmo sem atributo selecionado)
-		// Se houver atributo pré-selecionado, também mostra os valores específicos
-		const panel = html.find('.panel')[0];
-		if (panel) {
-			const checkedOption = html.find('input[name="option"]:checked');
-			if (checkedOption.length > 0) {
-				this.updateNVPanel({ target: checkedOption[0] })
-			} else {
-				// Atualizar sem atributo selecionado para mostrar apenas valores globais
-				this.updateNVPanel({ target: panel })
-			}
-		}
+		// O snapshot da sessão também faz a primeira renderização do painel.
+		this.applySessionState(this._pendingSessionState);
+		this._pendingSessionState = null;
+		this._publishSessionState();
 	}
 
 	async rollDefault(e) {
-		const options = e.target
-			.closest(".window-content")
-			.querySelector(".options-container")
-			.querySelectorAll('[name="option"]');
+		if (this._rollInProgress) return;
+
+		const root = e.target.closest(".window-content");
+		const options = root.querySelector(".options-container").querySelectorAll('[name="option"]');
 		const checkedOption = [...options].find((option) => option.checked);
 		if (!checkedOption) {
 			return ui.notifications.warn("Escolha um atributo para rolar com o movimento!");
 		}
+
+		if (this._isRemoteSession) {
+			this._rollInProgress = true;
+			const button = root.querySelector('.default-roll-button');
+			button.disabled = true;
+			button.textContent = "Aguardando...";
+			MoveRollSessionService.requestRoll(this._moveRollSession.id, this._collectSessionState());
+			return;
+		}
+
+		await this._executeRoll();
+	}
+
+	async _executeRoll() {
+		if (this._rollInProgress) return;
+
+		const root = this._getDialogRoot();
+		const checkedOption = root?.querySelector('input[name="option"]:checked');
+		if (!checkedOption) {
+			return ui.notifications.warn("Escolha um atributo para rolar com o movimento!");
+		}
+
+		this._rollInProgress = true;
 		const chosenAttribute = checkedOption.value;
-		const rollModifier = e.target
-			.closest(".window-content")
-			.querySelector('.modifier-input')
-			.value
+		const rollModifier = root.querySelector('.modifier-input').value;
 
 		const nvCalculation = this._buildNVCalculation(chosenAttribute);
 		const baseAdvantageLevel = nvCalculation.baseNVInfo.reduce((total, entry) => total + entry.value, 0);
 		const manualAdjustment = this._newAdvantageLevel;
 		const advantageLevel = nvCalculation.total;
 
+		let didRoll = false;
 		try {
 			await this._currentItem.moveRoll({
 				advantageLevel,
@@ -166,11 +196,80 @@ class RollMoveDialog extends Dialog {
 				attribute: chosenAttribute,
 				rollModifier
 			});
+			didRoll = true;
 		} finally {
-			MoveRollIndicatorService.stop();
-			this._moveRollResolved = true;
-			this._currentResolve(true);
-			this.close();
+			this._moveRollResolved = didRoll;
+			MoveRollSessionService.end(this._moveRollSession.id);
+			this._currentResolve(didRoll);
+		}
+	}
+
+	/** Execute a roll requested by a GM, using the state sent with the request. */
+	async rollFromSession(state) {
+		if (this._isRemoteSession || this._rollInProgress) return;
+		this.applySessionState(state);
+		await this._executeRoll();
+	}
+
+	/** Close this copy because the owning player's session ended. */
+	closeFromSession() {
+		this.close();
+	}
+
+	_getDialogRoot() {
+		const element = this.element?.[0] ?? this.element;
+		return element?.querySelector?.('.window-content') ?? null;
+	}
+
+	_collectSessionState() {
+		const root = this._getDialogRoot();
+		const entries = [...this._nvCalculation.baseEntries, ...this._nvCalculation.masterEntries];
+
+		return {
+			selectedAttribute: root?.querySelector('input[name="option"]:checked')?.value ?? null,
+			rollModifier: root?.querySelector('.modifier-input')?.value ?? "",
+			manualAdjustment: this._newAdvantageLevel,
+			disabledModifierIds: [...this._nvCalculation.disabledModifierIds],
+			entryValues: Object.fromEntries(entries.map((entry) => [entry.id, entry.value]))
+		};
+	}
+
+	_publishSessionState() {
+		if (this._applyingSessionState || this._rollInProgress || !this._moveRollSession) return;
+		MoveRollSessionService.update(this._moveRollSession.id, this._collectSessionState());
+	}
+
+	/** Apply a remote snapshot without echoing it back through the socket. */
+	applySessionState(state) {
+		if (!state) return;
+		const root = this._getDialogRoot();
+		if (!root) {
+			this._pendingSessionState = state;
+			return;
+		}
+
+		this._applyingSessionState = true;
+		try {
+			root.querySelectorAll('input[name="option"]').forEach((option) => {
+				option.checked = option.value === state.selectedAttribute;
+			});
+			const modifierInput = root.querySelector('.modifier-input');
+			if (modifierInput) modifierInput.value = state.rollModifier ?? "";
+
+			this._newAdvantageLevel = Number(state.manualAdjustment) || 0;
+			this._nvCalculation.disabledModifierIds = new Set(state.disabledModifierIds ?? []);
+
+			const entries = [...this._nvCalculation.baseEntries, ...this._nvCalculation.masterEntries];
+			for (const entry of entries) {
+				if (!Object.hasOwn(state.entryValues ?? {}, entry.id)) continue;
+				entry.value = Number(state.entryValues[entry.id]) || 0;
+				if (entry.modifier) entry.modifier.value = entry.value;
+			}
+
+			const target = root.querySelector('input[name="option"]:checked') ?? root.querySelector('.panel');
+			if (target) this.updateNVPanel({ target });
+		} finally {
+			this._applyingSessionState = false;
 		}
 	}
 
@@ -333,6 +432,7 @@ class RollMoveDialog extends Dialog {
 
 		const breakdown = panel.parentElement.querySelector('.nv-breakdown');
 		this._renderNVBreakdown(breakdown, { entries: calculation.entries });
+		this._publishSessionState();
 	}
 
 	/** Renderiza uma tag vertical para cada origem que compõe o NV total. */

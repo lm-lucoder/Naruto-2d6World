@@ -8,10 +8,11 @@ import { BoilerplateItemSheet } from "./sheets/item-sheet.mjs";
 import { preloadHandlebarsTemplates } from "./helpers/templates.mjs";
 import { BOILERPLATE } from "./helpers/config.mjs";
 import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
+import RollMoveDialog from "./dialogs/rollMoveDialog.mjs";
 import { GameSettings } from "./settings/settings.mjs";
 import { CharacterTrackerService } from "./services/character-tracker-service.mjs";
 import { MasterNVModifierService } from "./services/master-nv-modifier-service.mjs";
-import { MoveRollIndicatorService } from "./services/move-roll-indicator-service.mjs";
+import { MoveRollSessionService } from "./services/move-roll-session-service.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -31,7 +32,7 @@ Hooks.once('init', async function () {
   game.naruto2d6world = {
     characterTracker: CharacterTrackerService,
     masterNVModifiers: MasterNVModifierService,
-    moveRollIndicator: MoveRollIndicatorService
+    moveRollSessions: MoveRollSessionService
   };
 
   // Add custom constants for configuration.
@@ -144,7 +145,9 @@ Hooks.once("ready", async function () {
   Hooks.on("hotbarDrop", (bar, data, slot) => createItemMacro(data, slot));
 
   await MasterNVModifierService.migrateLegacySetting();
-  MoveRollIndicatorService.initialize();
+  MoveRollSessionService.initialize({
+    dialogFactory: (item, options) => RollMoveDialog.create(item, options)
+  });
 
   // Chat Move Message card Reroll event
   window.addEventListener("click", async (event) => {
