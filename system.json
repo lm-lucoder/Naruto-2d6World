@@ -109,7 +109,7 @@
     }
   ],
   "packFolders": [],
-  "socket": false,
+  "socket": true,
   "manifest": "https://github.com/Make-it-fly/Naruto-2d6World/releases/download/production/system.json",
   "download": "https://github.com/Make-it-fly/Naruto-2d6World/releases/download/production/naruto2d6world.rar",
   "background": "systems/boilerplate/assets/anvil-impact.png",

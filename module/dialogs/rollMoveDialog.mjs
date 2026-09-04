@@ -1,6 +1,7 @@
 import { GameSettings } from "../settings/settings.mjs";
 import { AdvantageLevelApi } from "../sheets/actor-sheet.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+import { MoveRollIndicatorService } from "../services/move-roll-indicator-service.mjs";
 
 class RollMoveDialog extends Dialog {
 	constructor(dialogData = {}, options = {}) {
@@ -14,6 +15,7 @@ class RollMoveDialog extends Dialog {
 	}
 
 	static async create(item) {
+		MoveRollIndicatorService.start();
 		const actor = item.actor;
 		const advantageLevel = AdvantageLevelApi.buildAdvantageLevel(actor)
 		let newAdvantageLevel = 0
@@ -67,7 +69,12 @@ class RollMoveDialog extends Dialog {
 				title: `Rolando movimento: ${item.name}`,
 				content,
 				buttons: {},
-				close: () => { resolve(false); }
+				close: () => {
+					if (!dlg._moveRollResolved) {
+						MoveRollIndicatorService.stop();
+						resolve(false);
+					}
+				}
 			});
 
 			dlg._currentResolve = resolve;
@@ -128,7 +135,7 @@ class RollMoveDialog extends Dialog {
 		}
 	}
 
-	rollDefault(e) {
+	async rollDefault(e) {
 		const options = e.target
 			.closest(".window-content")
 			.querySelector(".options-container")
@@ -148,18 +155,23 @@ class RollMoveDialog extends Dialog {
 		const manualAdjustment = this._newAdvantageLevel;
 		const advantageLevel = nvCalculation.total;
 
-		this._currentItem.moveRoll({
-			advantageLevel,
-			baseAdvantageLevel, // NV base do personagem
-			manualAdjustment, // Ajuste manual do diálogo
-			baseNVInfo: nvCalculation.baseNVInfo,
-			masterNVInfo: nvCalculation.masterNVInfo,
-			nvCalculation,
-			attribute: chosenAttribute,
-			rollModifier
-		});
-		this._currentResolve(true)
-		this.close();
+		try {
+			await this._currentItem.moveRoll({
+				advantageLevel,
+				baseAdvantageLevel, // NV base do personagem
+				manualAdjustment, // Ajuste manual do diálogo
+				baseNVInfo: nvCalculation.baseNVInfo,
+				masterNVInfo: nvCalculation.masterNVInfo,
+				nvCalculation,
+				attribute: chosenAttribute,
+				rollModifier
+			});
+		} finally {
+			MoveRollIndicatorService.stop();
+			this._moveRollResolved = true;
+			this._currentResolve(true);
+			this.close();
+		}
 	}
 
 	/** Snapshot of NV sources for this dialog only; no actor data is ever changed. */

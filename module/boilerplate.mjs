@@ -11,6 +11,7 @@ import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
 import { GameSettings } from "./settings/settings.mjs";
 import { CharacterTrackerService } from "./services/character-tracker-service.mjs";
 import { MasterNVModifierService } from "./services/master-nv-modifier-service.mjs";
+import { MoveRollIndicatorService } from "./services/move-roll-indicator-service.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -29,7 +30,8 @@ Hooks.once('init', async function () {
   };
   game.naruto2d6world = {
     characterTracker: CharacterTrackerService,
-    masterNVModifiers: MasterNVModifierService
+    masterNVModifiers: MasterNVModifierService,
+    moveRollIndicator: MoveRollIndicatorService
   };
 
   // Add custom constants for configuration.
@@ -142,6 +144,7 @@ Hooks.once("ready", async function () {
   Hooks.on("hotbarDrop", (bar, data, slot) => createItemMacro(data, slot));
 
   await MasterNVModifierService.migrateLegacySetting();
+  MoveRollIndicatorService.initialize();
 
   // Chat Move Message card Reroll event
   window.addEventListener("click", async (event) => {

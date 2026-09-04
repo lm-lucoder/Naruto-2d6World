@@ -1,0 +1,24 @@
+.players-list .player .naruto-move-roll-indicator {
+  align-items: center;
+  color: var(--color-text-light-highlight, #f0c36d);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  justify-content: center;
+  margin-right: 0.3rem;
+  pointer-events: none;
+  transform-origin: center;
+  animation: naruto-move-roll-pulse 1.35s ease-in-out infinite;
+}
+
+@keyframes naruto-move-roll-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(0.88);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
