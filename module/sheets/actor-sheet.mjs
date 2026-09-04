@@ -278,6 +278,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 	_prepareNPCItems(context) {
 		const conditions = [];
 		const moves = [];
+		const markers = [];
 		for (let item of context.items) {
 			item.img = item.img || DEFAULT_TOKEN;
 			if (item.type === "condition") {
@@ -288,10 +289,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 			if (item.type === "move") {
 				moves.push(item);
 			}
+			if (item.type === "marker") {
+				markers.push(item);
+			}
 		}
 		conditions.sort((left, right) => left.sort - right.sort);
+		markers.sort((left, right) => left.sort - right.sort);
 		context.conditions = conditions;
 		context.moves = moves;
+		context.markers = markers;
 	}
 
 	/* -------------------------------------------- */
@@ -365,6 +371,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 			condition.update({
 				system: { isActive: !condition.system.isActive },
 			});
+		});
+
+		html.find(".marker-card").on("click", async (event) => {
+			if (event.target.closest(".marker-details, a, button, input")) return;
+			const marker = this.actor.items.get(event.currentTarget.dataset.itemId);
+			if (!marker) return;
+			await marker.update({ "system.isActive": !marker.system.isActive });
 		});
 
 		html.find(".sheet-condition-tag").on("click", async (event) => {

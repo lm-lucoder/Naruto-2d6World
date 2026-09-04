@@ -6,6 +6,11 @@ import { ItemLegacyRollManager } from "../classes/item-legacy-roll-manager.mjs";
  * @extends {Item}
  */
 export class BoilerplateItem extends Item {
+	/** Markers are designed exclusively for NPC actor sheets. */
+	static canBeAddedToActor(itemType, actor) {
+		return itemType !== "marker" || !actor || actor.type === "npc";
+	}
+
 	/**
 	 * Get the appropriate roll manager based on settings
 	 * @returns {Object} The roll manager class to use

@@ -51,6 +51,15 @@ Hooks.once('init', async function () {
   CONFIG.Actor.documentClass = BoilerplateActor;
   CONFIG.Item.documentClass = BoilerplateItem;
 
+  Hooks.on("preCreateItem", (item, data, options, userId) => {
+    const parent = item.parent ?? options?.parent;
+    if (BoilerplateItem.canBeAddedToActor(item.type ?? data.type, parent)) return;
+    if (game.user.id === userId) {
+      ui.notifications.error("Marcadores são incompatíveis com fichas de personagem.");
+    }
+    return false;
+  });
+
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
   Actors.registerSheet("boilerplate", BoilerplateActorSheet, { makeDefault: true });

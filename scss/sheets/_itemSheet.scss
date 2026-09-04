@@ -315,3 +315,26 @@ header {
 		}
 	}
 }
+
+.item-marker-sheet {
+	.marker-fields {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 12px;
+
+		label {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+
+			span { min-width: 85px; font-weight: 600; }
+			input[type="text"] { flex: 1; }
+		}
+
+		.marker-active-field {
+			width: fit-content;
+			span { min-width: 0; }
+		}
+	}
+}
