@@ -112,6 +112,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       woundsMax: system.wounds?.max ?? 0,
       chakra: system.chakra?.value ?? 0,
       armor: system.armor?.value ?? 0,
+      pressure: system.pressure ?? 0,
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
       nv: baseNV + customNV + masterNV + activeGlobalConditionNV,

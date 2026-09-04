@@ -81,6 +81,7 @@
 			"templates": [
 				"base"
 			],
+			"pressure": 0,
 			"rank": "",
 			"village": "",
 			"age": "",

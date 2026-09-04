@@ -64,6 +64,7 @@
             <span class="character-tracker-wounds" data-tooltip="Ferimentos"><img src="systems/naruto2d6world/assets/icons/woundIcon.png" alt="">{{wounds}}/{{woundsMax}}</span>
             <span data-tooltip="Chakra"><img src="systems/naruto2d6world/assets/icons/chakraIcon.png" alt="">{{chakra}}</span>
             <span data-tooltip="Armadura"><img src="systems/naruto2d6world/assets/icons/shieldIcon.png" alt="">{{armor}}</span>
+            {{#unless isCharacter}}<span data-tooltip="Pressão">Pressão: {{pressure}}</span>{{/unless}}
             {{#if isCharacter}}
               <span data-tooltip="Momentum"><img src="systems/naruto2d6world/assets/icons/momentumIcon.png" alt="">{{momentum}}</span>
               <span data-tooltip="Vontade do Fogo"><img src="systems/naruto2d6world/assets/icons/fireWillIcon.png" alt="">{{fireWill}}</span>
