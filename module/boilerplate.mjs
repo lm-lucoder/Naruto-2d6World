@@ -324,13 +324,17 @@ Hooks.once("ready", async function () {
     button.type = "button";
     button.classList.add("ui-control", "character-tracker-sidebar-button");
     button.style.marginBottom = "0.5rem";
-    button.dataset.tooltip = "Abrir rastreador de personagens";
+    button.dataset.tooltip = "Clique: abrir rastreador de personagens • Botão direito: limpar personagens do rastreador";
     button.dataset.tooltipDirection = "LEFT";
     button.setAttribute("aria-label", "Abrir rastreador de personagens");
     button.innerHTML = '<i class="fa-solid fa-users"></i>';
     button.addEventListener("click", (event) => {
       event.preventDefault();
       CharacterTrackerService.open();
+    });
+    button.addEventListener("contextmenu", async (event) => {
+      event.preventDefault();
+      await CharacterTrackerService.clearAll();
     });
 
     const collapseButton = sidebarTabs.querySelector(".collapse, [data-action='toggleState'], [data-action='collapse']");

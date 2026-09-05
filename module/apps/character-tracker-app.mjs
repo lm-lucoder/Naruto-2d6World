@@ -3,6 +3,7 @@ import { MasterNVModifierService } from "../services/master-nv-modifier-service.
 import { NVModifierService } from "../services/nv-modifier-service.mjs";
 import { NVModifierFormDialog } from "../dialogs/nvModifierFormDialog.mjs";
 import ManageActorResourceDialog from "../dialogs/manageActorResourceDialog.mjs";
+import { ChatMessageInitiativeTemplates } from "../chat-message-templates/initiative-templates.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -31,7 +32,8 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       openActorSheet: (event, target) => this._runAndRefresh(() => this._openActorSheet(target.dataset.actorUuid)),
       openNVModifiers: (event, target) => this._runAndRefresh(() => this._openNVModifiers(target.dataset.actorUuid)),
       changeResource: (event, target) => this._handleResourceClick(event, target),
-      toggleCondition: (event, target) => this._runAndRefresh(() => this._toggleCondition(target.dataset.actorUuid, target.dataset.conditionId))
+      toggleCondition: (event, target) => this._runAndRefresh(() => this._toggleCondition(target.dataset.actorUuid, target.dataset.conditionId)),
+      toggleInitiative: (event, target) => this._runAndRefresh(() => this._toggleInitiative(target.dataset.actorUuid))
     },
     position: {
       width: 360,
@@ -128,6 +130,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
       fireWillMax: system.fireWill?.max ?? 0,
+      hasInitiative: Boolean(system.iniciativa),
       nv: baseNV + customNV + masterNV + activeGlobalConditionNV,
       baseNV,
       masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor).map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), movementLabel: NVModifierService.getMovementLabel(modifier) })) : [],
@@ -343,6 +346,15 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     const condition = actor?.items.get(conditionId);
     if (!condition?.isOwner) return;
     await condition.update({ "system.isActive": !condition.system.isActive });
+  }
+
+  static async _toggleInitiative(actorUuid) {
+    const actor = await fromUuid(actorUuid);
+    if (!actor?.isOwner) return;
+
+    const hasInitiative = !Boolean(actor.system.iniciativa);
+    await actor.update({ "system.iniciativa": hasInitiative });
+    await ChatMessageInitiativeTemplates.createInitiativeChangedMessage({ actor, hasInitiative });
   }
 
   static async _removeCondition(actorUuid, conditionId, skipConfirmation = false) {

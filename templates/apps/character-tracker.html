@@ -71,6 +71,14 @@
             {{/if}}
           </div>
           {{#if ../detailMode}}
+            {{#if isCharacter}}
+              <div class="character-tracker-detail-section character-tracker-initiative" aria-label="Iniciativa">
+                <span class="character-tracker-detail-label">Combate</span>
+                <div class="character-tracker-detail-tags">
+                  <button type="button" class="character-tracker-initiative-tag {{#if hasInitiative}}active{{/if}}" data-action="toggleInitiative" data-actor-uuid="{{uuid}}" data-tooltip="Clique para {{#if hasInitiative}}remover{{else}}declarar{{/if}} iniciativa">Iniciativa</button>
+                </div>
+              </div>
+            {{/if}}
             {{#if attributeNVs.length}}
               <div class="character-tracker-detail-section character-tracker-attribute-nv" aria-label="NV por atributo">
                 <span class="character-tracker-detail-label">NV por atributo</span>
