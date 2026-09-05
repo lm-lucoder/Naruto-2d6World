@@ -26,12 +26,28 @@
   }
 
   .naruto-marker-hud-name {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: inherit;
     font-size: 13px;
     font-weight: 600;
+    margin: 0;
+    min-height: 0;
     overflow: hidden;
+    padding: 0;
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    &[type="button"] {
+      cursor: pointer;
+    }
+
+    &[type="button"]:hover, &[type="button"]:focus-visible {
+      color: $c-blue-partial-success;
+      box-shadow: none;
+    }
   }
 
   .naruto-marker-hud-expand {

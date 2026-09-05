@@ -143,9 +143,15 @@ export class MarkerHudService {
       expandButton.dataset.tooltip = "Expandir/recolher marcador";
       expandButton.setAttribute("aria-label", "Expandir/recolher marcador");
 
-      const name = document.createElement("span");
+      const name = document.createElement(game.user.isGM ? "button" : "span");
       name.className = "naruto-marker-hud-name";
       name.textContent = marker.name;
+      if (game.user.isGM) {
+        name.type = "button";
+        name.dataset.tooltip = "Resolver marcador";
+        name.setAttribute("aria-label", `Resolver marcador: ${marker.name}`);
+        name.addEventListener("click", () => this.#confirmMarkerResolution(marker));
+      }
 
       const origin = document.createElement("button");
       origin.type = "button";
@@ -217,5 +223,25 @@ export class MarkerHudService {
       card.append(header, details);
       panel.append(card);
     }
+  }
+
+  static async #confirmMarkerResolution(marker) {
+    if (!game.user.isGM) return;
+
+    const markerName = foundry.utils.escapeHTML(marker.name);
+    const confirmed = await Dialog.confirm({
+      title: "Resolver marcador?",
+      content: `<p>Resolver o marcador <strong>${markerName}</strong>?</p>`
+    });
+    if (!confirmed) return;
+
+    const item = await fromUuid(marker.id);
+    if (!item || item.type !== "marker" || !item.system.isActive) return;
+
+    await item.update({ "system.isActive": false });
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker(),
+      content: `<p>Marcador &quot;${markerName}&quot; resolvido!</p>`
+    });
   }
 }
