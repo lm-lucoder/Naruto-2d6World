@@ -11,6 +11,7 @@ import {
 } from "../helpers/effects.mjs";
 import { ItemResourceManager } from "../classes/item-resource-manager.mjs";
 import { NVModifierService } from "../services/nv-modifier-service.mjs";
+import { ChatMessageInitiativeTemplates } from "../chat-message-templates/initiative-templates.mjs";
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -659,22 +660,13 @@ export class BoilerplateActorSheet extends ActorSheet {
 			const move = this.object.items.get(moveId);
 			move.reloadNPCMoveUses(e.shiftKey);
 		})
-		html.find('.iniciativa-checkbox').change(e => {
+		html.find('.iniciativa-checkbox').change(async (e) => {
 			const isChecked = e.target.checked;
-			this.object.update({ "system.iniciativa": isChecked });
-			if (isChecked) {
-				const speaker = ChatMessage.getSpeaker({ actor: this.object }).alias;
-				ChatMessage.create({
-					speaker: speaker,
-					content: `${this.object.name} declarou iniciativa!`,
-				});
-			} else {
-				const speaker = ChatMessage.getSpeaker({ actor: this.object }).alias;
-				ChatMessage.create({
-					speaker: speaker,
-					content: `${this.object.name} perdeu a iniciativa!`,
-				});
-			}
+			await this.object.update({ "system.iniciativa": isChecked });
+			await ChatMessageInitiativeTemplates.createInitiativeChangedMessage({
+				actor: this.object,
+				hasInitiative: isChecked
+			});
 		})
 		html.find('.btn-increase-advantage-level').click(e => {
 			this.object.update({ "system.advantageLevel.actual": this.object.system.advantageLevel.actual + 1 })

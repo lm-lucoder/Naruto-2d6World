@@ -1,0 +1,54 @@
+.initiative-change-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 4px;
+
+  &.has-initiative {
+    background: #d8af9c;
+    color: #482113;
+  }
+
+  &.without-initiative {
+    background: #d3d3d3;
+    color: #4a4a4a;
+  }
+
+  .initiative-change-portrait {
+    width: 60px;
+    height: 60px;
+    flex: 0 0 60px;
+    border: 0;
+    border-radius: 3px;
+    object-fit: cover;
+    cursor: help;
+  }
+
+  .initiative-change-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 1.15em;
+    flex-grow: 1;
+    .initiative-status {
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: center;
+    }
+  }
+}
+
+#tooltip.initiative-image-tooltip {
+  max-width: none;
+  padding: 4px;
+
+  .initiative-tooltip-image {
+    display: block;
+    width: auto;
+    height: 300px;
+    max-width: min(80vw, 500px);
+    border: 0;
+    object-fit: contain;
+  }
+}
