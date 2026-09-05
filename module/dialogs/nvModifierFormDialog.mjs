@@ -20,7 +20,11 @@ export class NVModifierFormDialog {
     const movementRows = normalized.moves.map((name) => this._buildMovementRowHTML(name)).join("");
 
     return foundry.applications.api.DialogV2.prompt({
-      window: { title },
+      window: {
+        title,
+        resizable: true,
+        contentClasses: ["nv-modifier-dialog-content"]
+      },
       content: `
         <div class="standard-form nv-modifier-form">
           <div class="form-group"><label>Nome</label><input name="name" type="text" value="${foundry.utils.escapeHTML(modifier.name ?? "")}" required autofocus></div>

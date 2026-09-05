@@ -270,6 +270,8 @@
     .nv-modifier-movement-select{ width: 100%; margin-bottom: 8px; }
     .nv-modifier-movement-drop-zone{
         min-height: 100px;
+        max-height: 420px;
+        overflow-y: auto;
         padding: 10px;
         border: 2px dashed rgba(0, 0, 0, .35);
         border-radius: 6px;
@@ -340,6 +342,15 @@
             }
         }
     }
+}
+
+/* The DialogV2 frame owns the available height after a manual resize. */
+.nv-modifier-dialog-content{
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+    .nv-modifier-form{ min-height: 0; }
 }
 
 .add-nv-modifier-dialog{
