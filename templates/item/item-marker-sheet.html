@@ -1,34 +1,34 @@
 <form class="{{cssClass}} item-marker-sheet" autocomplete="off">
   <header class="sheet-header">
-    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" />
     <div class="header-fields">
-      <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Nome"/></h1>
+      <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Nome" /></h1>
     </div>
   </header>
 
   <section class="marker-fields">
     <label>
       <span>Categoria</span>
-      <input type="text" name="system.category" value="{{system.category}}" placeholder="Categoria do marcador"/>
+      <input type="text" name="system.category" value="{{system.category}}" placeholder="Categoria do marcador" />
     </label>
     <label>
-      <span>Represents</span>
+      <span>Representa</span>
       <textarea name="system.represents" rows="3">{{system.represents}}</textarea>
     </label>
     <label>
-      <span>Effect</span>
+      <span>Efeito</span>
       <textarea name="system.effect" rows="3">{{system.effect}}</textarea>
     </label>
     <label>
-      <span>Pressure</span>
+      <span>Pressão</span>
       <textarea name="system.pressure" rows="3">{{system.pressure}}</textarea>
     </label>
     <label>
-      <span>Broke</span>
+      <span>Quebrar</span>
       <textarea name="system.broke" rows="3">{{system.broke}}</textarea>
     </label>
     <label class="marker-active-field">
-      <input type="checkbox" name="system.isActive" {{checked system.isActive}}/>
+      <input type="checkbox" name="system.isActive" {{checked system.isActive}} />
       <span>IsActive</span>
     </label>
   </section>

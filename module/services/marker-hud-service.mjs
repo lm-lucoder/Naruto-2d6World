@@ -190,10 +190,10 @@ export class MarkerHudService {
       details.append(category);
 
       for (const [label, value] of [
-        ["Represents", marker.represents],
-        ["Effect", marker.effect],
-        ["Pressure", marker.pressure],
-        ["Broke", marker.broke]
+        ["Representa", marker.represents],
+        ["Efeito", marker.effect],
+        ["Pressão", marker.pressure],
+        ["Quebrar", marker.broke]
       ]) {
         details.append(document.createElement("hr"));
         const field = document.createElement("p");
