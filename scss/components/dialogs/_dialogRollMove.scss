@@ -270,10 +270,10 @@
     .nv-modifier-movement-select{ width: 100%; margin-bottom: 8px; }
     .nv-modifier-movement-drop-zone{
         min-height: 300px;
-        padding: 8px;
+        padding: 10px;
         border: 2px dashed rgba(0, 0, 0, .35);
-        border-radius: 4px;
-        background: rgba(0, 0, 0, .035);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, .16);
         transition: border-color .15s ease, background-color .15s ease;
         &.drag-over{
             border-color: var(--color-border-highlight, #7a7971);
@@ -288,18 +288,36 @@
         justify-content: center;
         gap: 6px;
         margin: 0;
-        color: #666;
+        color: #575757;
+        font-size: .9em;
         pointer-events: none;
     }
-    .nv-modifier-movement-list{ list-style: none; margin: 0; padding: 0; }
+    .nv-modifier-movement-list{
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
     .nv-modifier-movement-row{
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        min-height: 30px;
-        padding: 4px 6px;
-        border-bottom: 1px solid rgba(0, 0, 0, .16);
+        min-height: 34px;
+        padding: 5px 7px 5px 10px;
+        border: 1px solid rgba(0, 0, 0, .2);
+        border-radius: 4px;
+        background: rgba(0, 0, 0, .06);
+        box-shadow: inset 3px 0 0 rgba(69, 93, 113, .55);
+        > span{
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
         .nv-modifier-remove-movement{
             display: inline-flex;
             align-items: center;
@@ -308,11 +326,18 @@
             width: 26px;
             height: 24px;
             padding: 0;
-            border: 0;
+            border: 1px solid transparent;
+            border-radius: 3px;
             color: #111;
             background: transparent;
             box-shadow: none;
-            &:hover{ color: #000; transform: scale(1.08); }
+            line-height: 1;
+            i{ margin: 0; line-height: 1; }
+            &:hover{
+                color: #000;
+                border-color: rgba(0, 0, 0, .25);
+                background: rgba(0, 0, 0, .08);
+            }
         }
     }
 }

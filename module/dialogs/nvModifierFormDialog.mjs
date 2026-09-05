@@ -22,7 +22,7 @@ export class NVModifierFormDialog {
     return foundry.applications.api.DialogV2.prompt({
       window: { title },
       content: `
-        <form class="standard-form nv-modifier-form">
+        <div class="standard-form nv-modifier-form">
           <div class="form-group"><label>Nome</label><input name="name" type="text" value="${foundry.utils.escapeHTML(modifier.name ?? "")}" required autofocus></div>
           <div class="form-group"><label>Valor</label><input name="value" type="number" value="${normalized.value}" step="1" required></div>
           <fieldset class="nv-modifier-attribute-fieldset">
@@ -42,7 +42,7 @@ export class NVModifierFormDialog {
               <ol class="nv-modifier-movement-list">${movementRows}</ol>
             </div>
           </fieldset>
-        </form>
+        </div>
       `,
       render: (_event, dialog) => this._activateMovementControls(dialog),
       ok: {
