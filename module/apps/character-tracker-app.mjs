@@ -55,11 +55,31 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
 
   /** Resource definitions shared by tracker controls, dialogs and chat cards. */
   static RESOURCE_CONFIG = Object.freeze({
-    wounds: { label: "Ferimentos", path: "system.wounds.value" },
-    chakra: { label: "Chakra", path: "system.chakra.value" },
-    armor: { label: "Armadura", path: "system.armor.value" },
-    momentum: { label: "Momentum", path: "system.momentum.actual" },
-    fireWill: { label: "Vontade do Fogo", path: "system.fireWill.value" }
+    wounds: {
+      label: "Ferimentos",
+      path: "system.wounds.value",
+      icon: "systems/naruto2d6world/assets/icons/woundIcon.png"
+    },
+    chakra: {
+      label: "Chakra",
+      path: "system.chakra.value",
+      icon: "systems/naruto2d6world/assets/icons/chakraIcon.png"
+    },
+    armor: {
+      label: "Armadura",
+      path: "system.armor.value",
+      icon: "systems/naruto2d6world/assets/icons/shieldIcon.png"
+    },
+    momentum: {
+      label: "Momentum",
+      path: "system.momentum.actual",
+      icon: "systems/naruto2d6world/assets/icons/momentumIcon.png"
+    },
+    fireWill: {
+      label: "Vontade do Fogo",
+      path: "system.fireWill.value",
+      icon: "systems/naruto2d6world/assets/icons/fireWillIcon.png"
+    }
   });
 
   constructor(options = {}) {
@@ -357,6 +377,11 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       `,
       buttons: [
         {
+          action: "decrease",
+          label: "<<",
+          callback: (_event, button) => this._adjustResourceDialogInput(button.form, -1)
+        },
+        {
           action: "apply",
           label: "Alterar",
           icon: "fa-solid fa-check",
@@ -370,11 +395,6 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
             await this._runAndRefresh(() => this._setResourceValue(actorUuid, resourceKey, value));
             await application.close({ submitted: true });
           }
-        },
-        {
-          action: "decrease",
-          label: "<<",
-          callback: (_event, button) => this._adjustResourceDialogInput(button.form, -1)
         },
         {
           action: "increase",
@@ -407,8 +427,10 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     const resource = this.RESOURCE_CONFIG[resourceKey];
     if (!actor?.isOwner || !resource || !Number.isFinite(value)) return;
 
+    const previousValue = this._getResourceValue(actor, resource);
     await actor.update({ [resource.path]: value });
-    await this._createResourceChangeMessage(actor, resource.label, value);
+    const currentValue = this._getResourceValue(actor, resource);
+    await this._createResourceChangeMessage(actor, resource, currentValue, currentValue - previousValue);
   }
 
   static _getResourceValue(actor, resource) {
@@ -416,11 +438,15 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     return Number.isFinite(value) ? value : 0;
   }
 
-  static async _createResourceChangeMessage(actor, label, value) {
+  static async _createResourceChangeMessage(actor, resource, value, difference) {
     const name = actor.token?.name ?? actor.name;
     const image = actor.img || "icons/svg/mystery-man.svg";
     const escapedName = foundry.utils.escapeHTML(name);
     const escapedImage = foundry.utils.escapeHTML(image);
+    const escapedIcon = foundry.utils.escapeHTML(resource.icon);
+    const differenceLabel = difference === 0
+      ? "0"
+      : `${difference < 0 ? "-" : "+"} ${Math.abs(difference)}`;
     const imageTooltip = foundry.utils.escapeHTML(`
       <img class="character-tracker-resource-tooltip-image" src="${escapedImage}" alt="${escapedName}">
     `.trim());
@@ -433,7 +459,11 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
             data-tooltip-html="${imageTooltip}" data-tooltip-class="character-tracker-resource-image-tooltip">
           <div class="character-tracker-resource-change-copy">
             <strong>${escapedName}</strong>
-            <span>O valor de ${foundry.utils.escapeHTML(label)} foi alterado para ${value}.</span>
+            <span class="character-tracker-resource-change-indicator" data-tooltip="${foundry.utils.escapeHTML(resource.label)}">
+              <img src="${escapedIcon}" alt="">
+              <strong>${differenceLabel}</strong>
+            </span>
+            <span>O valor de ${foundry.utils.escapeHTML(resource.label)} foi alterado para ${value}.</span>
           </div>
         </div>
       `
