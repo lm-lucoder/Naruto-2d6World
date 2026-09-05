@@ -1,5 +1,6 @@
 import ManageAbilityChakraDialog from "../dialogs/manageAbilityChakraDialog.mjs";
 import ManageAbilityResourceDialog from "../dialogs/manageAbilityResourceDialog.mjs";
+import ManageActorResourceDialog from "../dialogs/manageActorResourceDialog.mjs";
 import ManageItemQuantityDialog from "../dialogs/manageItemQuantityDialog.mjs";
 import ManageNVModifiersDialog from "../dialogs/manageNVModifiersDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
@@ -360,6 +361,14 @@ export class BoilerplateActorSheet extends ActorSheet {
 		// Rollable abilities.
 		html.find(".rollable").click(this._onRoll.bind(this));
 
+		html.find(".actor-resource-control").on("click", async (event) => {
+			event.preventDefault();
+			await ManageActorResourceDialog.create({
+				actor: this.actor,
+				resourceKey: event.currentTarget.dataset.resourceKey
+			});
+		});
+
 		html.find(".rollableWithDialog").click((event) => {
 			this._onRollMove(event);
 		});
@@ -608,14 +617,14 @@ export class BoilerplateActorSheet extends ActorSheet {
 				content: `${this.object.name} alterou seu NV para: ${newAdvantageLevel}`,
 			});
 		})
-		html.find('.range-option-icon-momentum').click(e => {
-			const newMomentum = parseInt(e.target.querySelector('.value').innerText)
-			this.object.update({ system: { momentum: { actual: newMomentum } } })
-			ChatMessage.create({
-				speaker: ChatMessage.getSpeaker(),
-				content: `${this.object.name} alterou seu momentum para: ${newMomentum}`,
+		html.find('.range-option-icon-momentum').click(async (e) => {
+			const newMomentum = parseInt(e.target.querySelector('.value').innerText);
+			await ManageActorResourceDialog.setValue({
+				actor: this.object,
+				resourceKey: "momentum",
+				value: newMomentum
 			});
-		})
+		});
 		html.find('.move-card-number-change').mousedown(e => {
 			const moveId = e.target.closest(".move-card").getAttribute('data-item-id');
 			const reference = e.target.getAttribute('data-number-reference');

@@ -88,6 +88,18 @@
 			flex-grow: 0;
 		}
 	}
+
+	.actor-resource-control {
+		padding: 1px 3px;
+		border-radius: 3px;
+		cursor: pointer;
+		transition: color 120ms ease, background-color 120ms ease;
+
+		&:hover {
+			color: #a66c00;
+			background: #e9bd6030;
+		}
+	}
 }
 
 .moves{

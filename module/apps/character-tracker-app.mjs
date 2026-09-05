@@ -2,6 +2,7 @@ import { CharacterTrackerService } from "../services/character-tracker-service.m
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 import { NVModifierService } from "../services/nv-modifier-service.mjs";
 import { NVModifierFormDialog } from "../dialogs/nvModifierFormDialog.mjs";
+import ManageActorResourceDialog from "../dialogs/manageActorResourceDialog.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -52,35 +53,6 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       template: "systems/naruto2d6world/templates/apps/character-tracker.html"
     }
   };
-
-  /** Resource definitions shared by tracker controls, dialogs and chat cards. */
-  static RESOURCE_CONFIG = Object.freeze({
-    wounds: {
-      label: "Ferimentos",
-      path: "system.wounds.value",
-      icon: "systems/naruto2d6world/assets/icons/woundIcon.png"
-    },
-    chakra: {
-      label: "Chakra",
-      path: "system.chakra.value",
-      icon: "systems/naruto2d6world/assets/icons/chakraIcon.png"
-    },
-    armor: {
-      label: "Armadura",
-      path: "system.armor.value",
-      icon: "systems/naruto2d6world/assets/icons/shieldIcon.png"
-    },
-    momentum: {
-      label: "Momentum",
-      path: "system.momentum.actual",
-      icon: "systems/naruto2d6world/assets/icons/momentumIcon.png"
-    },
-    fireWill: {
-      label: "Vontade do Fogo",
-      path: "system.fireWill.value",
-      icon: "systems/naruto2d6world/assets/icons/fireWillIcon.png"
-    }
-  });
 
   constructor(options = {}) {
     super(options);
@@ -357,117 +329,13 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     if (event.shiftKey) {
       return this._runAndRefresh(() => this._changeResourceBy(actorUuid, resource, 1));
     }
-    return this._openResourceDialog(actorUuid, resource);
-  }
-
-  static async _openResourceDialog(actorUuid, resourceKey) {
     const actor = await fromUuid(actorUuid);
-    const resource = this.RESOURCE_CONFIG[resourceKey];
-    if (!actor?.isOwner || !resource) return;
-
-    const currentValue = this._getResourceValue(actor, resource);
-    const dialog = new foundry.applications.api.DialogV2({
-      window: { title: "Mudar valor" },
-      position: { width: 320 },
-      form: { closeOnSubmit: false },
-      content: `
-        <div class="character-tracker-resource-dialog">
-          <input name="value" type="number" value="${currentValue}" step="1" aria-label="${foundry.utils.escapeHTML(resource.label)}" autofocus>
-        </div>
-      `,
-      buttons: [
-        {
-          action: "decrease",
-          label: "<<",
-          callback: (_event, button) => this._adjustResourceDialogInput(button.form, -1)
-        },
-        {
-          action: "apply",
-          label: "Alterar",
-          icon: "fa-solid fa-check",
-          default: true,
-          callback: async (_event, button, application) => {
-            const value = button.form.elements.value.valueAsNumber;
-            if (!Number.isFinite(value)) {
-              ui.notifications.warn("Informe um valor numérico válido.");
-              return;
-            }
-            await this._runAndRefresh(() => this._setResourceValue(actorUuid, resourceKey, value));
-            await application.close({ submitted: true });
-          }
-        },
-        {
-          action: "increase",
-          label: ">>",
-          callback: (_event, button) => this._adjustResourceDialogInput(button.form, 1)
-        }
-      ]
-    });
-    await dialog.render({ force: true });
-  }
-
-  static _adjustResourceDialogInput(form, amount) {
-    const input = form.elements.value;
-    const value = Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : 0;
-    input.value = value + amount;
-    input.focus();
-    input.select();
+    return ManageActorResourceDialog.create({ actor, resourceKey: resource });
   }
 
   static async _changeResourceBy(actorUuid, resourceKey, amount) {
     const actor = await fromUuid(actorUuid);
-    const resource = this.RESOURCE_CONFIG[resourceKey];
-    if (!actor?.isOwner || !resource) return;
-    const currentValue = this._getResourceValue(actor, resource);
-    await this._setResourceValue(actorUuid, resourceKey, currentValue + amount);
-  }
-
-  static async _setResourceValue(actorUuid, resourceKey, value) {
-    const actor = await fromUuid(actorUuid);
-    const resource = this.RESOURCE_CONFIG[resourceKey];
-    if (!actor?.isOwner || !resource || !Number.isFinite(value)) return;
-
-    const previousValue = this._getResourceValue(actor, resource);
-    await actor.update({ [resource.path]: value });
-    const currentValue = this._getResourceValue(actor, resource);
-    await this._createResourceChangeMessage(actor, resource, currentValue, currentValue - previousValue);
-  }
-
-  static _getResourceValue(actor, resource) {
-    const value = Number(foundry.utils.getProperty(actor, resource.path));
-    return Number.isFinite(value) ? value : 0;
-  }
-
-  static async _createResourceChangeMessage(actor, resource, value, difference) {
-    const name = actor.token?.name ?? actor.name;
-    const image = actor.img || "icons/svg/mystery-man.svg";
-    const escapedName = foundry.utils.escapeHTML(name);
-    const escapedImage = foundry.utils.escapeHTML(image);
-    const escapedIcon = foundry.utils.escapeHTML(resource.icon);
-    const differenceLabel = difference === 0
-      ? "0"
-      : `${difference < 0 ? "-" : "+"} ${Math.abs(difference)}`;
-    const imageTooltip = foundry.utils.escapeHTML(`
-      <img class="character-tracker-resource-tooltip-image" src="${escapedImage}" alt="${escapedName}">
-    `.trim());
-
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor }),
-      content: `
-        <div class="character-tracker-resource-change-card">
-          <img class="character-tracker-resource-change-portrait" src="${escapedImage}" alt="${escapedName}"
-            data-tooltip-html="${imageTooltip}" data-tooltip-class="character-tracker-resource-image-tooltip">
-          <div class="character-tracker-resource-change-copy">
-            <strong>${escapedName}</strong>
-            <span class="character-tracker-resource-change-indicator" data-tooltip="${foundry.utils.escapeHTML(resource.label)}">
-              <img src="${escapedIcon}" alt="">
-              <strong>${differenceLabel}</strong>
-            </span>
-            <span>O valor de ${foundry.utils.escapeHTML(resource.label)} foi alterado para ${value}.</span>
-          </div>
-        </div>
-      `
-    });
+    return ManageActorResourceDialog.changeBy({ actor, resourceKey, amount });
   }
 
   static async _toggleCondition(actorUuid, conditionId) {
