@@ -1,5 +1,6 @@
 import { GameSettings } from "../settings/settings.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+import { NVModifierService } from "../services/nv-modifier-service.mjs";
 
 /**
  * Classe para gerenciar rolagens de itens no modo legado (com modos de rolagem)
@@ -97,7 +98,7 @@ export class ItemLegacyRollManager {
 	 * @param {Object} params - Roll parameters
 	 */
 	static async moveRoll(item, params) {
-		const { advantageLevel, mode, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
+		const { advantageLevel, mode, nvCalculation, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers } = params;
 		
 		// Coletar NV adicional do atributo das condições (antes de calcular o modo)
 		let attributeNV = 0;
@@ -125,8 +126,15 @@ export class ItemLegacyRollManager {
 		
 		// Calculate mode from advantage level if not provided (for rerolls, mode is passed directly)
 		// Somar o NV adicional das condições e do mestre ao advantageLevel antes de calcular o modo
-		const masterNV = MasterNVModifierService.getTotal(item.actor);
-		const totalAdvantageLevel = (advantageLevel || 0) + attributeNV + masterNV;
+		const masterNV = MasterNVModifierService.getTotal(item.actor, attribute);
+		const moveNV = (item.system.nvModifiers ?? [])
+			.map((modifier) => NVModifierService.normalize(modifier))
+			.filter((modifier) => NVModifierService.appliesToAttribute(modifier, attribute))
+			.reduce((total, modifier) => total + modifier.value, 0);
+		// The modern pre-roll dialog already supplies a complete, temporarily-filtered snapshot.
+		const totalAdvantageLevel = nvCalculation
+			? Number(nvCalculation.total) || 0
+			: (advantageLevel || 0) + attributeNV + masterNV + moveNV;
 		const calculatedMode = mode || ItemLegacyRollManager.calculateModeByValue(totalAdvantageLevel);
 		
 		if (isUpdate && rerollMode == "adjustment") {

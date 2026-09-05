@@ -28,6 +28,32 @@ header {
 			align-items: center;
 		}
 	}
+	.move-nv-modifiers-section {
+		margin: 10px 0;
+		padding: 8px;
+		border: 1px solid $c-beige;
+		border-radius: 3px;
+		.move-nv-modifiers-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 8px;
+			.add-move-nv-modifier { width: 30px; flex: 0 0 30px; }
+		}
+		.move-nv-modifiers-list { list-style: none; margin: 8px 0 0; padding: 0; }
+		.move-nv-modifier {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto 28px 28px;
+			align-items: center;
+			gap: 6px;
+			padding: 5px 0;
+			border-top: 1px solid rgba(0, 0, 0, .15);
+			button { width: 28px; height: 24px; padding: 0; }
+			.move-nv-modifier-name { min-width: 0; }
+			small { display: block; color: #666; font-size: .75em; }
+		}
+		.move-nv-modifier-empty { padding-top: 6px; color: #666; font-style: italic; }
+	}
 }
 .item-condition-sheet{
 	.condition-global-modifiers {

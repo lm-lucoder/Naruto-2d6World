@@ -1,6 +1,7 @@
 import { GameSettings } from "../settings/settings.mjs";
 import { AdvantageLevelApi } from "../sheets/actor-sheet.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+import { NVModifierService } from "../services/nv-modifier-service.mjs";
 import { MoveRollSessionService } from "../services/move-roll-session-service.mjs";
 import ManageNVModifiersDialog from "./manageNVModifiersDialog.mjs";
 
@@ -193,6 +194,7 @@ class RollMoveDialog extends Dialog {
 				manualAdjustment, // Ajuste manual do diálogo
 				baseNVInfo: nvCalculation.baseNVInfo,
 				masterNVInfo: nvCalculation.masterNVInfo,
+				moveNVInfo: nvCalculation.moveNVInfo,
 				nvCalculation,
 				attribute: chosenAttribute,
 				rollModifier
@@ -224,7 +226,7 @@ class RollMoveDialog extends Dialog {
 
 	_collectSessionState() {
 		const root = this._getDialogRoot();
-		const entries = [...this._nvCalculation.baseEntries, ...this._nvCalculation.masterEntries];
+		const entries = [...this._nvCalculation.baseEntries, ...this._nvCalculation.moveEntries, ...this._nvCalculation.masterEntries];
 
 		return {
 			selectedAttribute: root?.querySelector('input[name="option"]:checked')?.value ?? null,
@@ -260,7 +262,7 @@ class RollMoveDialog extends Dialog {
 			this._newAdvantageLevel = Number(state.manualAdjustment) || 0;
 			this._nvCalculation.disabledModifierIds = new Set(state.disabledModifierIds ?? []);
 
-			const entries = [...this._nvCalculation.baseEntries, ...this._nvCalculation.masterEntries];
+			const entries = [...this._nvCalculation.baseEntries, ...this._nvCalculation.moveEntries, ...this._nvCalculation.masterEntries];
 			for (const entry of entries) {
 				if (!Object.hasOwn(state.entryValues ?? {}, entry.id)) continue;
 				entry.value = Number(state.entryValues[entry.id]) || 0;
@@ -276,23 +278,42 @@ class RollMoveDialog extends Dialog {
 
 	/** Snapshot of NV sources for this dialog only; no actor data is ever changed. */
 	_initializeNVCalculation(actor) {
-		const actorModifiers = (actor.system.nvModifiers ?? []).map((modifier, index) => ({
-			id: `actor:${modifier.id ?? index}`,
-			label: modifier.name || "Modificador personalizado",
-			reason: modifier.name || "Modificador personalizado",
-			value: Number(modifier.value) || 0,
-			removable: true,
-			adjustable: game.user.isGM || actor.isOwner,
-			modifierSource: "actor",
-			modifierId: modifier.id,
-			modifierIndex: index
-		}));
+		const actorModifiers = (actor.system.nvModifiers ?? []).map((source, index) => {
+			const modifier = NVModifierService.normalize(source);
+			return {
+				id: `actor:${modifier.id ?? index}`,
+				label: modifier.name || "Modificador personalizado",
+				reason: modifier.name || "Modificador personalizado",
+				value: Number(modifier.value) || 0,
+				removable: true,
+				adjustable: game.user.isGM || actor.isOwner,
+				modifierSource: "actor",
+				modifierId: modifier.id,
+				modifierIndex: index,
+				attributes: modifier.attributes
+			};
+		});
+
+		const moveModifiers = (this._currentItem.system.nvModifiers ?? []).map((source, index) => {
+			const modifier = NVModifierService.normalize(source);
+			return {
+				id: `move:${modifier.id ?? index}`,
+				label: `Movimento — ${modifier.name}`,
+				reason: `Movimento — ${modifier.name}`,
+				value: modifier.value,
+				attributes: modifier.attributes,
+				removable: true,
+				adjustable: false,
+				modifier
+			};
+		});
 		this._nvCalculation = {
 			disabledModifierIds: new Set(),
 			baseEntries: [
 				{ id: "base", label: "NV base", reason: "Base", value: Number(actor.system.advantageLevel?.actual) || 0, removable: false },
 				...actorModifiers
 			],
+			moveEntries: moveModifiers,
 			masterEntries: MasterNVModifierService.getModifiers(actor).map((modifier) => ({
 				id: `master:${modifier.scope}:${modifier.id}`,
 				label: modifier.label,
@@ -302,7 +323,8 @@ class RollMoveDialog extends Dialog {
 				modifierSource: "master",
 				modifierScope: modifier.scope,
 				modifierId: modifier.id,
-				modifier
+				modifier,
+				attributes: modifier.attributes
 			}))
 		};
 	}
@@ -338,8 +360,10 @@ class RollMoveDialog extends Dialog {
 
 	_buildNVCalculation(attribute) {
 		const state = this._nvCalculation;
-		const isEnabled = (entry) => !state.disabledModifierIds.has(entry.id);
+		const isEnabled = (entry) => !state.disabledModifierIds.has(entry.id)
+			&& NVModifierService.appliesToAttribute(entry, attribute);
 		const baseEntries = state.baseEntries.filter(isEnabled);
+		const moveEntries = state.moveEntries.filter(isEnabled);
 		const masterEntries = state.masterEntries.filter(isEnabled);
 		const conditionEntries = this._getConditionsNVInfo(attribute)
 			.map((condition) => ({ ...condition, id: `condition:${condition.id}`, label: condition.name, value: condition.totalNV, removable: true }))
@@ -347,11 +371,12 @@ class RollMoveDialog extends Dialog {
 		const manualEntries = this._newAdvantageLevel !== 0
 			? [{ id: "manual", label: "Ajuste manual", value: this._newAdvantageLevel, removable: false }]
 			: [];
-		const entries = [...baseEntries, ...conditionEntries, ...manualEntries, ...masterEntries];
+		const entries = [...baseEntries, ...moveEntries, ...conditionEntries, ...manualEntries, ...masterEntries];
 
 		return {
 			entries,
 			baseNVInfo: baseEntries.map(({ reason, value }) => ({ reason, value })),
+			moveNVInfo: moveEntries.map(({ reason, value, modifier }) => ({ ...modifier, reason, value })),
 			masterNVInfo: masterEntries.map((entry) => entry.modifier),
 			disabledConditionIds: [...state.disabledModifierIds]
 				.filter((id) => id.startsWith("condition:"))

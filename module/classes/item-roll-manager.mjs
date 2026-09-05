@@ -2,6 +2,7 @@
  * Classe para gerenciar rolagens de itens
  */
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+import { NVModifierService } from "../services/nv-modifier-service.mjs";
 
 export class ItemRollManager {
   /**
@@ -160,12 +161,13 @@ export class ItemRollManager {
    * @param {Object} params - Roll parameters
    */
   static async moveRoll(item, params) {
-    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo: suppliedMasterNVInfo, nvCalculation, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
+    const { advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo: suppliedMasterNVInfo, moveNVInfo: suppliedMoveNVInfo, nvCalculation, attribute, rollModifier, isUpdate, oldMessage, rerollMode, oldMessageRolls, newModifiers, originalChallengeDiceOne: preservedOriginalOne, originalChallengeDiceTwo: preservedOriginalTwo } = params;
 
     if (isUpdate && rerollMode == "adjustment") {
       // Para ajustes manuais, não recalcular condições - usar valores opcionais
       // Mas ainda considerar os modificadores do mestre.
-      const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getModifiers(item.actor);
+      const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getApplicableModifiers(item.actor, attribute);
+      const moveNVInfo = suppliedMoveNVInfo ?? ItemRollManager._getMoveNVInfo(item, attribute);
       const label = ItemRollManager.getMoveLabelRollTemplate({
         move: item,
         advantageLevel,
@@ -173,6 +175,7 @@ export class ItemRollManager {
         baseNVInfo,
         manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0,
         masterNVInfo,
+        moveNVInfo,
         conditionsNVInfo: [], // Não recalcular em ajustes
         attribute,
         rollModifier,
@@ -278,9 +281,17 @@ export class ItemRollManager {
       : (advantageLevel || 0);
 
     // Adicionar modificadores globais e locais do mestre.
-    const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getModifiers(actor);
+    const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getApplicableModifiers(actor, attribute);
     const masterNV = masterNVInfo.reduce((total, modifier) => total + modifier.value, 0);
-    const nvValue = baseAndManual + attributeNV + masterNV;
+    const moveNVInfo = suppliedMoveNVInfo ?? ItemRollManager._getMoveNVInfo(item, attribute);
+    const moveNV = moveNVInfo.reduce((total, modifier) => total + modifier.value, 0);
+    // Chat rerolls only carry the already-calculated total. Do not apply persisted
+    // sources a second time when the detailed pre-roll snapshot is unavailable.
+    const usesSuppliedRerollTotal = isUpdate && !nvCalculation
+      && baseAdvantageLevel === undefined && manualAdjustment === undefined;
+    const nvValue = usesSuppliedRerollTotal
+      ? (advantageLevel || 0)
+      : baseAndManual + attributeNV + masterNV + moveNV;
     const modifiedDice = ItemRollManager.applyAdvantageLevelToChallengeDice(
       nvValue,
       originalChallengeDiceOne,
@@ -294,11 +305,12 @@ export class ItemRollManager {
     const label = ItemRollManager.getMoveLabelRollTemplate({
       move: item,
       advantageLevel: nvValue, // Total: base + manual + condições + mestre
-      baseAdvantageLevel: baseAdvantageLevel !== undefined ? baseAdvantageLevel : (advantageLevel || 0), // NV base do personagem
-      baseNVInfo,
-      manualAdjustment: manualAdjustment !== undefined ? manualAdjustment : 0, // Ajuste manual do diálogo
-      masterNVInfo,
-      conditionsNVInfo: conditionsNVInfo, // Informações detalhadas das condições
+      baseAdvantageLevel: usesSuppliedRerollTotal ? undefined : (baseAdvantageLevel !== undefined ? baseAdvantageLevel : (advantageLevel || 0)),
+      baseNVInfo: usesSuppliedRerollTotal ? undefined : baseNVInfo,
+      manualAdjustment: usesSuppliedRerollTotal ? 0 : (manualAdjustment !== undefined ? manualAdjustment : 0),
+      masterNVInfo: usesSuppliedRerollTotal ? [] : masterNVInfo,
+      moveNVInfo: usesSuppliedRerollTotal ? [] : moveNVInfo,
+      conditionsNVInfo: usesSuppliedRerollTotal ? [] : conditionsNVInfo,
       attribute,
       rollModifier,
       actionDiceRoll: actionDiceRoll.total,
@@ -509,7 +521,7 @@ export class ItemRollManager {
    * @param {Object} params - Template parameters
    * @returns {string} HTML template string
    */
-  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo = [], conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
+  static getMoveLabelRollTemplate({ move, advantageLevel, baseAdvantageLevel, baseNVInfo, manualAdjustment, masterNVInfo = [], moveNVInfo = [], conditionsNVInfo, attribute, rollModifier, actionDiceRoll, challengeDiceOneRoll, challengeDiceTwoRoll, originalChallengeDiceOne, originalChallengeDiceTwo, newModifiers }) {
     let successCount = 0
     let match = false
     let resultType = ""
@@ -568,6 +580,11 @@ export class ItemRollManager {
         const manualSign = manualAdjustment > 0 ? "+" : "";
         nvParts.push(`${manualSign}${manualAdjustment} (manual)`);
       }
+
+      moveNVInfo.filter((modifier) => modifier.value !== 0).forEach((modifier) => {
+        const sign = modifier.value > 0 ? "+" : "";
+        nvParts.push(`${sign}${modifier.value} (${modifier.reason || `Movimento — ${modifier.name}`})`);
+      });
 
       // Adicionar cada modificador do mestre individualmente.
       masterNVInfo.filter((modifier) => modifier.value !== 0).forEach((modifier) => {
@@ -704,6 +721,13 @@ export class ItemRollManager {
 `.trim();
 
     return label
+  }
+
+  static _getMoveNVInfo(item, attribute) {
+    return (item.system.nvModifiers ?? [])
+      .map((modifier) => NVModifierService.normalize(modifier))
+      .filter((modifier) => NVModifierService.appliesToAttribute(modifier, attribute))
+      .map((modifier) => ({ ...modifier, reason: `Movimento — ${modifier.name}` }));
   }
 
   /**

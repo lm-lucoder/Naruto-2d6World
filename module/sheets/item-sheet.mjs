@@ -1,4 +1,6 @@
 import { ItemResourceManager } from "../classes/item-resource-manager.mjs";
+import { NVModifierService } from "../services/nv-modifier-service.mjs";
+import { NVModifierFormDialog } from "../dialogs/nvModifierFormDialog.mjs";
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -58,7 +60,11 @@ export class BoilerplateItemSheet extends ItemSheet {
 		}
 
 		if (itemData.type === "move") {
-
+			context.moveNVModifiers = (itemData.system.nvModifiers ?? []).map((modifier, index) => ({
+				...NVModifierService.normalize(modifier),
+				index,
+				attributeLabel: NVModifierService.getAttributeLabel(modifier)
+			}));
 		}
 		if (itemData.type === "skill") {
 			const rankChoices = {
@@ -183,7 +189,40 @@ export class BoilerplateItemSheet extends ItemSheet {
 		// Everything below here is only needed if the sheet is editable
 		if (!this.isEditable) return;
 
-		// Roll handlers, click handlers, etc. would go here.
+		html.find(".add-move-nv-modifier").click(() => this._addMoveNVModifier());
+		html.find(".edit-move-nv-modifier").click((event) => this._editMoveNVModifier(Number(event.currentTarget.closest("[data-modifier-index]").dataset.modifierIndex)));
+		html.find(".remove-move-nv-modifier").click((event) => this._removeMoveNVModifier(Number(event.currentTarget.closest("[data-modifier-index]").dataset.modifierIndex)));
+	}
+
+	async _addMoveNVModifier() {
+		const result = await NVModifierFormDialog.prompt({ title: "Adicionar NV do movimento", submitLabel: "Adicionar" });
+		if (!result) return;
+		await this.object.update({ "system.nvModifiers": [...(this.object.system.nvModifiers ?? []), { id: randomID(), ...result }] });
+	}
+
+	async _editMoveNVModifier(index) {
+		const modifiers = [...(this.object.system.nvModifiers ?? [])];
+		const modifier = modifiers[index];
+		if (!modifier) return;
+		const result = await NVModifierFormDialog.prompt({ title: "Editar NV do movimento", modifier });
+		if (!result) return;
+		modifiers[index] = { ...modifier, ...result, id: modifier.id || randomID() };
+		await this.object.update({ "system.nvModifiers": modifiers });
+	}
+
+	async _removeMoveNVModifier(index) {
+		const modifiers = [...(this.object.system.nvModifiers ?? [])];
+		const modifier = modifiers[index];
+		if (!modifier) return;
+		const confirmed = await foundry.applications.api.DialogV2.confirm({
+			window: { title: "Remover NV do movimento" },
+			content: `<p>Remover <strong>${foundry.utils.escapeHTML(modifier.name || "Modificador de NV")}</strong> deste movimento?</p>`,
+			yes: { label: "Remover", icon: "fa-solid fa-trash" },
+			no: { label: "Cancelar" }
+		});
+		if (!confirmed) return;
+		modifiers.splice(index, 1);
+		await this.object.update({ "system.nvModifiers": modifiers });
 	}
 
 	_addNewCondition_MoveConfig() {

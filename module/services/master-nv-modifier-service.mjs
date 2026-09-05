@@ -1,3 +1,5 @@
+import { NVModifierService } from "./nv-modifier-service.mjs";
+
 /** Manages the GM-owned NV modifiers applied globally or to one actor. */
 export class MasterNVModifierService {
   static GLOBAL_SETTING_KEY = "master-global-nv-modifiers";
@@ -32,13 +34,17 @@ export class MasterNVModifierService {
     ];
   }
 
-  static getTotal(actor) {
-    return this.getModifiers(actor).reduce((total, modifier) => total + modifier.value, 0);
+  static getApplicableModifiers(actor, attribute = null) {
+    return this.getModifiers(actor).filter((modifier) => NVModifierService.appliesToAttribute(modifier, attribute));
   }
 
-  static async addGlobalModifier({ name, value }) {
+  static getTotal(actor, attribute = null) {
+    return this.getApplicableModifiers(actor, attribute).reduce((total, modifier) => total + modifier.value, 0);
+  }
+
+  static async addGlobalModifier({ name, value, attributes = [] }) {
     this._requireGM();
-    const modifier = this._createModifier(name, value);
+    const modifier = this._createModifier(name, value, attributes);
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, [...this.getGlobalModifiers(), modifier]);
     return modifier;
   }
@@ -48,9 +54,9 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, this.getGlobalModifiers().filter((modifier) => modifier.id !== id));
   }
 
-  static async updateGlobalModifier(id, { name, value }) {
+  static async updateGlobalModifier(id, { name, value, attributes = [] }) {
     this._requireGM();
-    const updatedModifier = this._createModifier(name, value);
+    const updatedModifier = this._createModifier(name, value, attributes);
     const modifiers = this.getGlobalModifiers().map((modifier) => (
       modifier.id === id ? { ...updatedModifier, id } : modifier
     ));
@@ -70,11 +76,11 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, []);
   }
 
-  static async addLocalModifier(actor, { name, value }) {
+  static async addLocalModifier(actor, { name, value, attributes = [] }) {
     this._requireGM();
     if (!actor) throw new Error("Um personagem é obrigatório para criar um modificador local.");
     if (actor.type !== "character") throw new Error("Apenas personagens podem receber modificadores locais de NV do Mestre.");
-    const modifier = this._createModifier(name, value);
+    const modifier = this._createModifier(name, value, attributes);
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, [...this.getLocalModifiers(actor), modifier]);
     return modifier;
   }
@@ -96,10 +102,10 @@ export class MasterNVModifierService {
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, modifiers);
   }
 
-  static async updateLocalModifier(actor, id, { name, value }) {
+  static async updateLocalModifier(actor, id, { name, value, attributes = [] }) {
     this._requireGM();
     if (actor?.type !== "character") return;
-    const updatedModifier = this._createModifier(name, value);
+    const updatedModifier = this._createModifier(name, value, attributes);
     const modifiers = this.getLocalModifiers(actor).map((modifier) => (
       modifier.id === id ? { ...updatedModifier, id } : modifier
     ));
@@ -121,16 +127,16 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.LEGACY_SETTING_KEY, 0);
   }
 
-  static _createModifier(name, value) {
+  static _createModifier(name, value, attributes = []) {
     const numericValue = Number(value);
     if (!String(name ?? "").trim() || !Number.isFinite(numericValue)) {
       throw new Error("Informe um nome e um valor numérico para o modificador.");
     }
-    return { id: randomID(), name: String(name).trim(), value: numericValue };
+    return { id: randomID(), name: String(name).trim(), value: numericValue, attributes: NVModifierService.normalizeAttributes(attributes) };
   }
 
   static _normalize(modifier) {
-    return { id: modifier.id, name: modifier.name || "Modificador do Mestre", value: Number(modifier.value) || 0 };
+    return NVModifierService.normalize(modifier, "Modificador do Mestre");
   }
 
   static _requireGM() {

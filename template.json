@@ -115,6 +115,7 @@
 				"base"
 			],
 			"category": "Normal",
+			"nvModifiers": [],
 			"attributes": {
 				"bod": {
 					"on": false,

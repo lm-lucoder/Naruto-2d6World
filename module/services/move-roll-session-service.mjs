@@ -8,6 +8,7 @@ export class MoveRollSessionService {
   static #sessions = new Map();
   static #dialogs = new Map();
   static #dialogFactory = null;
+  static #pendingMessages = new Map();
 
   static initialize({ dialogFactory }) {
     this.#dialogFactory = dialogFactory;
@@ -39,6 +40,7 @@ export class MoveRollSessionService {
       id: randomID(),
       userId: game.user.id,
       itemUuid: item.uuid,
+      revision: 0,
       state: this.#cloneState(initialState)
     };
 
@@ -61,7 +63,8 @@ export class MoveRollSessionService {
     if (!session) return;
 
     session.state = this.#cloneState(state);
-    this.#emit("update", { sessionId, state: session.state });
+    session.revision += 1;
+    this.#emit("update", { sessionId, revision: session.revision, state: session.state });
   }
 
   /** Ask the owning player's client to execute the roll with this exact state. */
@@ -70,7 +73,8 @@ export class MoveRollSessionService {
     if (!session) return;
 
     session.state = this.#cloneState(state);
-    this.#emit("forceRoll", { sessionId, state: session.state });
+    session.revision += 1;
+    this.#emit("forceRoll", { sessionId, revision: session.revision, state: session.state });
   }
 
   static end(sessionId) {
@@ -131,19 +135,26 @@ export class MoveRollSessionService {
       }
       this.#sessions.set(session.userId, {
         ...session,
+        revision: Number(session.revision) || 0,
         state: this.#cloneState(session.state)
       });
+      this.#applyPendingMessage(session.id);
       this.renderIndicators();
       return;
     }
 
     const session = this.#findSession(payload.sessionId);
-    if (!session) return;
+    if (!session) {
+      if (action === "update" || action === "forceRoll") this.#queuePendingMessage(payload);
+      return;
+    }
     const isOwner = payload.sourceUserId === session.userId;
     const isGM = Boolean(sourceUser?.isGM);
     if (!isOwner && !isGM) return;
 
     if (action === "update") {
+      if (Number(payload.revision) < Number(session.revision)) return;
+      session.revision = Number(payload.revision) || session.revision;
       session.state = this.#cloneState(payload.state);
       if (payload.sourceUserId !== game.user.id) {
         this.#dialogs.get(session.id)?.applySessionState(session.state);
@@ -153,6 +164,8 @@ export class MoveRollSessionService {
 
     if (action === "forceRoll") {
       if (!isGM) return;
+      if (Number(payload.revision) < Number(session.revision)) return;
+      session.revision = Number(payload.revision) || session.revision;
       session.state = this.#cloneState(payload.state);
       if (session.userId === game.user.id && payload.sourceUserId !== game.user.id) {
         Promise.resolve(this.#dialogs.get(session.id)?.rollFromSession(session.state))
@@ -171,12 +184,28 @@ export class MoveRollSessionService {
     const dialog = this.#dialogs.get(sessionId);
     this.#dialogs.delete(sessionId);
     this.#sessions.delete(userId);
+    this.#pendingMessages.delete(sessionId);
     dialog?.closeFromSession();
     this.renderIndicators();
   }
 
   static #findSession(sessionId) {
     return [...this.#sessions.values()].find((session) => session.id === sessionId);
+  }
+
+  /** Socket ordering is normally preserved, but late subscribers can receive an update first. */
+  static #queuePendingMessage(payload) {
+    const previous = this.#pendingMessages.get(payload.sessionId);
+    if (!previous || Number(payload.revision) >= Number(previous.revision)) {
+      this.#pendingMessages.set(payload.sessionId, payload);
+    }
+  }
+
+  static #applyPendingMessage(sessionId) {
+    const payload = this.#pendingMessages.get(sessionId);
+    if (!payload) return;
+    this.#pendingMessages.delete(sessionId);
+    this.#handleMessage(payload);
   }
 
   static #cloneState(state = {}) {

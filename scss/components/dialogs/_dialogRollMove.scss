@@ -216,11 +216,39 @@
         }
         .edit-nv-modifier{ color: #665a38; }
         .edit-nv-modifier i:hover{ color: #3f351f; }
+        > span small{
+            display: block;
+            color: #6b6b6b;
+            font-size: .75em;
+            font-weight: normal;
+        }
     }
     .nv-modifier-empty{
         padding: 8px;
         text-align: center;
         color: #6b6b6b;
+    }
+}
+
+.nv-modifier-form{
+    .nv-modifier-attribute-fieldset{
+        margin: 4px 0 0;
+        padding: 8px;
+        border: 1px solid $c-beige;
+        border-radius: 3px;
+        .hint{ margin: 0 0 6px; }
+    }
+    .nv-modifier-attribute-options{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+    }
+    .nv-modifier-attribute-option{
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        white-space: nowrap;
     }
 }
 

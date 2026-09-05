@@ -1,5 +1,7 @@
 import { CharacterTrackerService } from "../services/character-tracker-service.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
+import { NVModifierService } from "../services/nv-modifier-service.mjs";
+import { NVModifierFormDialog } from "../dialogs/nvModifierFormDialog.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -83,7 +85,10 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       canAdd: game.user.isGM,
       canManage: game.user.isGM,
       detailMode: CharacterTrackerService.detailMode,
-      masterGlobalModifiers: MasterNVModifierService.getGlobalModifiers(),
+      masterGlobalModifiers: MasterNVModifierService.getGlobalModifiers().map((modifier) => ({
+        ...modifier,
+        attributeLabel: NVModifierService.getAttributeLabel(modifier)
+      })),
       actors: orderedActors.map((actor) => this._prepareActorContext(actor))
     };
   }
@@ -91,7 +96,10 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   _prepareActorContext(actor) {
     const system = actor.system;
     const isCharacter = actor.type === "character";
-    const customNV = (system.nvModifiers ?? []).reduce((total, modifier) => total + (Number(modifier.value) || 0), 0);
+    const actorModifiers = (system.nvModifiers ?? []).map((modifier) => NVModifierService.normalize(modifier));
+    const customNV = actorModifiers
+      .filter((modifier) => NVModifierService.appliesToAttribute(modifier))
+      .reduce((total, modifier) => total + modifier.value, 0);
     // `sort` is Foundry's native Item ordering key, maintained when items are
     // rearranged by drag-and-drop on the actor sheet.
     const conditions = actor.items
@@ -117,7 +125,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       fireWill: system.fireWill?.value ?? 0,
       nv: baseNV + customNV + masterNV + activeGlobalConditionNV,
       baseNV,
-      masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor) : [],
+      masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor).map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier) })) : [],
       conditions: conditions
         .map((condition) => ({
           id: condition.id,
@@ -125,16 +133,16 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
           isActive: Boolean(condition.system.isActive),
           description: this._formatTooltip(condition.system.description) || "Sem descrição."
         })),
-      attributeNVs: isCharacter ? this._prepareAttributeNVs(actor, customNV) : [],
+      attributeNVs: isCharacter ? this._prepareAttributeNVs(actor) : [],
       nvModifiers: isCharacter ? [
-        ...(system.nvModifiers ?? []).map((modifier) => ({ id: modifier.id, name: modifier.name || "Modificador da ficha", value: Number(modifier.value) || 0, source: "Ficha", canDelete: true, modifierType: "actor" })),
-        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ id: modifier.id, name: modifier.name, value: modifier.value, source: "Mestre Global", canDelete: false }))
+        ...actorModifiers.map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), source: "Ficha", canDelete: true, modifierType: "actor" })),
+        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), source: "Mestre Global", canDelete: false }))
       ] : []
     };
   }
 
   /** Mirrors the NV calculation used for moves, including active condition effects per attribute. */
-  _prepareAttributeNVs(actor, customNV) {
+  _prepareAttributeNVs(actor) {
     const attributeNames = {
       bod: "Físico",
       agl: "Agilidade",
@@ -143,13 +151,16 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       shd: "Sombra"
     };
     const activeConditions = actor.items.filter((item) => item.type === "condition" && item.system.isActive);
-    const commonNV = (Number(actor.system.advantageLevel?.actual) || 0)
-      + customNV
-      + MasterNVModifierService.getTotal(actor)
-      + activeConditions.reduce((total, condition) => total + (Number(condition.system.globalNV) || 0), 0);
+    const actorModifiers = (actor.system.nvModifiers ?? []).map((modifier) => NVModifierService.normalize(modifier));
+    const baseNV = Number(actor.system.advantageLevel?.actual) || 0;
+    const conditionGlobalNV = activeConditions.reduce((total, condition) => total + (Number(condition.system.globalNV) || 0), 0);
 
     return Object.entries(actor.system.attributes ?? {}).map(([key, attribute]) => {
       const conditionNV = activeConditions.reduce((total, condition) => total + (Number(condition.system.attributes?.[key]?.nv) || 0), 0);
+      const customNV = actorModifiers
+        .filter((modifier) => NVModifierService.appliesToAttribute(modifier, key))
+        .reduce((total, modifier) => total + modifier.value, 0);
+      const masterNV = MasterNVModifierService.getTotal(actor, key);
       const conditionModifierTotal = activeConditions.reduce((total, condition) => (
         total
         + (Number(condition.system.globalNV) || 0)
@@ -157,7 +168,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       ), 0);
       return {
         name: attribute.name || attributeNames[key] || key,
-        value: commonNV + conditionNV,
+        value: baseNV + customNV + masterNV + conditionGlobalNV + conditionNV,
         conditionModifierTotal
       };
     });
@@ -223,17 +234,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   }
 
   static async _addMasterGlobalModifier() {
-    const result = await foundry.applications.api.DialogV2.prompt({
-      window: { title: "Adicionar NV global do Mestre" },
-      content: `<form class="standard-form"><div class="form-group"><label>Nome</label><input name="name" type="text" required autofocus></div><div class="form-group"><label>Valor</label><input name="value" type="number" value="0" step="1" required></div></form>`,
-      ok: {
-        label: "Adicionar",
-        callback: (event, button) => {
-          const form = button.form ?? button.closest("form");
-          return { name: form.elements.name.value, value: form.elements.value.value };
-        }
-      }
-    });
+    const result = await NVModifierFormDialog.prompt({ title: "Adicionar NV global do Mestre", submitLabel: "Adicionar" });
     if (!result) return;
     try {
       await MasterNVModifierService.addGlobalModifier(result);
@@ -375,16 +376,6 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   }
 
   static async _promptMasterGlobalModifier(title, modifier = {}) {
-    return foundry.applications.api.DialogV2.prompt({
-      window: { title },
-      content: `<form class="standard-form"><div class="form-group"><label>Nome</label><input name="name" type="text" value="${foundry.utils.escapeHTML(modifier.name ?? "")}" required autofocus></div><div class="form-group"><label>Valor</label><input name="value" type="number" value="${Number(modifier.value) || 0}" step="1" required></div></form>`,
-      ok: {
-        label: modifier.id ? "Salvar" : "Adicionar",
-        callback: (event, button) => {
-          const form = button.form ?? button.closest("form");
-          return { name: form.elements.name.value, value: form.elements.value.value };
-        }
-      }
-    });
+    return NVModifierFormDialog.prompt({ title, modifier, submitLabel: modifier.id ? "Salvar" : "Adicionar" });
   }
 }

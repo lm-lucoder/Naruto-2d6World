@@ -12,7 +12,7 @@
   </header>
   <ol class="character-tracker-master-list">
     {{#each masterGlobalModifiers}}
-      <li class="character-tracker-master-entry" data-modifier-id="{{id}}" data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: diminuir">
+      <li class="character-tracker-master-entry" data-modifier-id="{{id}}" data-tooltip="{{attributeLabel}} • Clique: +1 NV • Shift+clique: +5 NV • Botão direito: diminuir">
         <span>{{name}}</span><strong>{{#if (greaterThan value 0)}}+{{/if}}{{value}} NV</strong>
         {{#if ../canManage}}<button type="button" class="character-tracker-edit" data-action="editMasterGlobal" data-modifier-id="{{id}}" data-tooltip="Editar modificador"><i class="fa-solid fa-pen"></i></button>{{/if}}
         {{#if ../canManage}}<button type="button" class="character-tracker-remove" data-action="removeMasterGlobal" data-modifier-id="{{id}}" data-tooltip="Remover modificador"><i class="fa-solid fa-xmark"></i></button>{{/if}}
@@ -92,8 +92,8 @@
                 <span class="character-tracker-detail-label">NV</span>
                 <div class="character-tracker-detail-tags">
                   {{#if baseNV}}<span class="character-tracker-nv-modifier" data-tooltip="NV base da ficha">NV Base: {{#if (greaterThan baseNV 0)}}+{{/if}}{{baseNV}}</span>{{/if}}
-                  {{#each nvModifiers}}{{#if canDelete}}<span class="character-tracker-nv-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="{{modifierType}}" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-nv-modifier" data-tooltip="Modificador global do Mestre">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/if}}{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
-                  {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="master-local" data-tooltip="Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
+                  {{#each nvModifiers}}{{#if canDelete}}<span class="character-tracker-nv-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="{{modifierType}}" data-tooltip="{{attributeLabel}} • Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span class="character-tracker-nv-modifier" data-tooltip="{{attributeLabel}}">{{source}}: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/if}}{{else}}<span class="character-tracker-detail-empty">Nenhum</span>{{/each}}
+                  {{#each masterLocalModifiers}}<span class="character-tracker-local-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}" data-modifier-id="{{id}}" data-modifier-type="master-local" data-tooltip="{{attributeLabel}} • Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
                 </div>
               </div>
             {{/if}}
