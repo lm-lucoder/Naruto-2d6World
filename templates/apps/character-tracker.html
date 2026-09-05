@@ -61,13 +61,13 @@
               <button type="button" class="character-tracker-nv" data-action="openNVModifiers" data-actor-uuid="{{uuid}}" data-tooltip="Abrir modificadores de NV">NV {{nv}}</button>
               <span class="character-tracker-resource-separator" aria-hidden="true">|</span>
             {{/if}}
-            <span class="character-tracker-wounds" data-tooltip="Ferimentos"><img src="systems/naruto2d6world/assets/icons/woundIcon.png" alt="">{{wounds}}/{{woundsMax}}</span>
-            <span data-tooltip="Chakra"><img src="systems/naruto2d6world/assets/icons/chakraIcon.png" alt="">{{chakra}}</span>
-            <span data-tooltip="Armadura"><img src="systems/naruto2d6world/assets/icons/shieldIcon.png" alt="">{{armor}}</span>
+            <button type="button" class="character-tracker-resource character-tracker-wounds" data-action="changeResource" data-actor-uuid="{{uuid}}" data-resource="wounds" data-tooltip="Ferimentos • Clique: mudar valor • Shift+clique: +1 • Shift+botão direito: -1"><img src="systems/naruto2d6world/assets/icons/woundIcon.png" alt="">{{wounds}}/{{woundsMax}}</button>
+            <button type="button" class="character-tracker-resource" data-action="changeResource" data-actor-uuid="{{uuid}}" data-resource="chakra" data-tooltip="Chakra • Clique: mudar valor • Shift+clique: +1 • Shift+botão direito: -1"><img src="systems/naruto2d6world/assets/icons/chakraIcon.png" alt="">{{chakra}}/{{chakraMax}}</button>
+            <button type="button" class="character-tracker-resource" data-action="changeResource" data-actor-uuid="{{uuid}}" data-resource="armor" data-tooltip="Armadura • Clique: mudar valor • Shift+clique: +1 • Shift+botão direito: -1"><img src="systems/naruto2d6world/assets/icons/shieldIcon.png" alt="">{{armor}}</button>
             {{#unless isCharacter}}<span data-tooltip="Pressão">Pressão: {{pressure}}</span>{{/unless}}
             {{#if isCharacter}}
-              <span data-tooltip="Momentum"><img src="systems/naruto2d6world/assets/icons/momentumIcon.png" alt="">{{momentum}}</span>
-              <span data-tooltip="Vontade do Fogo"><img src="systems/naruto2d6world/assets/icons/fireWillIcon.png" alt="">{{fireWill}}</span>
+              <button type="button" class="character-tracker-resource" data-action="changeResource" data-actor-uuid="{{uuid}}" data-resource="momentum" data-tooltip="Momentum • Clique: mudar valor • Shift+clique: +1 • Shift+botão direito: -1"><img src="systems/naruto2d6world/assets/icons/momentumIcon.png" alt="">{{momentum}}</button>
+              <button type="button" class="character-tracker-resource" data-action="changeResource" data-actor-uuid="{{uuid}}" data-resource="fireWill" data-tooltip="Vontade do Fogo • Clique: mudar valor • Shift+clique: +1 • Shift+botão direito: -1"><img src="systems/naruto2d6world/assets/icons/fireWillIcon.png" alt="">{{fireWill}}/{{fireWillMax}}</button>
             {{/if}}
           </div>
           {{#if ../detailMode}}

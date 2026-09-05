@@ -29,6 +29,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       removeMasterLocal: (event, target) => this._runAndRefresh(() => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId)),
       openActorSheet: (event, target) => this._runAndRefresh(() => this._openActorSheet(target.dataset.actorUuid)),
       openNVModifiers: (event, target) => this._runAndRefresh(() => this._openNVModifiers(target.dataset.actorUuid)),
+      changeResource: (event, target) => this._handleResourceClick(event, target),
       toggleCondition: (event, target) => this._runAndRefresh(() => this._toggleCondition(target.dataset.actorUuid, target.dataset.conditionId))
     },
     position: {
@@ -51,6 +52,15 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       template: "systems/naruto2d6world/templates/apps/character-tracker.html"
     }
   };
+
+  /** Resource definitions shared by tracker controls, dialogs and chat cards. */
+  static RESOURCE_CONFIG = Object.freeze({
+    wounds: { label: "Ferimentos", path: "system.wounds.value" },
+    chakra: { label: "Chakra", path: "system.chakra.value" },
+    armor: { label: "Armadura", path: "system.armor.value" },
+    momentum: { label: "Momentum", path: "system.momentum.actual" },
+    fireWill: { label: "Vontade do Fogo", path: "system.fireWill.value" }
+  });
 
   constructor(options = {}) {
     super(options);
@@ -120,10 +130,12 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       wounds: system.wounds?.value ?? 0,
       woundsMax: system.wounds?.max ?? 0,
       chakra: system.chakra?.value ?? 0,
+      chakraMax: system.chakra?.max ?? 0,
       armor: system.armor?.value ?? 0,
       pressure: system.pressure ?? 0,
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
+      fireWillMax: system.fireWill?.max ?? 0,
       nv: baseNV + customNV + masterNV + activeGlobalConditionNV,
       baseNV,
       masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor).map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), movementLabel: NVModifierService.getMovementLabel(modifier) })) : [],
@@ -204,6 +216,18 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
           modifier.dataset.modifierType,
           modifier.dataset.modifierId,
           event.shiftKey
+        ));
+      });
+    }
+    for (const resource of this.element.querySelectorAll(".character-tracker-resource")) {
+      resource.addEventListener("contextmenu", (event) => {
+        if (!event.shiftKey) return;
+        event.preventDefault();
+        event.stopPropagation();
+        CharacterTrackerApplication._runAndRefresh(() => CharacterTrackerApplication._changeResourceBy(
+          resource.dataset.actorUuid,
+          resource.dataset.resource,
+          -1
         ));
       });
     }
@@ -306,6 +330,114 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     if (!actor) return;
     const { default: ManageNVModifiersDialog } = await import("../dialogs/manageNVModifiersDialog.mjs");
     ManageNVModifiersDialog.create({ actor });
+  }
+
+  static async _handleResourceClick(event, target) {
+    const { actorUuid, resource } = target.dataset;
+    if (event.shiftKey) {
+      return this._runAndRefresh(() => this._changeResourceBy(actorUuid, resource, 1));
+    }
+    return this._openResourceDialog(actorUuid, resource);
+  }
+
+  static async _openResourceDialog(actorUuid, resourceKey) {
+    const actor = await fromUuid(actorUuid);
+    const resource = this.RESOURCE_CONFIG[resourceKey];
+    if (!actor?.isOwner || !resource) return;
+
+    const currentValue = this._getResourceValue(actor, resource);
+    const dialog = new foundry.applications.api.DialogV2({
+      window: { title: "Mudar valor" },
+      position: { width: 320 },
+      form: { closeOnSubmit: false },
+      content: `
+        <div class="character-tracker-resource-dialog">
+          <input name="value" type="number" value="${currentValue}" step="1" aria-label="${foundry.utils.escapeHTML(resource.label)}" autofocus>
+        </div>
+      `,
+      buttons: [
+        {
+          action: "apply",
+          label: "Alterar",
+          icon: "fa-solid fa-check",
+          default: true,
+          callback: async (_event, button, application) => {
+            const value = button.form.elements.value.valueAsNumber;
+            if (!Number.isFinite(value)) {
+              ui.notifications.warn("Informe um valor numérico válido.");
+              return;
+            }
+            await this._runAndRefresh(() => this._setResourceValue(actorUuid, resourceKey, value));
+            await application.close({ submitted: true });
+          }
+        },
+        {
+          action: "decrease",
+          label: "<<",
+          callback: (_event, button) => this._adjustResourceDialogInput(button.form, -1)
+        },
+        {
+          action: "increase",
+          label: ">>",
+          callback: (_event, button) => this._adjustResourceDialogInput(button.form, 1)
+        }
+      ]
+    });
+    await dialog.render({ force: true });
+  }
+
+  static _adjustResourceDialogInput(form, amount) {
+    const input = form.elements.value;
+    const value = Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : 0;
+    input.value = value + amount;
+    input.focus();
+    input.select();
+  }
+
+  static async _changeResourceBy(actorUuid, resourceKey, amount) {
+    const actor = await fromUuid(actorUuid);
+    const resource = this.RESOURCE_CONFIG[resourceKey];
+    if (!actor?.isOwner || !resource) return;
+    const currentValue = this._getResourceValue(actor, resource);
+    await this._setResourceValue(actorUuid, resourceKey, currentValue + amount);
+  }
+
+  static async _setResourceValue(actorUuid, resourceKey, value) {
+    const actor = await fromUuid(actorUuid);
+    const resource = this.RESOURCE_CONFIG[resourceKey];
+    if (!actor?.isOwner || !resource || !Number.isFinite(value)) return;
+
+    await actor.update({ [resource.path]: value });
+    await this._createResourceChangeMessage(actor, resource.label, value);
+  }
+
+  static _getResourceValue(actor, resource) {
+    const value = Number(foundry.utils.getProperty(actor, resource.path));
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  static async _createResourceChangeMessage(actor, label, value) {
+    const name = actor.token?.name ?? actor.name;
+    const image = actor.img || "icons/svg/mystery-man.svg";
+    const escapedName = foundry.utils.escapeHTML(name);
+    const escapedImage = foundry.utils.escapeHTML(image);
+    const imageTooltip = foundry.utils.escapeHTML(`
+      <img class="character-tracker-resource-tooltip-image" src="${escapedImage}" alt="${escapedName}">
+    `.trim());
+
+    await ChatMessage.create({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      content: `
+        <div class="character-tracker-resource-change-card">
+          <img class="character-tracker-resource-change-portrait" src="${escapedImage}" alt="${escapedName}"
+            data-tooltip-html="${imageTooltip}" data-tooltip-class="character-tracker-resource-image-tooltip">
+          <div class="character-tracker-resource-change-copy">
+            <strong>${escapedName}</strong>
+            <span>O valor de ${foundry.utils.escapeHTML(label)} foi alterado para ${value}.</span>
+          </div>
+        </div>
+      `
+    });
   }
 
   static async _toggleCondition(actorUuid, conditionId) {
