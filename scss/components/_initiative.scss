@@ -1,3 +1,35 @@
+.chat-message.naruto2d6world-initiative-message {
+  min-height: 151px;
+  aspect-ratio: 285 / 151;
+  padding: 20px 5px 15px 35px;
+  color: #482113;
+  background-color: transparent !important;
+  background-image: url("../assets/templates-bg/bg-scroll-card-template.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+
+  &.deleting {
+    min-height: 0;
+    aspect-ratio: auto;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .message-header {
+    padding: 0 4px 3px;
+    color: #5c392b;
+    border-bottom: 1px solid rgb(92 57 43 / 28%);
+  }
+
+  .message-content {
+    overflow: visible;
+  }
+}
+
 .initiative-change-card {
   display: flex;
   align-items: center;
@@ -6,13 +38,13 @@
   border-radius: 4px;
 
   &.has-initiative {
-    background: #d8af9c;
+    background: transparent;
     color: #482113;
   }
 
   &.without-initiative {
-    background: #d3d3d3;
-    color: #4a4a4a;
+    background: transparent;
+    color: #533d35;
   }
 
   .initiative-change-portrait {

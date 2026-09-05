@@ -12,6 +12,11 @@ export class ChatMessageInitiativeTemplates {
 
     return ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor }),
+      flags: {
+        naruto2d6world: {
+          initiativeChange: true
+        }
+      },
       content: `
         <div class="initiative-change-card ${hasInitiative ? "has-initiative" : "without-initiative"}">
           <img class="initiative-change-portrait" src="${escapedImage}" alt="${escapedName}"

@@ -22,6 +22,13 @@ import { MarkerHudService } from "./services/marker-hud-service.mjs";
 
 Hooks.once('init', async function () {
 
+  // ChatMessage flags persist with the document, so the special initiative
+  // presentation is restored whenever Foundry renders the chat history.
+  Hooks.on("renderChatMessageHTML", (message, html) => {
+    if (!message.getFlag("naruto2d6world", "initiativeChange")) return;
+    html.classList.add("naruto2d6world-initiative-message");
+  });
+
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
   GameSettings.start();
