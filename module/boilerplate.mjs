@@ -13,6 +13,7 @@ import { GameSettings } from "./settings/settings.mjs";
 import { CharacterTrackerService } from "./services/character-tracker-service.mjs";
 import { MasterNVModifierService } from "./services/master-nv-modifier-service.mjs";
 import { MoveRollSessionService } from "./services/move-roll-session-service.mjs";
+import { MarkerHudService } from "./services/marker-hud-service.mjs";
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -32,7 +33,8 @@ Hooks.once('init', async function () {
   game.naruto2d6world = {
     characterTracker: CharacterTrackerService,
     masterNVModifiers: MasterNVModifierService,
-    moveRollSessions: MoveRollSessionService
+    moveRollSessions: MoveRollSessionService,
+    markerHud: MarkerHudService
   };
 
   // Add custom constants for configuration.
@@ -157,6 +159,7 @@ Hooks.once("ready", async function () {
   MoveRollSessionService.initialize({
     dialogFactory: (item, options) => RollMoveDialog.create(item, options)
   });
+  MarkerHudService.initialize();
 
   // Chat Move Message card Reroll event
   window.addEventListener("click", async (event) => {

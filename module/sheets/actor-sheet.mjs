@@ -375,9 +375,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 		html.find(".marker-card").on("click", async (event) => {
 			if (event.target.closest(".marker-details, a, button, input")) return;
-			const marker = this.actor.items.get(event.currentTarget.dataset.itemId);
-			if (!marker) return;
-			await marker.update({ "system.isActive": !marker.system.isActive });
+			await this._toggleMarker(event.currentTarget.dataset.itemId);
+		});
+
+		html.find(".marker-toggle").on("click", async (event) => {
+			event.preventDefault();
+			await this._toggleMarker(event.currentTarget.closest(".marker-card")?.dataset.itemId);
 		});
 
 		html.find(".sheet-condition-tag").on("click", async (event) => {
@@ -708,6 +711,20 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 		// Finally, create the item!
 		return await Item.create(itemData, { parent: this.actor });
+	}
+
+	/** Toggle an embedded marker with the id-bearing payload required by Foundry. */
+	async _toggleMarker(markerId) {
+		const marker = this.actor.items.get(markerId);
+		if (!marker || marker.type !== "marker") return;
+		const embeddedId = marker.id ?? marker._id;
+		if (!embeddedId) {
+			return ui.notifications.error("Não foi possível identificar o marcador para atualização.");
+		}
+		await this.actor.updateEmbeddedDocuments("Item", [{
+			_id: embeddedId,
+			"system.isActive": !marker.system.isActive
+		}]);
 	}
 
 	/**
