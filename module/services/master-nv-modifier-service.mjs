@@ -96,6 +96,16 @@ export class MasterNVModifierService {
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, modifiers);
   }
 
+  static async updateLocalModifier(actor, id, { name, value }) {
+    this._requireGM();
+    if (actor?.type !== "character") return;
+    const updatedModifier = this._createModifier(name, value);
+    const modifiers = this.getLocalModifiers(actor).map((modifier) => (
+      modifier.id === id ? { ...updatedModifier, id } : modifier
+    ));
+    await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, modifiers);
+  }
+
   static async clearLocalModifiers(actor) {
     this._requireGM();
     if (actor?.type !== "character") return;

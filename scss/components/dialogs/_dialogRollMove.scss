@@ -174,8 +174,12 @@
         border: 1px solid $c-beige;
         border-radius: 3px;
         background-color: #00000012;
-        &.fixed{
+        &.fixed:not(.has-edit){
             grid-template-columns: 1fr auto;
+        }
+        &.has-edit{
+            grid-template-columns: 1fr auto auto;
+            &.has-delete{ grid-template-columns: 1fr auto auto auto; }
         }
         &.custom{
             background-color: #42c4541f;
@@ -185,7 +189,8 @@
             &:hover{ filter: brightness(.94); }
         }
         .remove-nv-modifier,
-        .remove-master-nv-modifier{
+        .remove-master-nv-modifier,
+        .edit-nv-modifier{
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -204,10 +209,13 @@
             }
         }
         .remove-nv-modifier i:hover,
-        .remove-master-nv-modifier i:hover{
+        .remove-master-nv-modifier i:hover,
+        .edit-nv-modifier i:hover{
             color: #7f0000;
             transform: scale(1.12);
         }
+        .edit-nv-modifier{ color: #665a38; }
+        .edit-nv-modifier i:hover{ color: #3f351f; }
     }
     .nv-modifier-empty{
         padding: 8px;
