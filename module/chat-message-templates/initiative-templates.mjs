@@ -14,7 +14,8 @@ export class ChatMessageInitiativeTemplates {
       speaker: ChatMessage.getSpeaker({ actor }),
       flags: {
         naruto2d6world: {
-          initiativeChange: true
+          initiativeChange: true,
+          hasInitiative
         }
       },
       content: `

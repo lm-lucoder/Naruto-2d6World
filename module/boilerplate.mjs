@@ -27,6 +27,9 @@ Hooks.once('init', async function () {
   Hooks.on("renderChatMessageHTML", (message, html) => {
     if (!message.getFlag("naruto2d6world", "initiativeChange")) return;
     html.classList.add("naruto2d6world-initiative-message");
+    if (message.getFlag("naruto2d6world", "hasInitiative") === false) {
+      html.classList.add("without-initiative");
+    }
   });
 
   // Add utility classes to the global game object so that they're more easily

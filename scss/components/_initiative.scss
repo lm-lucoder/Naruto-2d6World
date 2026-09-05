@@ -12,6 +12,10 @@
   border-radius: 0;
   box-shadow: none;
 
+  &.without-initiative {
+    filter: grayscale(100%);
+  }
+
   &.deleting {
     min-height: 0;
     aspect-ratio: auto;
