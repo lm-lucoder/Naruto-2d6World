@@ -6,6 +6,13 @@ import { MoveRollSessionService } from "../services/move-roll-session-service.mj
 import ManageNVModifiersDialog from "./manageNVModifiersDialog.mjs";
 
 class RollMoveDialog extends Dialog {
+	static get defaultOptions() {
+		return mergeObject(super.defaultOptions, {
+			resizable: true,
+			height: "auto"
+		});
+	}
+
 	constructor(dialogData = {}, options = {}) {
 		super(dialogData, options);
 		this.options.classes = ["my-custom-class-name"];
@@ -469,13 +476,22 @@ class RollMoveDialog extends Dialog {
 		panel.querySelector('.actual').innerText = `${totalNV > 0 ? "+" : ""}${totalNV} NV`;
 
 		const breakdown = panel.parentElement.querySelector('.nv-breakdown');
-		this._renderNVBreakdown(breakdown, { entries: calculation.entries });
+		const layoutChanged = this._renderNVBreakdown(breakdown, { entries: calculation.entries });
+		if (layoutChanged) requestAnimationFrame(() => this._fitToContent());
 		this._publishSessionState();
+	}
+
+	_fitToContent() {
+		if (!this.rendered || this._minimized) return;
+		this.setPosition({ height: "auto" });
 	}
 
 	/** Renderiza uma tag vertical para cada origem que compõe o NV total. */
 	_renderNVBreakdown(container, { entries }) {
-		if (!container) return;
+		if (!container) return false;
+		const layoutSignature = entries.map((entry) => entry.id).join("|");
+		const layoutChanged = layoutSignature !== this._nvBreakdownLayoutSignature;
+		this._nvBreakdownLayoutSignature = layoutSignature;
 		container.replaceChildren();
 
 		for (const entry of entries) {
@@ -508,6 +524,7 @@ class RollMoveDialog extends Dialog {
 			}
 			container.append(tag);
 		}
+		return layoutChanged;
 	}
 
 	static _getAdvantageLevelClass(paramValue) {

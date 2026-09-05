@@ -9,6 +9,13 @@ class ManageNVModifiersDialog extends Dialog {
   static _nativeRefreshTimers = new Map();
   static _socketRevisions = new Map();
 
+  static get defaultOptions() {
+    return mergeObject(super.defaultOptions, {
+      resizable: true,
+      height: "auto"
+    });
+  }
+
   static initializeSocket() {
     if (this._socketInitialized) return;
     this._socketInitialized = true;
@@ -81,8 +88,24 @@ class ManageNVModifiersDialog extends Dialog {
     this.data.title = `Modificadores de NV — ${this._actor.name}`;
     this.data.content = this.constructor._buildContent(this._actor, this._remoteModifierState);
     this.render(true, { focus });
+    requestAnimationFrame(() => this._fitToContent());
     if (focus) this.bringToTop();
     return this;
+  }
+
+  _fitToContent() {
+    if (!this.rendered || this._minimized) return;
+    const element = this.element?.[0] ?? this.element;
+    const rows = [...(element?.querySelectorAll?.(".nv-modifiers-list > li") ?? [])];
+    const layoutSignature = rows.map((row) => [
+      row.className,
+      row.dataset.modifierSource ?? "",
+      row.dataset.modifierId ?? "",
+      row.querySelector(":scope > span")?.textContent ?? ""
+    ].join(":")).join("|");
+    if (this._nvListLayoutSignature === layoutSignature) return;
+    this._nvListLayoutSignature = layoutSignature;
+    this.setPosition({ height: "auto" });
   }
 
   async close(options = {}) {
