@@ -31,6 +31,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       removeMasterLocal: (event, target) => this._runAndRefresh(() => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId)),
       openActorSheet: (event, target) => this._runAndRefresh(() => this._openActorSheet(target.dataset.actorUuid)),
       openNVModifiers: (event, target) => this._runAndRefresh(() => this._openNVModifiers(target.dataset.actorUuid)),
+      editNVModifier: (event, target) => this._runAndRefresh(() => this._editNVModifier(target.dataset.actorUuid, target.dataset.modifierType, target.dataset.modifierId)),
       changeResource: (event, target) => this._handleResourceClick(event, target),
       toggleCondition: (event, target) => this._runAndRefresh(() => this._toggleCondition(target.dataset.actorUuid, target.dataset.conditionId)),
       toggleInitiative: (event, target) => this._runAndRefresh(() => this._toggleInitiative(target.dataset.actorUuid))
@@ -325,6 +326,37 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     if (!actor) return;
     const { default: ManageNVModifiersDialog } = await import("../dialogs/manageNVModifiersDialog.mjs");
     ManageNVModifiersDialog.create({ actor });
+  }
+
+  static async _editNVModifier(actorUuid, modifierType, modifierId) {
+    const actor = await fromUuid(actorUuid);
+    if (!actor) return;
+
+    const modifier = modifierType === "master-local"
+      ? MasterNVModifierService.getLocalModifiers(actor).find((entry) => entry.id === modifierId)
+      : (actor.system.nvModifiers ?? []).find((entry) => entry.id === modifierId);
+    if (!modifier) return ui.notifications.warn("Modificador de NV não encontrado.");
+
+    const result = await NVModifierFormDialog.prompt({
+      title: "Editar modificador de NV",
+      modifier,
+      actor
+    });
+    if (!result) return;
+
+    if (modifierType === "master-local") {
+      await MasterNVModifierService.updateLocalModifier(actor, modifierId, result);
+      return;
+    }
+
+    if (!game.user.isGM && !actor.isOwner) {
+      return ui.notifications.warn("Você não possui permissão para alterar este modificador de NV.");
+    }
+    await actor.update({
+      "system.nvModifiers": (actor.system.nvModifiers ?? []).map((entry) => (
+        entry.id === modifierId ? { ...entry, ...result } : entry
+      ))
+    });
   }
 
   static async _handleResourceClick(event, target) {

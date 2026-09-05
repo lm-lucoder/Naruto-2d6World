@@ -144,19 +144,19 @@
             <div class="character-tracker-detail-tags">
               {{#if baseNV}}<span class="character-tracker-nv-modifier" data-tooltip="NV base da ficha">NV Base: {{#if
                 (greaterThan baseNV 0)}}+{{/if}}{{baseNV}}</span>{{/if}}
-              {{#each nvModifiers}}{{#if canDelete}}<span
-                class="character-tracker-nv-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}"
+              {{#each nvModifiers}}{{#if canDelete}}<button type="button"
+                class="character-tracker-nv-modifier character-tracker-editable-nv character-tracker-deletable-nv" data-action="editNVModifier" data-actor-uuid="{{../uuid}}"
                 data-modifier-id="{{id}}" data-modifier-type="{{modifierType}}"
-                data-tooltip="{{attributeLabel}} • {{movementLabel}} • Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}:
-                {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{else}}<span
+                data-tooltip="{{attributeLabel}} • {{movementLabel}} • Clique: editar • Botão direito: remover • Shift+botão direito: remover sem confirmação">{{source}}:
+                {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</button>{{else}}<span
                 class="character-tracker-nv-modifier" data-tooltip="{{attributeLabel}} • {{movementLabel}}">{{source}}:
                 {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/if}}{{else}}<span
                 class="character-tracker-detail-empty">Nenhum</span>{{/each}}
-              {{#each masterLocalModifiers}}<span
-                class="character-tracker-local-modifier character-tracker-deletable-nv" data-actor-uuid="{{../uuid}}"
+              {{#each masterLocalModifiers}}<button type="button"
+                class="character-tracker-local-modifier character-tracker-editable-nv character-tracker-deletable-nv" data-action="editNVModifier" data-actor-uuid="{{../uuid}}"
                 data-modifier-id="{{id}}" data-modifier-type="master-local"
-                data-tooltip="{{attributeLabel}} • {{movementLabel}} • Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre
-                Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</span>{{/each}}
+                data-tooltip="{{attributeLabel}} • {{movementLabel}} • Clique: editar • Botão direito: remover • Shift+botão direito: remover sem confirmação">Mestre
+                Local: {{name}} {{#if (greaterThan value 0)}}+{{/if}}{{value}}</button>{{/each}}
             </div>
           </div>
           {{/if}}

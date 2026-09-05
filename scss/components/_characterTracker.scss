@@ -201,14 +201,16 @@
   .character-tracker-initiative-tag { display: inline-flex; align-items: center; min-height: 0; margin: 0; padding: 1px 3px; border: 0; border-radius: 2px; color: #606060; background: #00000012; cursor: pointer; font: inherit; font-size: inherit; line-height: 1.2; white-space: nowrap; }
   .character-tracker-initiative-tag.active { color: #4d2618; background: #FE8D59; }
   .character-tracker-nv-modifier { cursor: default; }
-  .character-tracker-deletable-nv { cursor: context-menu; }
+  .character-tracker-editable-nv { cursor: pointer; }
+  .character-tracker-editable-nv:hover { filter: brightness(0.92); }
+  .character-tracker-deletable-nv { cursor: pointer; }
   .character-tracker-deletable-nv:hover { filter: brightness(0.92); }
   .character-tracker-condition.active { color: #155f85; background: #bfe4f7; }
   .character-tracker-attribute-nv-tag { display: inline-flex; align-items: center; gap: 2px; padding: 1px 3px; border-radius: 2px; color: #606060; background: #00000012; white-space: nowrap; }
   .character-tracker-attribute-nv-tag.condition-positive { color: #155f85; background: #bfe4f7; }
   .character-tracker-attribute-nv-tag.condition-negative { color: #8d2727; background: #f3c6c6; }
   .character-tracker-local-modifiers { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 2px; }
-  .character-tracker-local-modifier { display: inline-flex; align-items: center; gap: 2px; padding: 1px 3px; border-radius: 2px; color: #5d3e0b; background: #e9bd6040; font-size: 10px; white-space: nowrap; }
+  .character-tracker-local-modifier { display: inline-flex; align-items: center; gap: 2px; margin: 0; padding: 1px 3px; border: 0; border-radius: 2px; color: #5d3e0b; background: #e9bd6040; cursor: pointer; font: inherit; font-size: 10px; white-space: nowrap; }
   .character-tracker-local-modifier button { width: 13px; height: 13px; padding: 0; border: 0; color: #b40309; background: transparent; cursor: pointer; font-size: 10px; }
 
   .character-tracker-empty {
