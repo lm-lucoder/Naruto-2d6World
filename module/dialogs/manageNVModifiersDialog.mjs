@@ -158,7 +158,7 @@ class ManageNVModifiersDialog extends Dialog {
       const canAdjustMasterModifier = game.user.isGM;
       rows.push(`
         <li class="nv-modifier-row ${canRemoveMasterModifier ? "custom" : "fixed"} ${canAdjustMasterModifier ? "adjustable has-edit" : ""} ${canRemoveMasterModifier ? "has-delete" : ""}" data-modifier-source="master" data-modifier-scope="${modifier.scope}" data-modifier-id="${modifier.id}" data-modifier-index="" data-modifier-value="${modifier.value}" ${canAdjustMasterModifier ? 'data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV"' : ""}>
-          <span>${escapeHTML(modifier.label)}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small></span>
+          <span>${escapeHTML(modifier.label)}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small><small>${escapeHTML(NVModifierService.getMovementLabel(modifier))}</small></span>
           <strong>${this._formatValue(modifier.value)}</strong>
           ${canAdjustMasterModifier ? `<button type="button" class="edit-nv-modifier" data-tooltip="Editar modificador"><i class="fa-solid fa-pen"></i></button>` : ""}
           ${canRemoveMasterModifier ? `<button type="button" class="remove-master-nv-modifier" data-modifier-id="${modifier.id}"><i class="fa-solid fa-trash"></i></button>` : ""}
@@ -172,7 +172,7 @@ class ManageNVModifiersDialog extends Dialog {
       const value = Number(modifier.value) || 0;
       rows.push(`
         <li class="nv-modifier-row custom ${canAdjustActorModifiers ? "adjustable has-edit" : ""} has-delete" data-modifier-source="actor" data-modifier-id="${modifier.id ?? ""}" data-modifier-index="${index}" data-modifier-value="${value}" ${canAdjustActorModifiers ? 'data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV"' : ""}>
-          <span>${escapeHTML(modifier.name || "Modificador personalizado")}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small></span>
+          <span>${escapeHTML(modifier.name || "Modificador personalizado")}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small><small>${escapeHTML(NVModifierService.getMovementLabel(modifier))}</small></span>
           <strong>${this._formatValue(value)}</strong>
           ${canAdjustActorModifiers ? `<button type="button" class="edit-nv-modifier" data-tooltip="Editar modificador"><i class="fa-solid fa-pen"></i></button>` : ""}
           <button type="button" class="remove-nv-modifier" data-modifier-id="${modifier.id}"><i class="fa-solid fa-trash"></i></button>
@@ -247,7 +247,7 @@ class ManageNVModifiersDialog extends Dialog {
     ));
     if (!modifier) return ui.notifications.warn("Modificador de NV não encontrado.");
 
-    const result = await NVModifierFormDialog.prompt({ title: "Editar modificador de NV", modifier });
+    const result = await NVModifierFormDialog.prompt({ title: "Editar modificador de NV", modifier, actor: this._actor });
     if (!result) return;
     try {
       if (modifierSource === "master") {
@@ -271,7 +271,7 @@ class ManageNVModifiersDialog extends Dialog {
 
   async _openAddDialog() {
     const actor = this._actor;
-    const result = await NVModifierFormDialog.prompt({ title: "Adicionar modificador de NV", submitLabel: "Adicionar" });
+    const result = await NVModifierFormDialog.prompt({ title: "Adicionar modificador de NV", submitLabel: "Adicionar", actor });
     if (!result) return;
     const modifiers = [...(actor.system.nvModifiers ?? []), { id: randomID(), ...result }];
     await actor.update({ "system.nvModifiers": modifiers });
@@ -282,7 +282,7 @@ class ManageNVModifiersDialog extends Dialog {
   async _openAddMasterLocalDialog() {
     if (!game.user.isGM) return ui.notifications.warn("Somente o Mestre pode adicionar modificadores locais de NV.");
     const actor = this._actor;
-    const result = await NVModifierFormDialog.prompt({ title: "Adicionar modificador local do Mestre", submitLabel: "Adicionar" });
+    const result = await NVModifierFormDialog.prompt({ title: "Adicionar modificador local do Mestre", submitLabel: "Adicionar", actor });
     if (!result) return;
     try {
       await MasterNVModifierService.addLocalModifier(actor, result);

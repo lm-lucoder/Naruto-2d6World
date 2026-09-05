@@ -34,17 +34,17 @@ export class MasterNVModifierService {
     ];
   }
 
-  static getApplicableModifiers(actor, attribute = null) {
-    return this.getModifiers(actor).filter((modifier) => NVModifierService.appliesToAttribute(modifier, attribute));
+  static getApplicableModifiers(actor, attribute = null, movement = null) {
+    return this.getModifiers(actor).filter((modifier) => NVModifierService.applies(modifier, { attribute, movement }));
   }
 
-  static getTotal(actor, attribute = null) {
-    return this.getApplicableModifiers(actor, attribute).reduce((total, modifier) => total + modifier.value, 0);
+  static getTotal(actor, attribute = null, movement = null) {
+    return this.getApplicableModifiers(actor, attribute, movement).reduce((total, modifier) => total + modifier.value, 0);
   }
 
-  static async addGlobalModifier({ name, value, attributes = [] }) {
+  static async addGlobalModifier({ name, value, attributes = [], moves = [] }) {
     this._requireGM();
-    const modifier = this._createModifier(name, value, attributes);
+    const modifier = this._createModifier(name, value, attributes, moves);
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, [...this.getGlobalModifiers(), modifier]);
     return modifier;
   }
@@ -54,9 +54,9 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, this.getGlobalModifiers().filter((modifier) => modifier.id !== id));
   }
 
-  static async updateGlobalModifier(id, { name, value, attributes = [] }) {
+  static async updateGlobalModifier(id, { name, value, attributes = [], moves = [] }) {
     this._requireGM();
-    const updatedModifier = this._createModifier(name, value, attributes);
+    const updatedModifier = this._createModifier(name, value, attributes, moves);
     const modifiers = this.getGlobalModifiers().map((modifier) => (
       modifier.id === id ? { ...updatedModifier, id } : modifier
     ));
@@ -76,11 +76,11 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, []);
   }
 
-  static async addLocalModifier(actor, { name, value, attributes = [] }) {
+  static async addLocalModifier(actor, { name, value, attributes = [], moves = [] }) {
     this._requireGM();
     if (!actor) throw new Error("Um personagem é obrigatório para criar um modificador local.");
     if (actor.type !== "character") throw new Error("Apenas personagens podem receber modificadores locais de NV do Mestre.");
-    const modifier = this._createModifier(name, value, attributes);
+    const modifier = this._createModifier(name, value, attributes, moves);
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, [...this.getLocalModifiers(actor), modifier]);
     return modifier;
   }
@@ -102,10 +102,10 @@ export class MasterNVModifierService {
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, modifiers);
   }
 
-  static async updateLocalModifier(actor, id, { name, value, attributes = [] }) {
+  static async updateLocalModifier(actor, id, { name, value, attributes = [], moves = [] }) {
     this._requireGM();
     if (actor?.type !== "character") return;
-    const updatedModifier = this._createModifier(name, value, attributes);
+    const updatedModifier = this._createModifier(name, value, attributes, moves);
     const modifiers = this.getLocalModifiers(actor).map((modifier) => (
       modifier.id === id ? { ...updatedModifier, id } : modifier
     ));
@@ -127,12 +127,18 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.LEGACY_SETTING_KEY, 0);
   }
 
-  static _createModifier(name, value, attributes = []) {
+  static _createModifier(name, value, attributes = [], moves = []) {
     const numericValue = Number(value);
     if (!String(name ?? "").trim() || !Number.isFinite(numericValue)) {
       throw new Error("Informe um nome e um valor numérico para o modificador.");
     }
-    return { id: randomID(), name: String(name).trim(), value: numericValue, attributes: NVModifierService.normalizeAttributes(attributes) };
+    return {
+      id: randomID(),
+      name: String(name).trim(),
+      value: numericValue,
+      attributes: NVModifierService.normalizeAttributes(attributes),
+      moves: NVModifierService.normalizeMoves(moves)
+    };
   }
 
   static _normalize(modifier) {

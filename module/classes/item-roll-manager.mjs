@@ -166,7 +166,7 @@ export class ItemRollManager {
     if (isUpdate && rerollMode == "adjustment") {
       // Para ajustes manuais, não recalcular condições - usar valores opcionais
       // Mas ainda considerar os modificadores do mestre.
-      const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getApplicableModifiers(item.actor, attribute);
+      const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getApplicableModifiers(item.actor, attribute, item);
       const moveNVInfo = suppliedMoveNVInfo ?? ItemRollManager._getMoveNVInfo(item, attribute);
       const label = ItemRollManager.getMoveLabelRollTemplate({
         move: item,
@@ -281,7 +281,7 @@ export class ItemRollManager {
       : (advantageLevel || 0);
 
     // Adicionar modificadores globais e locais do mestre.
-    const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getApplicableModifiers(actor, attribute);
+    const masterNVInfo = suppliedMasterNVInfo ?? MasterNVModifierService.getApplicableModifiers(actor, attribute, item);
     const masterNV = masterNVInfo.reduce((total, modifier) => total + modifier.value, 0);
     const moveNVInfo = suppliedMoveNVInfo ?? ItemRollManager._getMoveNVInfo(item, attribute);
     const moveNV = moveNVInfo.reduce((total, modifier) => total + modifier.value, 0);
@@ -726,7 +726,7 @@ export class ItemRollManager {
   static _getMoveNVInfo(item, attribute) {
     return (item.system.nvModifiers ?? [])
       .map((modifier) => NVModifierService.normalize(modifier))
-      .filter((modifier) => NVModifierService.appliesToAttribute(modifier, attribute))
+      .filter((modifier) => NVModifierService.applies(modifier, { attribute, movement: item }))
       .map((modifier) => ({ ...modifier, reason: `Movimento — ${modifier.name}` }));
   }
 

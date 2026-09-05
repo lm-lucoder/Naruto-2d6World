@@ -233,7 +233,11 @@ class RollMoveDialog extends Dialog {
 			rollModifier: root?.querySelector('.modifier-input')?.value ?? "",
 			manualAdjustment: this._newAdvantageLevel,
 			disabledModifierIds: [...this._nvCalculation.disabledModifierIds],
-			entryValues: Object.fromEntries(entries.map((entry) => [entry.id, entry.value]))
+			entryValues: Object.fromEntries(entries.map((entry) => [entry.id, entry.value])),
+			entryFilters: Object.fromEntries(entries.map((entry) => [entry.id, {
+				attributes: NVModifierService.normalizeAttributes(entry.attributes),
+				moves: NVModifierService.normalizeMoves(entry.moves)
+			}]))
 		};
 	}
 
@@ -266,6 +270,10 @@ class RollMoveDialog extends Dialog {
 			for (const entry of entries) {
 				if (!Object.hasOwn(state.entryValues ?? {}, entry.id)) continue;
 				entry.value = Number(state.entryValues[entry.id]) || 0;
+				if (Object.hasOwn(state.entryFilters ?? {}, entry.id)) {
+					entry.attributes = NVModifierService.normalizeAttributes(state.entryFilters[entry.id]?.attributes);
+					entry.moves = NVModifierService.normalizeMoves(state.entryFilters[entry.id]?.moves);
+				}
 				if (entry.modifier) entry.modifier.value = entry.value;
 			}
 
@@ -290,7 +298,8 @@ class RollMoveDialog extends Dialog {
 				modifierSource: "actor",
 				modifierId: modifier.id,
 				modifierIndex: index,
-				attributes: modifier.attributes
+				attributes: modifier.attributes,
+				moves: modifier.moves
 			};
 		});
 
@@ -302,6 +311,7 @@ class RollMoveDialog extends Dialog {
 				reason: `Movimento — ${modifier.name}`,
 				value: modifier.value,
 				attributes: modifier.attributes,
+				moves: modifier.moves,
 				removable: true,
 				adjustable: false,
 				modifier
@@ -324,7 +334,8 @@ class RollMoveDialog extends Dialog {
 				modifierScope: modifier.scope,
 				modifierId: modifier.id,
 				modifier,
-				attributes: modifier.attributes
+				attributes: modifier.attributes,
+				moves: modifier.moves
 			}))
 		};
 	}
@@ -361,7 +372,7 @@ class RollMoveDialog extends Dialog {
 	_buildNVCalculation(attribute) {
 		const state = this._nvCalculation;
 		const isEnabled = (entry) => !state.disabledModifierIds.has(entry.id)
-			&& NVModifierService.appliesToAttribute(entry, attribute);
+			&& NVModifierService.applies(entry, { attribute, movement: this._currentItem });
 		const baseEntries = state.baseEntries.filter(isEnabled);
 		const moveEntries = state.moveEntries.filter(isEnabled);
 		const masterEntries = state.masterEntries.filter(isEnabled);

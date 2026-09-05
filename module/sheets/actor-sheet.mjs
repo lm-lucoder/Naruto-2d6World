@@ -1241,7 +1241,7 @@ export class AdvantageLevelApi {
 		}
 		this.addAdvantageLevelContext(context, baseLevel, "Base")
 		for (const modifier of context.actor.system.nvModifiers ?? []) {
-			if (!NVModifierService.appliesToAttribute(modifier)) continue;
+			if (!NVModifierService.applies(modifier)) continue;
 			this.addAdvantageLevelContext(context, Number(modifier.value) || 0, modifier.name || "Modificador personalizado")
 		}
 
@@ -1264,7 +1264,7 @@ export class AdvantageLevelApi {
 			]
 		}
 		for (const modifier of actor.system.nvModifiers ?? []) {
-			if (!NVModifierService.appliesToAttribute(modifier)) continue;
+			if (!NVModifierService.applies(modifier)) continue;
 			data.reasons.push({ value: Number(modifier.value) || 0, reason: modifier.name || "Modificador personalizado" })
 		}
 		data.value = data.reasons.reduce((total, reason) => total + reason.value, 0)

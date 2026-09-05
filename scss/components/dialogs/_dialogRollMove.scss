@@ -250,6 +250,61 @@
         margin: 0;
         white-space: nowrap;
     }
+    .nv-modifier-movement-fieldset{
+        margin: 8px 0 0;
+        padding: 8px;
+        border: 1px solid $c-beige;
+        border-radius: 3px;
+        .hint{ margin: 0 0 6px; }
+    }
+    .nv-modifier-movement-select{ width: 100%; margin-bottom: 8px; }
+    .nv-modifier-movement-drop-zone{
+        min-height: 300px;
+        padding: 8px;
+        border: 2px dashed rgba(0, 0, 0, .35);
+        border-radius: 4px;
+        background: rgba(0, 0, 0, .035);
+        transition: border-color .15s ease, background-color .15s ease;
+        &.drag-over{
+            border-color: var(--color-border-highlight, #7a7971);
+            background: rgba(56, 118, 171, .12);
+        }
+        &.empty .nv-modifier-movement-drop-hint{ display: flex; }
+    }
+    .nv-modifier-movement-drop-hint{
+        display: none;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin: 0;
+        color: #666;
+        pointer-events: none;
+    }
+    .nv-modifier-movement-list{ list-style: none; margin: 0; padding: 0; }
+    .nv-modifier-movement-row{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 30px;
+        padding: 4px 6px;
+        border-bottom: 1px solid rgba(0, 0, 0, .16);
+        .nv-modifier-remove-movement{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 26px;
+            width: 26px;
+            height: 24px;
+            padding: 0;
+            border: 0;
+            color: #111;
+            background: transparent;
+            box-shadow: none;
+            &:hover{ color: #000; transform: scale(1.08); }
+        }
+    }
 }
 
 .add-nv-modifier-dialog{

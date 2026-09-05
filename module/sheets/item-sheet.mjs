@@ -63,7 +63,8 @@ export class BoilerplateItemSheet extends ItemSheet {
 			context.moveNVModifiers = (itemData.system.nvModifiers ?? []).map((modifier, index) => ({
 				...NVModifierService.normalize(modifier),
 				index,
-				attributeLabel: NVModifierService.getAttributeLabel(modifier)
+				attributeLabel: NVModifierService.getAttributeLabel(modifier),
+				movementLabel: NVModifierService.getMovementLabel(modifier)
 			}));
 		}
 		if (itemData.type === "skill") {
@@ -195,7 +196,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 	}
 
 	async _addMoveNVModifier() {
-		const result = await NVModifierFormDialog.prompt({ title: "Adicionar NV do movimento", submitLabel: "Adicionar" });
+		const result = await NVModifierFormDialog.prompt({ title: "Adicionar NV do movimento", submitLabel: "Adicionar", actor: this.object.actor });
 		if (!result) return;
 		await this.object.update({ "system.nvModifiers": [...(this.object.system.nvModifiers ?? []), { id: randomID(), ...result }] });
 	}
@@ -204,7 +205,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 		const modifiers = [...(this.object.system.nvModifiers ?? [])];
 		const modifier = modifiers[index];
 		if (!modifier) return;
-		const result = await NVModifierFormDialog.prompt({ title: "Editar NV do movimento", modifier });
+		const result = await NVModifierFormDialog.prompt({ title: "Editar NV do movimento", modifier, actor: this.object.actor });
 		if (!result) return;
 		modifiers[index] = { ...modifier, ...result, id: modifier.id || randomID() };
 		await this.object.update({ "system.nvModifiers": modifiers });

@@ -126,10 +126,10 @@ export class ItemLegacyRollManager {
 		
 		// Calculate mode from advantage level if not provided (for rerolls, mode is passed directly)
 		// Somar o NV adicional das condições e do mestre ao advantageLevel antes de calcular o modo
-		const masterNV = MasterNVModifierService.getTotal(item.actor, attribute);
+		const masterNV = MasterNVModifierService.getTotal(item.actor, attribute, item);
 		const moveNV = (item.system.nvModifiers ?? [])
 			.map((modifier) => NVModifierService.normalize(modifier))
-			.filter((modifier) => NVModifierService.appliesToAttribute(modifier, attribute))
+			.filter((modifier) => NVModifierService.applies(modifier, { attribute, movement: item }))
 			.reduce((total, modifier) => total + modifier.value, 0);
 		// The modern pre-roll dialog already supplies a complete, temporarily-filtered snapshot.
 		const totalAdvantageLevel = nvCalculation

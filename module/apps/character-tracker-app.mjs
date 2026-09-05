@@ -87,7 +87,8 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       detailMode: CharacterTrackerService.detailMode,
       masterGlobalModifiers: MasterNVModifierService.getGlobalModifiers().map((modifier) => ({
         ...modifier,
-        attributeLabel: NVModifierService.getAttributeLabel(modifier)
+        attributeLabel: NVModifierService.getAttributeLabel(modifier),
+        movementLabel: NVModifierService.getMovementLabel(modifier)
       })),
       actors: orderedActors.map((actor) => this._prepareActorContext(actor))
     };
@@ -98,7 +99,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     const isCharacter = actor.type === "character";
     const actorModifiers = (system.nvModifiers ?? []).map((modifier) => NVModifierService.normalize(modifier));
     const customNV = actorModifiers
-      .filter((modifier) => NVModifierService.appliesToAttribute(modifier))
+      .filter((modifier) => NVModifierService.applies(modifier))
       .reduce((total, modifier) => total + modifier.value, 0);
     // `sort` is Foundry's native Item ordering key, maintained when items are
     // rearranged by drag-and-drop on the actor sheet.
@@ -125,7 +126,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       fireWill: system.fireWill?.value ?? 0,
       nv: baseNV + customNV + masterNV + activeGlobalConditionNV,
       baseNV,
-      masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor).map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier) })) : [],
+      masterLocalModifiers: isCharacter ? MasterNVModifierService.getLocalModifiers(actor).map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), movementLabel: NVModifierService.getMovementLabel(modifier) })) : [],
       conditions: conditions
         .map((condition) => ({
           id: condition.id,
@@ -135,8 +136,8 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
         })),
       attributeNVs: isCharacter ? this._prepareAttributeNVs(actor) : [],
       nvModifiers: isCharacter ? [
-        ...actorModifiers.map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), source: "Ficha", canDelete: true, modifierType: "actor" })),
-        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), source: "Mestre Global", canDelete: false }))
+        ...actorModifiers.map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), movementLabel: NVModifierService.getMovementLabel(modifier), source: "Ficha", canDelete: true, modifierType: "actor" })),
+        ...MasterNVModifierService.getGlobalModifiers().map((modifier) => ({ ...modifier, attributeLabel: NVModifierService.getAttributeLabel(modifier), movementLabel: NVModifierService.getMovementLabel(modifier), source: "Mestre Global", canDelete: false }))
       ] : []
     };
   }
@@ -158,7 +159,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     return Object.entries(actor.system.attributes ?? {}).map(([key, attribute]) => {
       const conditionNV = activeConditions.reduce((total, condition) => total + (Number(condition.system.attributes?.[key]?.nv) || 0), 0);
       const customNV = actorModifiers
-        .filter((modifier) => NVModifierService.appliesToAttribute(modifier, key))
+        .filter((modifier) => NVModifierService.applies(modifier, { attribute: key }))
         .reduce((total, modifier) => total + modifier.value, 0);
       const masterNV = MasterNVModifierService.getTotal(actor, key);
       const conditionModifierTotal = activeConditions.reduce((total, condition) => (
@@ -258,7 +259,8 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   static async _addMasterLocalToTracked() {
     const actors = (await CharacterTrackerService.getTrackedActors()).filter((actor) => actor.type === "character");
     if (!actors.length) return ui.notifications.warn("Adicione personagens ao rastreador antes de aplicar um NV local.");
-    const result = await this._promptMasterGlobalModifier("Adicionar NV local do Mestre para o rastreador");
+    const movementNames = actors.flatMap((actor) => NVModifierService.getActorMovementNames(actor));
+    const result = await this._promptMasterGlobalModifier("Adicionar NV local do Mestre para o rastreador", {}, movementNames);
     if (!result) return;
     try {
       await Promise.all(actors.map((actor) => MasterNVModifierService.addLocalModifier(actor, result)));
@@ -375,7 +377,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     }
   }
 
-  static async _promptMasterGlobalModifier(title, modifier = {}) {
-    return NVModifierFormDialog.prompt({ title, modifier, submitLabel: modifier.id ? "Salvar" : "Adicionar" });
+  static async _promptMasterGlobalModifier(title, modifier = {}, movementNames = null) {
+    return NVModifierFormDialog.prompt({ title, modifier, movementNames, submitLabel: modifier.id ? "Salvar" : "Adicionar" });
   }
 }

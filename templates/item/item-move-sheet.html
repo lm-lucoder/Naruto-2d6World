@@ -52,7 +52,7 @@
         <ol class="move-nv-modifiers-list">
           {{#each moveNVModifiers}}
             <li class="move-nv-modifier" data-modifier-index="{{index}}">
-              <span class="move-nv-modifier-name">{{name}} <small>{{attributeLabel}}</small></span>
+              <span class="move-nv-modifier-name">{{name}} <small>{{attributeLabel}}</small><small>{{movementLabel}}</small></span>
               <strong>{{#if (greaterThan value 0)}}+{{/if}}{{value}} NV</strong>
               {{#if ../editable}}
                 <button type="button" class="edit-move-nv-modifier" data-tooltip="Editar modificador"><i class="fa-solid fa-pen"></i></button>
