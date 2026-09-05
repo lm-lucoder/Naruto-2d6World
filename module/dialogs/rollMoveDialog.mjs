@@ -2,6 +2,7 @@ import { GameSettings } from "../settings/settings.mjs";
 import { AdvantageLevelApi } from "../sheets/actor-sheet.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 import { MoveRollSessionService } from "../services/move-roll-session-service.mjs";
+import ManageNVModifiersDialog from "./manageNVModifiersDialog.mjs";
 
 class RollMoveDialog extends Dialog {
 	constructor(dialogData = {}, options = {}) {
@@ -329,6 +330,7 @@ class RollMoveDialog extends Dialog {
 			entry.value += amount;
 			if (entry.modifier) entry.modifier.value += amount;
 			this.updateNVPanel(event);
+			ManageNVModifiersDialog.notifyChange(this._currentItem.actor, { refreshLocal: true });
 		} catch (error) {
 			ui.notifications.warn(error.message || "Não foi possível alterar o modificador de NV.");
 		}

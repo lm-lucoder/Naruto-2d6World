@@ -9,6 +9,7 @@ import { preloadHandlebarsTemplates } from "./helpers/templates.mjs";
 import { BOILERPLATE } from "./helpers/config.mjs";
 import AlterMoveResultDialog from "./dialogs/alterMoveResultDialog.mjs";
 import RollMoveDialog from "./dialogs/rollMoveDialog.mjs";
+import ManageNVModifiersDialog from "./dialogs/manageNVModifiersDialog.mjs";
 import { GameSettings } from "./settings/settings.mjs";
 import { CharacterTrackerService } from "./services/character-tracker-service.mjs";
 import { MasterNVModifierService } from "./services/master-nv-modifier-service.mjs";
@@ -159,6 +160,7 @@ Hooks.once("ready", async function () {
   MoveRollSessionService.initialize({
     dialogFactory: (item, options) => RollMoveDialog.create(item, options)
   });
+  ManageNVModifiersDialog.initializeSocket();
   MarkerHudService.initialize();
 
   // Chat Move Message card Reroll event

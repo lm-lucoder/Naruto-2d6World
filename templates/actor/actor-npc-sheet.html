@@ -151,14 +151,16 @@
         </div>
         <ul class="markers-list">
           {{#each markers as |marker|}}
-          <li class="marker-card item {{#if marker.system.isActive}}active{{/if}}" data-item-id="{{marker._id}}" role="button" tabindex="0" aria-pressed="{{#if marker.system.isActive}}true{{else}}false{{/if}}">
+          <li class="marker-card item {{#if marker.system.isActive}}active{{/if}}" data-item-id="{{marker._id}}"
+            role="button" tabindex="0" aria-pressed="{{#if marker.system.isActive}}true{{else}}false{{/if}}">
             <div class="marker-header">
               <div class="marker-summary">
                 <span class="title">{{marker.name}}</span>
                 <span class="represents">{{marker.system.represents}}</span>
               </div>
               <div class="controls">
-                <button type="button" class="marker-toggle" title="Ativar/desativar marcador" aria-label="Ativar/desativar marcador">
+                <button type="button" class="marker-toggle" title="Ativar/desativar marcador"
+                  aria-label="Ativar/desativar marcador">
                   <i class="fa-solid fa-toggle-{{#if marker.system.isActive}}on{{else}}off{{/if}}"></i>
                 </button>
                 <a class="item-edit" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
@@ -168,9 +170,9 @@
             <details class="marker-details">
               <summary>Detalhes</summary>
               <div class="marker-detail-list">
-                <p><strong>Effect:</strong> {{marker.system.effect}}</p>
-                <p><strong>Pressure:</strong> {{marker.system.pressure}}</p>
-                <p><strong>Broke:</strong> {{marker.system.broke}}</p>
+                <p><strong>Efeito:</strong> {{marker.system.effect}}</p>
+                <p><strong>Pressão:</strong> {{marker.system.pressure}}</p>
+                <p><strong>Quebrar:</strong> {{marker.system.broke}}</p>
               </div>
             </details>
           </li>

@@ -1,15 +1,74 @@
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 
 class ManageNVModifiersDialog extends Dialog {
+  static SOCKET_EVENT = "system.naruto2d6world";
+  static _instance = null;
+  static _socketInitialized = false;
+  static _remoteRefreshTimer = null;
+
+  static initializeSocket() {
+    if (this._socketInitialized) return;
+    this._socketInitialized = true;
+    game.socket.on(this.SOCKET_EVENT, (payload) => {
+      if (payload?.type !== "nvModifierDialog:refresh" || payload.sourceUserId === game.user.id) return;
+      const dialog = this._instance;
+      if (!dialog?.rendered || dialog._actor?.uuid !== payload.actorUuid) return;
+
+      // Coalesce rapid clicks and allow the synchronized Document/Setting
+      // update to reach this client before rebuilding the dialog content.
+      clearTimeout(this._remoteRefreshTimer);
+      this._remoteRefreshTimer = setTimeout(() => dialog.refresh({ focus: false }), 30);
+    });
+  }
+
   static async create({ actor }) {
+    const existing = this._instance;
+    if (existing) {
+      existing._actor = actor;
+      existing.refresh();
+      return existing;
+    }
+
     const dialog = new this({
       title: `Modificadores de NV — ${actor.name}`,
       content: this._buildContent(actor),
       buttons: {}
     });
     dialog._actor = actor;
+    this._instance = dialog;
     dialog.render(true);
     return dialog;
+  }
+
+  refresh({ focus = true } = {}) {
+    this.data.title = `Modificadores de NV — ${this._actor.name}`;
+    this.data.content = this.constructor._buildContent(this._actor);
+    this.render(true, { focus });
+    if (focus) this.bringToTop();
+    return this;
+  }
+
+  async close(options = {}) {
+    if (this.constructor._instance === this) this.constructor._instance = null;
+    clearTimeout(this.constructor._remoteRefreshTimer);
+    return super.close(options);
+  }
+
+  static notifyChange(actor, { refreshLocal = false } = {}) {
+    if (!actor?.uuid) return;
+    const dialog = this._instance;
+    if (refreshLocal && dialog?.rendered && dialog._actor?.uuid === actor.uuid) {
+      dialog.refresh({ focus: false });
+    }
+    game.socket.emit(this.SOCKET_EVENT, {
+      type: "nvModifierDialog:refresh",
+      sourceUserId: game.user.id,
+      actorUuid: actor.uuid
+    });
+  }
+
+  _notifyRemoteRefresh() {
+    this.constructor.notifyChange(this._actor);
   }
 
   static _formatValue(value) {
@@ -119,6 +178,7 @@ class ManageNVModifiersDialog extends Dialog {
       const value = (Number(row.dataset.modifierValue) || 0) + amount;
       row.dataset.modifierValue = String(value);
       row.querySelector("strong").textContent = ManageNVModifiersDialog._formatValue(value);
+      this._notifyRemoteRefresh();
     } catch (error) {
       ui.notifications.warn(error.message || "Não foi possível alterar o modificador de NV.");
     }
@@ -173,6 +233,7 @@ class ManageNVModifiersDialog extends Dialog {
                 ? `Mestre ${modifierScope} — ${name}`
                 : name;
               row.querySelector("strong").textContent = ManageNVModifiersDialog._formatValue(value);
+              this._notifyRemoteRefresh();
             } catch (error) {
               ui.notifications.warn(error.message || "Não foi possível editar o modificador de NV.");
             }
@@ -205,8 +266,8 @@ class ManageNVModifiersDialog extends Dialog {
             }
             const modifiers = [...(actor.system.nvModifiers ?? []), { id: randomID(), name, value }];
             await actor.update({ "system.nvModifiers": modifiers });
-            this.close();
-            ManageNVModifiersDialog.create({ actor });
+            this.refresh();
+            this._notifyRemoteRefresh();
           }
         },
         cancel: { label: "Cancelar" }
@@ -230,8 +291,8 @@ class ManageNVModifiersDialog extends Dialog {
                 name: html.find('[name="name"]').val().trim(),
                 value: Number(html.find('[name="value"]').val())
               });
-              this.close();
-              ManageNVModifiersDialog.create({ actor });
+              this.refresh();
+              this._notifyRemoteRefresh();
             } catch (error) {
               ui.notifications.warn(error.message);
             }
@@ -246,15 +307,15 @@ class ManageNVModifiersDialog extends Dialog {
   async _removeMasterLocalModifier(modifierId) {
     if (!game.user.isGM) return ui.notifications.warn("Somente o Mestre pode remover modificadores locais de NV.");
     await MasterNVModifierService.removeLocalModifier(this._actor, modifierId);
-    this.close();
-    ManageNVModifiersDialog.create({ actor: this._actor });
+    this.refresh();
+    this._notifyRemoteRefresh();
   }
 
   async _removeModifier(modifierId) {
     const modifiers = (this._actor.system.nvModifiers ?? []).filter((modifier) => modifier.id !== modifierId);
     await this._actor.update({ "system.nvModifiers": modifiers });
-    this.close();
-    ManageNVModifiersDialog.create({ actor: this._actor });
+    this.refresh();
+    this._notifyRemoteRefresh();
   }
 }
 
