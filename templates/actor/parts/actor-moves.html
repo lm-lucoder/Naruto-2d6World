@@ -5,9 +5,9 @@
     </label>
 </div>
 {{#if sheetConditionTags.length}}
-<div class="sheet-condition-tags" aria-label="Condições do personagem">
+<div class="sheet-condition-tags item-list" aria-label="Condições do personagem">
     {{#each sheetConditionTags}}
-        <button type="button" class="sheet-condition-tag {{#if isActive}}active{{/if}}" data-item-id="{{id}}" data-tooltip="{{{description}}}">{{name}}</button>
+        <button type="button" draggable="true" class="sheet-condition-tag item {{#if isActive}}active{{/if}}" data-item-id="{{id}}" data-tooltip="{{{description}}}">{{name}}</button>
     {{/each}}
 </div>
 {{/if}}

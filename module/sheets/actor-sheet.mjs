@@ -24,6 +24,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		this._expandedItems = new Set();
 		this._expandedAbilities = new Set();
 		this._expandedMoves = new Set();
+		this._conditionTagDragging = false;
 	}
 
 	/** @override */
@@ -129,14 +130,15 @@ export class BoilerplateActorSheet extends ActorSheet {
 				if (item && item.parent === this.actor) {
 					// Verificar novamente se não está em uma região de scroll
 					const isInScroll = e.target?.closest?.(".scroll-items-list") || e.target?.closest?.(".item-scroll-items-list");
-					if (!isInScroll) {
+					const isConditionTagSort = e.target?.closest?.(".sheet-condition-tags [data-item-id]");
+					if (!isInScroll && !isConditionTagSort) {
 						return false;
 					}
 				}
 			}
 		}
 
-		super._onDropItem(e, data)
+		return super._onDropItem(e, data);
 	}
 	/* -------------------------------------------- */
 
@@ -393,8 +395,19 @@ export class BoilerplateActorSheet extends ActorSheet {
 			await this._toggleMarker(event.currentTarget.closest(".marker-card")?.dataset.itemId);
 		});
 
+		html.find(".sheet-condition-tag").on("dragstart", () => {
+			this._conditionTagDragging = true;
+		});
+
+		html.find(".sheet-condition-tag").on("dragend", () => {
+			window.setTimeout(() => {
+				this._conditionTagDragging = false;
+			}, 0);
+		});
+
 		html.find(".sheet-condition-tag").on("click", async (event) => {
 			event.preventDefault();
+			if (this._conditionTagDragging) return;
 			const condition = this.actor.items.get(event.currentTarget.dataset.itemId);
 			if (!condition) return;
 			await condition.update({ "system.isActive": !condition.system.isActive });
