@@ -23,6 +23,10 @@
     grid-template-columns: 16px minmax(0, 1fr) 24px;
     min-height: 30px;
     padding: 4px 7px;
+
+    &.has-target-control {
+      grid-template-columns: 16px minmax(0, 1fr) 20px 24px;
+    }
   }
 
   .naruto-marker-hud-name {
@@ -70,6 +74,26 @@
     }
   }
 
+  .naruto-marker-hud-add-target {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 11px;
+    height: auto;
+    line-height: 1;
+    margin: 0;
+    min-height: 0;
+    padding: 2px;
+    width: auto;
+
+    &:hover, &:focus-visible {
+      color: $c-blue-partial-success;
+      box-shadow: none;
+    }
+  }
+
   .naruto-marker-hud-origin {
     background: transparent;
     border: 0;
@@ -88,6 +112,45 @@
       object-fit: cover;
       width: 22px;
     }
+  }
+
+  .naruto-marker-hud-targets {
+    align-items: center;
+    border-top: 1px solid rgba(181, 179, 164, 0.3);
+    display: flex;
+    gap: 7px;
+    min-height: 31px;
+    padding: 4px 7px;
+  }
+
+  .naruto-marker-hud-targets-label {
+    flex: 0 0 auto;
+    font-size: 12px;
+  }
+
+  .naruto-marker-hud-target-portraits {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+
+  .naruto-marker-hud-target {
+    display: block;
+
+    &.is-removable {
+      cursor: context-menu;
+    }
+  }
+
+  .naruto-marker-hud-target-image {
+    border: 1px solid rgba(181, 179, 164, 0.6);
+    border-radius: 50%;
+    display: block;
+    height: 22px;
+    object-fit: cover;
+    width: 22px;
   }
 
   .naruto-marker-hud-details {

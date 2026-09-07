@@ -47,6 +47,7 @@ export class MarkerHudService {
           originName: String(actor.name ?? ""),
           originImage: String(actor.img ?? "icons/svg/mystery-man.svg"),
           originUuid: actor.uuid,
+          targets: this.#normalizeTargets(item.system.targets),
           sort: Number(item.sort) || 0
         })))
       .sort((left, right) => (
@@ -108,9 +109,25 @@ export class MarkerHudService {
       broke: String(marker.broke ?? ""),
       originName: String(marker.originName ?? ""),
       originImage: String(marker.originImage ?? "icons/svg/mystery-man.svg"),
-      originUuid: String(marker.originUuid ?? "")
+      originUuid: String(marker.originUuid ?? ""),
+      targets: this.#normalizeTargets(marker.targets)
     }));
     this.render();
+  }
+
+  static #normalizeTargets(targets) {
+    if (!Array.isArray(targets)) return [];
+
+    const normalized = targets.flatMap((target) => {
+      if (!target || typeof target !== "object" || !target.uuid) return [];
+      return [{
+        uuid: String(target.uuid),
+        name: String(target.name ?? "Alvo"),
+        image: String(target.image ?? "icons/svg/mystery-man.svg")
+      }];
+    });
+
+    return [...new Map(normalized.map((target) => [target.uuid, target])).values()];
   }
 
   static render() {
@@ -135,7 +152,7 @@ export class MarkerHudService {
       card.dataset.markerId = marker.id;
 
       const header = document.createElement("div");
-      header.className = "naruto-marker-hud-header";
+      header.className = `naruto-marker-hud-header${game.user.isGM ? " has-target-control" : ""}`;
 
       const expandButton = document.createElement("button");
       expandButton.type = "button";
@@ -178,6 +195,51 @@ export class MarkerHudService {
         }
       });
 
+      let addTargetButton = null;
+      if (game.user.isGM) {
+        addTargetButton = document.createElement("button");
+        addTargetButton.type = "button";
+        addTargetButton.className = "naruto-marker-hud-add-target";
+        addTargetButton.dataset.tooltip = "Adicionar personagem ao marcador";
+        addTargetButton.setAttribute("aria-label", "Adicionar personagem ao marcador");
+        addTargetButton.innerHTML = '<i class="fa-solid fa-user-plus" aria-hidden="true"></i>';
+        addTargetButton.addEventListener("click", () => this.#addSelectedTargets(marker));
+      }
+
+      const targets = document.createElement("div");
+      targets.className = "naruto-marker-hud-targets";
+      targets.hidden = marker.targets.length === 0;
+
+      const targetsLabel = document.createElement("strong");
+      targetsLabel.className = "naruto-marker-hud-targets-label";
+      targetsLabel.textContent = "Alvos";
+
+      const targetPortraits = document.createElement("div");
+      targetPortraits.className = "naruto-marker-hud-target-portraits";
+      for (const target of marker.targets) {
+        const portrait = document.createElement("span");
+        portrait.className = "naruto-marker-hud-target";
+        portrait.dataset.tooltipDirection = "LEFT";
+        const targetName = foundry.utils.escapeHTML(target.name);
+        const targetImage = foundry.utils.escapeHTML(target.image);
+        portrait.dataset.tooltip = `<div class="naruto-marker-origin-tooltip-content"><img src="${targetImage}" alt=""><span>${targetName}</span></div>`;
+
+        const image = document.createElement("img");
+        image.className = "naruto-marker-hud-target-image";
+        image.src = target.image;
+        image.alt = target.name;
+        portrait.append(image);
+        if (game.user.isGM) {
+          portrait.classList.add("is-removable");
+          portrait.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            this.#removeTarget(marker, target.uuid);
+          });
+        }
+        targetPortraits.append(portrait);
+      }
+      targets.append(targetsLabel, targetPortraits);
+
       const details = document.createElement("div");
       details.className = "naruto-marker-hud-details";
       details.hidden = !this.#expandedMarkerIds.has(marker.id);
@@ -219,10 +281,49 @@ export class MarkerHudService {
       setExpanded(!details.hidden);
       expandButton.addEventListener("click", () => setExpanded(details.hidden));
 
-      header.append(expandButton, name, origin);
-      card.append(header, details);
+      header.append(expandButton, name);
+      if (addTargetButton) header.append(addTargetButton);
+      header.append(origin);
+      card.append(header, targets, details);
       panel.append(card);
     }
+  }
+
+  static async #addSelectedTargets(marker) {
+    if (!game.user.isGM) return;
+
+    const selectedActors = (canvas?.tokens?.controlled ?? [])
+      .map((token) => token.actor)
+      .filter((actor) => actor?.type === "character" || actor?.type === "npc");
+    if (!selectedActors.length) {
+      return ui.notifications.warn("Selecione ao menos um token de personagem ou NPC.");
+    }
+
+    const item = await fromUuid(marker.id);
+    if (!item || item.type !== "marker" || !item.system.isActive) return;
+
+    const selectedTargets = selectedActors.map((actor) => ({
+      uuid: actor.uuid,
+      name: String(actor.name ?? "Alvo"),
+      image: String(actor.img ?? "icons/svg/mystery-man.svg")
+    }));
+    const targets = this.#normalizeTargets([
+      ...this.#normalizeTargets(item.system.targets),
+      ...selectedTargets
+    ]);
+
+    await item.update({ "system.targets": targets });
+  }
+
+  static async #removeTarget(marker, targetUuid) {
+    if (!game.user.isGM) return;
+
+    const item = await fromUuid(marker.id);
+    if (!item || item.type !== "marker") return;
+
+    const targets = this.#normalizeTargets(item.system.targets)
+      .filter((target) => target.uuid !== targetUuid);
+    await item.update({ "system.targets": targets });
   }
 
   static async #confirmMarkerResolution(marker) {

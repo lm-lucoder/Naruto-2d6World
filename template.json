@@ -237,7 +237,8 @@
 			"pressure": "",
 			"broke": "",
 			"isActive": false,
-			"category": ""
+			"category": "",
+			"targets": []
 		},
 		"ability": {
 			"templates": [
