@@ -217,8 +217,10 @@ export class MarkerHudService {
       const targetPortraits = document.createElement("div");
       targetPortraits.className = "naruto-marker-hud-target-portraits";
       for (const target of marker.targets) {
-        const portrait = document.createElement("span");
+        const portrait = document.createElement("button");
+        portrait.type = "button";
         portrait.className = "naruto-marker-hud-target";
+        portrait.setAttribute("aria-label", `Abrir ficha de ${target.name}`);
         portrait.dataset.tooltipDirection = "LEFT";
         const targetName = foundry.utils.escapeHTML(target.name);
         const targetImage = foundry.utils.escapeHTML(target.image);
@@ -229,6 +231,15 @@ export class MarkerHudService {
         image.src = target.image;
         image.alt = target.name;
         portrait.append(image);
+        portrait.addEventListener("click", async () => {
+          if (!target.uuid) return;
+          try {
+            const actor = await fromUuid(target.uuid);
+            actor?.sheet?.render(true);
+          } catch (_error) {
+            // A user without permission simply cannot open the actor sheet.
+          }
+        });
         if (game.user.isGM) {
           portrait.classList.add("is-removable");
           portrait.addEventListener("contextmenu", (event) => {
