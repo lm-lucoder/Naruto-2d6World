@@ -56,6 +56,12 @@
 
           {{/if}}
         </div>
+        {{#if user.isGM}}
+        <div class="resource-content flexrow flex-center">
+          <label for="system.IsAlly">Aliado</label>
+          <input type="checkbox" name="system.IsAlly" {{checked system.IsAlly}} />
+        </div>
+        {{/if}}
       </div>
       {{/unless}}
     </div>
@@ -104,12 +110,16 @@
             <input type="text" name="system.chakra.max" value="{{system.chakra.max}}" data-dtype="Number" />
           </div>
         </div>
+        {{#if showPressure}}
         <div class="resource-card">
           <label for="system.pressure" class="resource-label">Pressão</label>
           <div class="resource-content flexrow flex-center flex-between">
             <input type="number" name="system.pressure" value="{{system.pressure}}" data-dtype="Number" step="1" />
+            <span>/</span>
+            <input type="number" name="system.pressureMax" value="{{system.pressureMax}}" data-dtype="Number" step="1" />
           </div>
         </div>
+        {{/if}}
       </div>
       <div class="conditions-container" data-group="secondary" data-tab="conditions">
         <h3 class="conditions-title">Condições</h3>
@@ -144,6 +154,7 @@
           {{/each}}
         </ul>
       </div>
+      {{#if showMarkers}}
       <div class="markers-container">
         <h3 class="conditions-title">Marcadores</h3>
         <div class="section-buttons">
@@ -179,6 +190,7 @@
           {{/each}}
         </ul>
       </div>
+      {{/if}}
       <div class="moves-container">
         <h3 class="conditions-title">Movimentos</h3>
         <div class="section-buttons">

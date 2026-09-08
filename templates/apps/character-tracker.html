@@ -89,7 +89,7 @@
               data-actor-uuid="{{uuid}}" data-resource="armor"
               data-tooltip="Armadura • Clique: mudar valor • Shift+clique: +1 • Shift+botão direito: -1"><img
                 src="systems/naruto2d6world/assets/icons/shieldIcon.png" alt="">{{armor}}</button>
-            {{#unless isCharacter}}<span data-tooltip="Pressão">Pressão: {{pressure}}</span>{{/unless}}
+            {{#unless isCharacter}}<span data-tooltip="Pressão">Pressão: {{pressure}}/{{pressureMax}}</span>{{/unless}}
             {{#if isCharacter}}
             <button type="button" class="character-tracker-resource" data-action="changeResource"
               data-actor-uuid="{{uuid}}" data-resource="momentum"

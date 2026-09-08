@@ -128,6 +128,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       chakraMax: system.chakra?.max ?? 0,
       armor: system.armor?.value ?? 0,
       pressure: system.pressure ?? 0,
+      pressureMax: system.pressureMax ?? 0,
       momentum: system.momentum?.actual ?? 0,
       fireWill: system.fireWill?.value ?? 0,
       fireWillMax: system.fireWill?.max ?? 0,

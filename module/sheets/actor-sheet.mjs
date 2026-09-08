@@ -152,6 +152,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 		context.system = actorData.system;
 		context.flags = actorData.flags;
 		context.user = game.user
+		if (actorData.type === "npc") {
+			const isAlly = Boolean(actorData.system.IsAlly);
+			context.isAlly = isAlly;
+			context.showPressure = !isAlly || game.settings.get("naruto2d6world", "allow-ally-pressure");
+			context.showMarkers = !isAlly || game.settings.get("naruto2d6world", "allow-ally-markers");
+		}
 
 		if (actorData.type == "character") {
 			this._prepareCharacterItems(context);
@@ -284,6 +290,8 @@ export class BoilerplateActorSheet extends ActorSheet {
 		const conditions = [];
 		const moves = [];
 		const markers = [];
+		const movesByCategory = {};
+		const isAlly = Boolean(this.actor.system.IsAlly);
 		for (let item of context.items) {
 			item.img = item.img || DEFAULT_TOKEN;
 			if (item.type === "condition") {
@@ -291,8 +299,16 @@ export class BoilerplateActorSheet extends ActorSheet {
 				this._prepareConditionData(item);
 				conditions.push(item);
 			}
-			if (item.type === "move") {
+			if (item.type === "move" && Boolean(item.system.IsAllyMovement) === isAlly) {
 				moves.push(item);
+				if (movesByCategory[item.system.category]) {
+					movesByCategory[item.system.category].items.push(item);
+				} else {
+					movesByCategory[item.system.category] = {
+						name: item.system.category,
+						items: [item],
+					};
+				}
 			}
 			if (item.type === "marker") {
 				markers.push(item);
@@ -302,6 +318,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		markers.sort((left, right) => left.sort - right.sort);
 		context.conditions = conditions;
 		context.moves = moves;
+		context.movesByCategory = movesByCategory;
 		context.markers = markers;
 	}
 

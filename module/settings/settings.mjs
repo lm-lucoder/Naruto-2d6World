@@ -41,6 +41,24 @@ class GameSettings {
       default: false,
     });
 
+    game.settings.register("naruto2d6world", "allow-ally-pressure", {
+      name: "Exibir Pressão para NPCs aliados",
+      hint: "Permite que a ficha de NPCs marcados como aliados exiba o atributo Pressão.",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+    });
+
+    game.settings.register("naruto2d6world", "allow-ally-markers", {
+      name: "Exibir Marcadores para NPCs aliados",
+      hint: "Permite que a ficha de NPCs marcados como aliados exiba a seção de Marcadores.",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+    });
+
     game.settings.register("naruto2d6world", "master-global-nv", {
       name: "NV Global do Mestre",
       hint: "Modificador de NV global controlado pelo mestre, aplicado a todas as rolagens de movimentos.",

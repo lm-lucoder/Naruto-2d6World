@@ -83,6 +83,10 @@
         </div>
         {{#if system.isNpcMove}}
         <div>
+          <label class="resource-label">Is Ally Movement</label>
+          <input type="checkbox" name="system.IsAllyMovement" {{checked system.IsAllyMovement}}>
+        </div>
+        <div>
           <label class="resource-label">Move uses</label>
           <div style="display: flex; gap: 15px;">
             <input type="checkbox" name="system.npcUses.on" {{checked system.npcUses.on}}>

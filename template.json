@@ -81,7 +81,9 @@
 			"templates": [
 				"base"
 			],
+			"IsAlly": false,
 			"pressure": 0,
+			"pressureMax": 0,
 			"rank": "",
 			"village": "",
 			"age": "",
@@ -150,6 +152,7 @@
 			},
 			"rollMode": "normal",
 			"isNpcMove": false,
+			"IsAllyMovement": false,
 			"npcUses": {
 				"on": false,
 				"min": 0,
