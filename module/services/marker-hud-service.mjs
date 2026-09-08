@@ -19,6 +19,9 @@ export class MarkerHudService {
     Hooks.on("deleteItem", (item) => this.#handleDocumentChange(item));
     Hooks.on("createActor", (actor) => this.#handleActorChange(actor));
     Hooks.on("deleteActor", (actor) => this.#handleActorChange(actor));
+    window.addEventListener("resize", () => {
+      this.#fitPanelToViewport(document.getElementById(this.PANEL_ID));
+    });
 
     this.render();
     if (game.user.isGM) this.publish();
@@ -298,6 +301,14 @@ export class MarkerHudService {
       card.append(header, targets, details);
       panel.append(card);
     }
+
+    this.#fitPanelToViewport(panel);
+  }
+
+  static #fitPanelToViewport(panel) {
+    if (!panel || panel.hidden) return;
+    const availableHeight = Math.max(0, window.innerHeight - panel.getBoundingClientRect().top - 8);
+    panel.style.maxHeight = `${Math.floor(availableHeight)}px`;
   }
 
   static async #addSelectedTargets(marker) {

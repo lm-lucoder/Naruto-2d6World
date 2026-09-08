@@ -3,7 +3,10 @@
   margin-left: auto;
   margin-top: 6px;
   max-width: 218.98px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   pointer-events: auto;
+  scrollbar-gutter: stable;
   width: 100%;
 
   .naruto-marker-hud-card {
