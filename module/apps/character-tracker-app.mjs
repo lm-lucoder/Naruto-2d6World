@@ -25,7 +25,9 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       removeMasterGlobal: (event, target) => this._runAndRefresh(() => MasterNVModifierService.removeGlobalModifier(target.dataset.modifierId)),
       clearMasterGlobal: () => this._runAndRefresh(() => MasterNVModifierService.clearGlobalModifiers()),
       editMasterGlobal: (event, target) => this._runAndRefresh(() => this._editMasterGlobalModifier(target.dataset.modifierId)),
-      toggleDetails: () => this._runAndRefresh(() => CharacterTrackerService.toggleDetailMode()),
+      expandAllDetails: () => this._runAndRefresh(() => CharacterTrackerService.expandAllDetails()),
+      collapseAllDetails: () => this._runAndRefresh(() => CharacterTrackerService.collapseAllDetails()),
+      toggleActorDetails: (event, target) => this._runAndRefresh(() => CharacterTrackerService.toggleActorDetails(target.dataset.actorUuid)),
       addMasterLocalToTracked: () => this._runAndRefresh(() => this._addMasterLocalToTracked()),
       clearMasterLocalFromTracked: () => this._runAndRefresh(() => this._clearMasterLocalFromTracked()),
       removeMasterLocal: (event, target) => this._runAndRefresh(() => this._removeMasterLocalModifier(target.dataset.actorUuid, target.dataset.modifierId)),
@@ -89,7 +91,6 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
     return {
       canAdd: game.user.isGM,
       canManage: game.user.isGM,
-      detailMode: CharacterTrackerService.detailMode,
       masterGlobalModifiers: MasterNVModifierService.getGlobalModifiers().map((modifier) => ({
         ...modifier,
         attributeLabel: NVModifierService.getAttributeLabel(modifier),
@@ -122,6 +123,7 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
       name: actor.name,
       img: actor.img,
       isCharacter,
+      detailsExpanded: CharacterTrackerService.isDetailExpanded(actor.uuid),
       wounds: system.wounds?.value ?? 0,
       woundsMax: system.wounds?.max ?? 0,
       chakra: system.chakra?.value ?? 0,
@@ -362,6 +364,10 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
 
   static async _handleResourceClick(event, target) {
     const { actorUuid, resource } = target.dataset;
+    if (event.ctrlKey) {
+      event.preventDefault();
+      return this._runAndRefresh(() => this._applyResourceDefault(actorUuid, resource));
+    }
     if (event.shiftKey) {
       return this._runAndRefresh(() => this._changeResourceBy(actorUuid, resource, 1));
     }
@@ -372,6 +378,11 @@ export class CharacterTrackerApplication extends HandlebarsApplicationMixin(Appl
   static async _changeResourceBy(actorUuid, resourceKey, amount) {
     const actor = await fromUuid(actorUuid);
     return ManageActorResourceDialog.changeBy({ actor, resourceKey, amount });
+  }
+
+  static async _applyResourceDefault(actorUuid, resourceKey) {
+    const actor = await fromUuid(actorUuid);
+    return ManageActorResourceDialog.applySpecialAction({ actor, resourceKey });
   }
 
   static async _toggleCondition(actorUuid, conditionId) {

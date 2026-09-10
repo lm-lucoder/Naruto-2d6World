@@ -3,6 +3,7 @@ export class CharacterTrackerService {
   static SETTING_KEY = "character-tracker-actors";
   static AUTO_OPEN_SETTING_KEY = "auto-open-character-tracker";
   static DETAIL_MODE_SETTING_KEY = "character-tracker-detail-mode";
+  static EXPANDED_DETAILS_SETTING_KEY = "character-tracker-expanded-details";
   static _application = null;
 
   static registerSettings() {
@@ -27,6 +28,13 @@ export class CharacterTrackerService {
       type: Boolean,
       default: false
     });
+    game.settings.register("naruto2d6world", this.EXPANDED_DETAILS_SETTING_KEY, {
+      name: "Personagens expandidos no rastreador",
+      scope: "client",
+      config: false,
+      type: Object,
+      default: {}
+    });
 
     Hooks.on("updateActor", (actor) => {
       // Foundry broadcasts Actor document updates to every connected client.
@@ -43,7 +51,8 @@ export class CharacterTrackerService {
     Hooks.on("updateSetting", (setting) => {
       const rerenderKeys = [
         "naruto2d6world.master-global-nv-modifiers",
-        `naruto2d6world.${this.DETAIL_MODE_SETTING_KEY}`
+        `naruto2d6world.${this.DETAIL_MODE_SETTING_KEY}`,
+        `naruto2d6world.${this.EXPANDED_DETAILS_SETTING_KEY}`
       ];
       if (!rerenderKeys.includes(setting.key) || !this._application?.rendered) return;
       this._application.render();
@@ -63,9 +72,34 @@ export class CharacterTrackerService {
     return game.settings.get("naruto2d6world", this.DETAIL_MODE_SETTING_KEY);
   }
 
-  static async toggleDetailMode() {
+  static get expandedDetailActors() {
+    return game.settings.get("naruto2d6world", this.EXPANDED_DETAILS_SETTING_KEY) ?? {};
+  }
+
+  static isDetailExpanded(actorUuid) {
+    return Boolean(this.expandedDetailActors[actorUuid]);
+  }
+
+  static async toggleActorDetails(actorUuid) {
     if (!game.user.isGM) return;
-    await game.settings.set("naruto2d6world", this.DETAIL_MODE_SETTING_KEY, !this.detailMode);
+    const expandedActors = { ...this.expandedDetailActors };
+    if (expandedActors[actorUuid]) delete expandedActors[actorUuid];
+    else expandedActors[actorUuid] = true;
+    await game.settings.set("naruto2d6world", this.EXPANDED_DETAILS_SETTING_KEY, expandedActors);
+  }
+
+  static async expandAllDetails() {
+    if (!game.user.isGM) return;
+    await game.settings.set(
+      "naruto2d6world",
+      this.EXPANDED_DETAILS_SETTING_KEY,
+      Object.fromEntries(this.trackedActorUuids.map((actorUuid) => [actorUuid, true]))
+    );
+  }
+
+  static async collapseAllDetails() {
+    if (!game.user.isGM) return;
+    await game.settings.set("naruto2d6world", this.EXPANDED_DETAILS_SETTING_KEY, {});
   }
 
   static async addControlledTokens() {
@@ -93,6 +127,9 @@ export class CharacterTrackerService {
 
     const updatedUuids = this.trackedActorUuids.filter((uuid) => uuid !== actorUuid);
     await game.settings.set("naruto2d6world", this.SETTING_KEY, updatedUuids);
+    const expandedActors = { ...this.expandedDetailActors };
+    delete expandedActors[actorUuid];
+    await game.settings.set("naruto2d6world", this.EXPANDED_DETAILS_SETTING_KEY, expandedActors);
     await this.open();
   }
 
@@ -102,6 +139,7 @@ export class CharacterTrackerService {
     }
 
     await game.settings.set("naruto2d6world", this.SETTING_KEY, []);
+    await this.collapseAllDetails();
     await this.open();
   }
 
@@ -119,10 +157,24 @@ export class CharacterTrackerService {
     return this._application;
   }
 
-  /** Force the currently open tracker to reflect any operation performed in it. */
+  /**
+   * Refresh an already open tracker without changing its window z-index or the
+   * user's position in the character list. In ApplicationV2, `force: true`
+   * intentionally calls `bringToFront`, so it is reserved for explicit opens.
+   */
   static async refresh() {
     if (!game.user.isGM || !this._application?.rendered) return;
-    await this._application.render({ force: true });
+    const list = this._application.element?.querySelector(".character-tracker-list");
+    const scrollTop = list?.scrollTop ?? 0;
+    const scrollLeft = list?.scrollLeft ?? 0;
+
+    await this._application.render({ parts: ["main"] });
+
+    const refreshedList = this._application.element?.querySelector(".character-tracker-list");
+    if (refreshedList) {
+      refreshedList.scrollTop = scrollTop;
+      refreshedList.scrollLeft = scrollLeft;
+    }
   }
 
   static _refreshForTrackedActor(actor) {

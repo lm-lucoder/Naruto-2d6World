@@ -44,7 +44,8 @@
 
   .character-tracker-add,
   .character-tracker-clear,
-  .character-tracker-details-toggle {
+  .character-tracker-details-expand-all,
+  .character-tracker-details-collapse-all {
     width: 24px;
     height: 24px;
     padding: 0;
@@ -55,8 +56,6 @@
   .character-tracker-clear {
     color: #73590d;
   }
-
-  .character-tracker-details-toggle.active { color: #2477a5; background: #bfe4f7; }
 
   .character-tracker-remove {
     width: 18px;
@@ -126,6 +125,9 @@
 
   .character-tracker-name-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px; width: 100%; min-width: 0; }
   .character-tracker-name-row .character-tracker-name { min-width: 0; }
+  .character-tracker-name-actions { display: flex; align-items: center; gap: 3px; }
+  .character-tracker-entry-details-toggle { width: 18px; height: 18px; margin: 0; padding: 0; border: 0; border-radius: 2px; color: #606060; background: transparent; cursor: pointer; }
+  .character-tracker-entry-details-toggle:hover, .character-tracker-entry-details-toggle.active { color: #2477a5; background: #bfe4f7; }
 
   .character-tracker-resources {
     display: flex;
@@ -231,7 +233,7 @@
 
   .character-tracker-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
   .character-tracker-toolbar-actions { display: flex; gap: 3px; }
-  .character-tracker-add, .character-tracker-clear { width: 22px; height: 22px; padding: 0; border: 1px solid $c-beige; border-radius: 3px; }
+  .character-tracker-add, .character-tracker-clear, .character-tracker-details-expand-all, .character-tracker-details-collapse-all { width: 22px; height: 22px; padding: 0; border: 1px solid $c-beige; border-radius: 3px; }
   .character-tracker-clear { color: #73590d; }
   .character-tracker-master-list { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
   .character-tracker-master-entry { display: flex; align-items: center; gap: 4px; min-width: 0; padding: 1px 2px; border-radius: 2px; cursor: pointer; }

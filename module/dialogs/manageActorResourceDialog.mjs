@@ -17,6 +17,13 @@ export default class ManageActorResourceDialog {
       maxPath: "system.chakra.max",
       specialAction: "reload"
     },
+    pressure: {
+      label: "Pressão",
+      path: "system.pressure",
+      icon: "icons/svg/light.svg",
+      maxPath: "system.pressureMax",
+      specialAction: "reload"
+    },
     armor: {
       label: "Armadura",
       path: "system.armor.value",
