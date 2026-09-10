@@ -133,8 +133,12 @@ class RollMoveDialog extends Dialog {
 			this._nvCalculation.disabledModifierIds.add(button.dataset.modifierId);
 			this.updateNVPanel(ev);
 		})
+		html.on('click', '.toggle-roll-nv-modifier', (ev) => {
+			const button = ev.target.closest('.toggle-roll-nv-modifier');
+			this._toggleTemporaryModifier(button.dataset.modifierId, ev);
+		})
 		html.on('click', '.nv-breakdown-tag.adjustable', async (ev) => {
-			if (ev.target.closest('.remove-roll-nv-modifier')) return;
+			if (ev.target.closest('.remove-roll-nv-modifier, .toggle-roll-nv-modifier')) return;
 			await this._adjustPersistentModifier(ev.currentTarget.dataset.entryId, ev.shiftKey ? 5 : 1, ev);
 		});
 		html.on('contextmenu', '.nv-breakdown-tag.adjustable', async (ev) => {
@@ -311,6 +315,7 @@ class RollMoveDialog extends Dialog {
 				modifierId: modifier.id,
 				modifierIndex: index,
 				active: modifier.active,
+				toggleable: true,
 				attributes: modifier.attributes,
 				moves: modifier.moves
 			};
@@ -324,6 +329,7 @@ class RollMoveDialog extends Dialog {
 				reason: `Movimento — ${modifier.name}`,
 				value: modifier.value,
 				active: modifier.active,
+				toggleable: true,
 				attributes: modifier.attributes,
 				moves: modifier.moves,
 				removable: true,
@@ -343,6 +349,7 @@ class RollMoveDialog extends Dialog {
 				label: modifier.label,
 				value: modifier.value,
 				active: modifier.active,
+				toggleable: true,
 				removable: true,
 				adjustable: game.user.isGM,
 				modifierSource: "master",
@@ -382,6 +389,22 @@ class RollMoveDialog extends Dialog {
 		} catch (error) {
 			ui.notifications.warn(error.message || "Não foi possível alterar o modificador de NV.");
 		}
+	}
+
+	/** Toggle a modifier in the dialog snapshot only; no document is updated. */
+	_toggleTemporaryModifier(entryId, event) {
+		const entries = [
+			...this._nvCalculation.baseEntries,
+			...this._nvCalculation.moveEntries,
+			...this._nvCalculation.masterEntries
+		];
+		const entry = entries.find((candidate) => candidate.id === entryId);
+		if (!entry?.toggleable) return;
+
+		entry.active = !NVModifierService.isActive(entry);
+		// `modifier` is a normalized dialog copy, never the original Item data.
+		if (entry.modifier) entry.modifier.active = entry.active;
+		this.updateNVPanel(event);
 	}
 
 	_buildNVCalculation(attribute) {
@@ -514,6 +537,7 @@ class RollMoveDialog extends Dialog {
 			const isActive = NVModifierService.isActive(entry);
 			if (!isActive) tag.classList.add('inactive');
 			if (entry.removable && isActive) tag.classList.add('removable');
+			if (entry.toggleable) tag.classList.add('toggleable');
 			if (entry.adjustable && isActive) {
 				tag.classList.add('adjustable');
 				tag.dataset.entryId = entry.id;
@@ -529,6 +553,20 @@ class RollMoveDialog extends Dialog {
 			value.textContent = `${entry.value > 0 ? '+' : ''}${entry.value} NV`;
 
 			tag.append(label, value);
+			if (entry.toggleable) {
+				const toggleButton = document.createElement('button');
+				toggleButton.type = 'button';
+				toggleButton.classList.add('toggle-roll-nv-modifier');
+				toggleButton.dataset.modifierId = entry.id;
+				toggleButton.dataset.tooltip = isActive
+					? 'Desativar somente nesta rolagem'
+					: 'Ativar somente nesta rolagem';
+				toggleButton.setAttribute('aria-label', isActive
+					? 'Desativar modificador nesta rolagem'
+					: 'Ativar modificador nesta rolagem');
+				toggleButton.innerHTML = `<i class="fa-solid ${isActive ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>`;
+				tag.append(toggleButton);
+			}
 			if (entry.removable && isActive) {
 				const removeButton = document.createElement('button');
 				removeButton.type = 'button';
