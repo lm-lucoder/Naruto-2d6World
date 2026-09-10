@@ -85,14 +85,8 @@
                 border: 1px solid $c-beige;
                 border-radius: 3px;
                 background-color: #00000012;
-                &.removable{
-                    grid-template-columns: minmax(0, 1fr) auto 20px;
-                }
                 &.toggleable{
                     grid-template-columns: minmax(0, 1fr) auto 22px;
-                    &.removable{
-                        grid-template-columns: minmax(0, 1fr) auto 22px 20px;
-                    }
                 }
                 &.adjustable{
                     cursor: pointer;
@@ -115,18 +109,6 @@
                     font-weight: bold;
                     white-space: nowrap;
                     text-align: right;
-                }
-                .remove-roll-nv-modifier{
-                    width: 20px;
-                    height: 20px;
-                    padding: 0;
-                    border: 0;
-                    color: #b40309;
-                    background: transparent;
-                    cursor: pointer;
-                }
-                .remove-roll-nv-modifier:hover{
-                    filter: brightness(.75);
                 }
                 .toggle-roll-nv-modifier{
                     display: inline-flex;

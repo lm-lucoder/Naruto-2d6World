@@ -203,7 +203,6 @@ export class ItemRollManager {
     const activeConditions = parentConditions.filter(
       (condition) => condition.system.isActive
     );
-    const disabledConditionIds = new Set(nvCalculation?.disabledConditionIds ?? []);
     for (const activeCondition of activeConditions) {
       // Coletar NV global (aplica a todos os atributos)
       const globalNV = parseInt(activeCondition.system?.globalNV) || 0;
@@ -215,7 +214,7 @@ export class ItemRollManager {
       // Calcular total de NV desta condição (global + específico)
       const conditionTotalNV = globalNV + attributeSpecificNV;
 
-      if (!disabledConditionIds.has(activeCondition.id) && conditionTotalNV !== 0) {
+      if (conditionTotalNV !== 0) {
         attributeNV += conditionTotalNV;
         conditionsNVInfo.push({
           name: activeCondition.name,

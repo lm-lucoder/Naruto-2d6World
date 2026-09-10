@@ -213,7 +213,6 @@ export class MoveRollSessionService {
       selectedAttribute: state.selectedAttribute ?? null,
       rollModifier: state.rollModifier ?? "",
       manualAdjustment: Number(state.manualAdjustment) || 0,
-      disabledModifierIds: [...(state.disabledModifierIds ?? [])],
       entryValues: { ...(state.entryValues ?? {}) },
       entryFilters: Object.fromEntries(Object.entries(state.entryFilters ?? {}).map(([id, filters]) => [id, {
         attributes: [...(filters?.attributes ?? [])],
