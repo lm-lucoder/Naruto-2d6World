@@ -27,9 +27,16 @@ export class NVModifierService {
       id: modifier.id || randomID(),
       name: String(modifier.name || fallbackName),
       value: Number(modifier.value) || 0,
+      // Existing worlds do not have this field yet. An omitted value must keep
+      // the previous behavior: the modifier is active.
+      active: modifier.active !== false,
       attributes: this.normalizeAttributes(modifier.attributes),
       moves: this.normalizeMoves(modifier.moves)
     };
+  }
+
+  static isActive(modifier) {
+    return modifier?.active !== false;
   }
 
   static appliesToAttribute(modifier, attribute = null) {
@@ -45,7 +52,9 @@ export class NVModifierService {
   }
 
   static applies(modifier, { attribute = null, movement = null } = {}) {
-    return this.appliesToAttribute(modifier, attribute) && this.appliesToMovement(modifier, movement);
+    return this.isActive(modifier)
+      && this.appliesToAttribute(modifier, attribute)
+      && this.appliesToMovement(modifier, movement);
   }
 
   static getAttributeLabel(modifier) {

@@ -62,6 +62,7 @@ export class NVModifierFormDialog {
           return {
             name,
             value,
+            active: normalized.active,
             attributes: [...form.querySelectorAll('[name="attributes"]:checked')].map((input) => input.value),
             moves: [...form.querySelectorAll(".nv-modifier-movement-row")].map((row) => row.dataset.movementName)
           };

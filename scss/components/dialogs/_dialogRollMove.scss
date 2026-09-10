@@ -92,6 +92,14 @@
                     cursor: pointer;
                     &:hover{ filter: brightness(.94); }
                 }
+                &.inactive{
+                    color: #6b6b6b;
+                    background-color: #00000008;
+                    border-style: dashed;
+                    opacity: .7;
+                    .label{ font-style: italic; }
+                    .value{ color: #6b6b6b; }
+                }
                 .label{
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -190,6 +198,8 @@
         &.has-edit{
             grid-template-columns: 1fr auto auto;
             &.has-delete{ grid-template-columns: 1fr auto auto auto; }
+            &.has-toggle{ grid-template-columns: 1fr auto auto auto; }
+            &.has-toggle.has-delete{ grid-template-columns: 1fr auto auto auto auto; }
         }
         &.custom{
             background-color: #42c4541f;
@@ -198,9 +208,18 @@
             cursor: pointer;
             &:hover{ filter: brightness(.94); }
         }
+        &.inactive{
+            color: #6b6b6b;
+            background-color: #00000008;
+            border-style: dashed;
+            opacity: .7;
+            > span:first-child{ font-style: italic; }
+            > strong{ color: #6b6b6b; }
+        }
         .remove-nv-modifier,
         .remove-master-nv-modifier,
-        .edit-nv-modifier{
+        .edit-nv-modifier,
+        .toggle-nv-modifier{
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -220,12 +239,15 @@
         }
         .remove-nv-modifier i:hover,
         .remove-master-nv-modifier i:hover,
-        .edit-nv-modifier i:hover{
+        .edit-nv-modifier i:hover,
+        .toggle-nv-modifier i:hover{
             color: #7f0000;
             transform: scale(1.12);
         }
         .edit-nv-modifier{ color: #665a38; }
         .edit-nv-modifier i:hover{ color: #3f351f; }
+        .toggle-nv-modifier{ color: #376b4a; }
+        .toggle-nv-modifier i:hover{ color: #1f4a30; }
         > span small{
             display: block;
             color: #6b6b6b;

@@ -42,9 +42,9 @@ export class MasterNVModifierService {
     return this.getApplicableModifiers(actor, attribute, movement).reduce((total, modifier) => total + modifier.value, 0);
   }
 
-  static async addGlobalModifier({ name, value, attributes = [], moves = [] }) {
+  static async addGlobalModifier({ name, value, active = true, attributes = [], moves = [] }) {
     this._requireGM();
-    const modifier = this._createModifier(name, value, attributes, moves);
+    const modifier = this._createModifier(name, value, attributes, moves, active);
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, [...this.getGlobalModifiers(), modifier]);
     return modifier;
   }
@@ -54,9 +54,9 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, this.getGlobalModifiers().filter((modifier) => modifier.id !== id));
   }
 
-  static async updateGlobalModifier(id, { name, value, attributes = [], moves = [] }) {
+  static async updateGlobalModifier(id, { name, value, active = true, attributes = [], moves = [] }) {
     this._requireGM();
-    const updatedModifier = this._createModifier(name, value, attributes, moves);
+    const updatedModifier = this._createModifier(name, value, attributes, moves, active);
     const modifiers = this.getGlobalModifiers().map((modifier) => (
       modifier.id === id ? { ...updatedModifier, id } : modifier
     ));
@@ -76,11 +76,11 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.GLOBAL_SETTING_KEY, []);
   }
 
-  static async addLocalModifier(actor, { name, value, attributes = [], moves = [] }) {
+  static async addLocalModifier(actor, { name, value, active = true, attributes = [], moves = [] }) {
     this._requireGM();
     if (!actor) throw new Error("Um personagem é obrigatório para criar um modificador local.");
     if (actor.type !== "character") throw new Error("Apenas personagens podem receber modificadores locais de NV do Mestre.");
-    const modifier = this._createModifier(name, value, attributes, moves);
+    const modifier = this._createModifier(name, value, attributes, moves, active);
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, [...this.getLocalModifiers(actor), modifier]);
     return modifier;
   }
@@ -102,10 +102,10 @@ export class MasterNVModifierService {
     await actor.setFlag("naruto2d6world", this.LOCAL_FLAG_KEY, modifiers);
   }
 
-  static async updateLocalModifier(actor, id, { name, value, attributes = [], moves = [] }) {
+  static async updateLocalModifier(actor, id, { name, value, active = true, attributes = [], moves = [] }) {
     this._requireGM();
     if (actor?.type !== "character") return;
-    const updatedModifier = this._createModifier(name, value, attributes, moves);
+    const updatedModifier = this._createModifier(name, value, attributes, moves, active);
     const modifiers = this.getLocalModifiers(actor).map((modifier) => (
       modifier.id === id ? { ...updatedModifier, id } : modifier
     ));
@@ -127,7 +127,7 @@ export class MasterNVModifierService {
     await game.settings.set("naruto2d6world", this.LEGACY_SETTING_KEY, 0);
   }
 
-  static _createModifier(name, value, attributes = [], moves = []) {
+  static _createModifier(name, value, attributes = [], moves = [], active = true) {
     const numericValue = Number(value);
     if (!String(name ?? "").trim() || !Number.isFinite(numericValue)) {
       throw new Error("Informe um nome e um valor numérico para o modificador.");
@@ -136,6 +136,7 @@ export class MasterNVModifierService {
       id: randomID(),
       name: String(name).trim(),
       value: numericValue,
+      active: active !== false,
       attributes: NVModifierService.normalizeAttributes(attributes),
       moves: NVModifierService.normalizeMoves(moves)
     };

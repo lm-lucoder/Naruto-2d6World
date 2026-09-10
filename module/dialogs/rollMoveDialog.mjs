@@ -243,7 +243,8 @@ class RollMoveDialog extends Dialog {
 			entryValues: Object.fromEntries(entries.map((entry) => [entry.id, entry.value])),
 			entryFilters: Object.fromEntries(entries.map((entry) => [entry.id, {
 				attributes: NVModifierService.normalizeAttributes(entry.attributes),
-				moves: NVModifierService.normalizeMoves(entry.moves)
+				moves: NVModifierService.normalizeMoves(entry.moves),
+				active: NVModifierService.isActive(entry)
 			}]))
 		};
 	}
@@ -280,8 +281,12 @@ class RollMoveDialog extends Dialog {
 				if (Object.hasOwn(state.entryFilters ?? {}, entry.id)) {
 					entry.attributes = NVModifierService.normalizeAttributes(state.entryFilters[entry.id]?.attributes);
 					entry.moves = NVModifierService.normalizeMoves(state.entryFilters[entry.id]?.moves);
+					entry.active = state.entryFilters[entry.id]?.active !== false;
 				}
-				if (entry.modifier) entry.modifier.value = entry.value;
+				if (entry.modifier) {
+					entry.modifier.value = entry.value;
+					entry.modifier.active = entry.active;
+				}
 			}
 
 			const target = root.querySelector('input[name="option"]:checked') ?? root.querySelector('.panel');
@@ -305,6 +310,7 @@ class RollMoveDialog extends Dialog {
 				modifierSource: "actor",
 				modifierId: modifier.id,
 				modifierIndex: index,
+				active: modifier.active,
 				attributes: modifier.attributes,
 				moves: modifier.moves
 			};
@@ -317,6 +323,7 @@ class RollMoveDialog extends Dialog {
 				label: `Movimento — ${modifier.name}`,
 				reason: `Movimento — ${modifier.name}`,
 				value: modifier.value,
+				active: modifier.active,
 				attributes: modifier.attributes,
 				moves: modifier.moves,
 				removable: true,
@@ -327,7 +334,7 @@ class RollMoveDialog extends Dialog {
 		this._nvCalculation = {
 			disabledModifierIds: new Set(),
 			baseEntries: [
-				{ id: "base", label: "NV base", reason: "Base", value: Number(actor.system.advantageLevel?.actual) || 0, removable: false },
+				{ id: "base", label: "NV base", reason: "Base", value: Number(actor.system.advantageLevel?.actual) || 0, active: true, removable: false },
 				...actorModifiers
 			],
 			moveEntries: moveModifiers,
@@ -335,6 +342,7 @@ class RollMoveDialog extends Dialog {
 				id: `master:${modifier.scope}:${modifier.id}`,
 				label: modifier.label,
 				value: modifier.value,
+				active: modifier.active,
 				removable: true,
 				adjustable: game.user.isGM,
 				modifierSource: "master",
@@ -378,28 +386,34 @@ class RollMoveDialog extends Dialog {
 
 	_buildNVCalculation(attribute) {
 		const state = this._nvCalculation;
-		const isEnabled = (entry) => !state.disabledModifierIds.has(entry.id)
-			&& NVModifierService.applies(entry, { attribute, movement: this._currentItem });
-		const baseEntries = state.baseEntries.filter(isEnabled);
-		const moveEntries = state.moveEntries.filter(isEnabled);
-		const masterEntries = state.masterEntries.filter(isEnabled);
+		// A disabled modifier is deliberately still shown in the breakdown. It is
+		// only excluded from the total, preserving visibility of the current NV
+		// configuration while making its inactive state explicit.
+		const isVisible = (entry) => !state.disabledModifierIds.has(entry.id)
+			&& NVModifierService.appliesToAttribute(entry, attribute)
+			&& NVModifierService.appliesToMovement(entry, this._currentItem);
+		const isEnabled = (entry) => isVisible(entry) && NVModifierService.isActive(entry);
+		const baseEntries = state.baseEntries.filter(isVisible);
+		const moveEntries = state.moveEntries.filter(isVisible);
+		const masterEntries = state.masterEntries.filter(isVisible);
 		const conditionEntries = this._getConditionsNVInfo(attribute)
-			.map((condition) => ({ ...condition, id: `condition:${condition.id}`, label: condition.name, value: condition.totalNV, removable: true }))
-			.filter(isEnabled);
+			.map((condition) => ({ ...condition, id: `condition:${condition.id}`, label: condition.name, value: condition.totalNV, active: true, removable: true }))
+			.filter(isVisible);
 		const manualEntries = this._newAdvantageLevel !== 0
-			? [{ id: "manual", label: "Ajuste manual", value: this._newAdvantageLevel, removable: false }]
+			? [{ id: "manual", label: "Ajuste manual", value: this._newAdvantageLevel, active: true, removable: false }]
 			: [];
 		const entries = [...baseEntries, ...moveEntries, ...conditionEntries, ...manualEntries, ...masterEntries];
+		const activeEntries = entries.filter(isEnabled);
 
 		return {
 			entries,
-			baseNVInfo: baseEntries.map(({ reason, value }) => ({ reason, value })),
-			moveNVInfo: moveEntries.map(({ reason, value, modifier }) => ({ ...modifier, reason, value })),
-			masterNVInfo: masterEntries.map((entry) => entry.modifier),
+			baseNVInfo: baseEntries.filter(isEnabled).map(({ reason, value }) => ({ reason, value })),
+			moveNVInfo: moveEntries.filter(isEnabled).map(({ reason, value, modifier }) => ({ ...modifier, reason, value })),
+			masterNVInfo: masterEntries.filter(isEnabled).map((entry) => entry.modifier),
 			disabledConditionIds: [...state.disabledModifierIds]
 				.filter((id) => id.startsWith("condition:"))
 				.map((id) => id.slice("condition:".length)),
-			total: entries.reduce((total, entry) => total + entry.value, 0)
+			total: activeEntries.reduce((total, entry) => total + entry.value, 0)
 		};
 	}
 
@@ -497,8 +511,10 @@ class RollMoveDialog extends Dialog {
 		for (const entry of entries) {
 			const tag = document.createElement('div');
 			tag.classList.add('nv-breakdown-tag', entry.value > 0 ? 'positive' : entry.value < 0 ? 'negative' : 'neutral');
-			if (entry.removable) tag.classList.add('removable');
-			if (entry.adjustable) {
+			const isActive = NVModifierService.isActive(entry);
+			if (!isActive) tag.classList.add('inactive');
+			if (entry.removable && isActive) tag.classList.add('removable');
+			if (entry.adjustable && isActive) {
 				tag.classList.add('adjustable');
 				tag.dataset.entryId = entry.id;
 				tag.dataset.tooltip = 'Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV';
@@ -506,14 +522,14 @@ class RollMoveDialog extends Dialog {
 
 			const label = document.createElement('span');
 			label.classList.add('label');
-			label.textContent = entry.label;
+			label.textContent = isActive ? entry.label : `${entry.label} (inativo)`;
 
 			const value = document.createElement('span');
 			value.classList.add('value');
 			value.textContent = `${entry.value > 0 ? '+' : ''}${entry.value} NV`;
 
 			tag.append(label, value);
-			if (entry.removable) {
+			if (entry.removable && isActive) {
 				const removeButton = document.createElement('button');
 				removeButton.type = 'button';
 				removeButton.classList.add('remove-roll-nv-modifier');

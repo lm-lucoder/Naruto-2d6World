@@ -12,6 +12,7 @@ class ManageNVModifiersDialog extends Dialog {
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
       resizable: true,
+      width: 500,
       height: "auto"
     });
   }
@@ -173,31 +174,40 @@ class ManageNVModifiersDialog extends Dialog {
     }
 
     const masterModifiers = [
-      ...(modifierState?.masterGlobalModifiers ?? MasterNVModifierService.getGlobalModifiers()).map((modifier) => ({ ...modifier, scope: "Global", label: `Mestre Global — ${modifier.name}` })),
-      ...(modifierState?.masterLocalModifiers ?? MasterNVModifierService.getLocalModifiers(actor)).map((modifier) => ({ ...modifier, scope: "Local", label: `Mestre Local — ${modifier.name}` }))
+      ...(modifierState?.masterGlobalModifiers ?? MasterNVModifierService.getGlobalModifiers()).map((source) => {
+        const modifier = NVModifierService.normalize(source, "Modificador do Mestre");
+        return { ...modifier, scope: "Global", label: `Mestre Global — ${modifier.name}` };
+      }),
+      ...(modifierState?.masterLocalModifiers ?? MasterNVModifierService.getLocalModifiers(actor)).map((source) => {
+        const modifier = NVModifierService.normalize(source, "Modificador do Mestre");
+        return { ...modifier, scope: "Local", label: `Mestre Local — ${modifier.name}` };
+      })
     ];
     for (const modifier of masterModifiers) {
       const canRemoveMasterModifier = game.user.isGM && modifier.scope === "Local";
       const canAdjustMasterModifier = game.user.isGM;
       rows.push(`
-        <li class="nv-modifier-row ${canRemoveMasterModifier ? "custom" : "fixed"} ${canAdjustMasterModifier ? "adjustable has-edit" : ""} ${canRemoveMasterModifier ? "has-delete" : ""}" data-modifier-source="master" data-modifier-scope="${modifier.scope}" data-modifier-id="${modifier.id}" data-modifier-index="" data-modifier-value="${modifier.value}" ${canAdjustMasterModifier ? 'data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV"' : ""}>
-          <span>${escapeHTML(modifier.label)}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small><small>${escapeHTML(NVModifierService.getMovementLabel(modifier))}</small></span>
+        <li class="nv-modifier-row ${canRemoveMasterModifier ? "custom" : "fixed"} ${modifier.active ? "" : "inactive"} ${canAdjustMasterModifier ? `has-edit has-toggle ${modifier.active ? "adjustable" : ""}` : ""} ${canRemoveMasterModifier ? "has-delete" : ""}" data-modifier-source="master" data-modifier-scope="${modifier.scope}" data-modifier-id="${modifier.id}" data-modifier-index="" data-modifier-value="${modifier.value}" ${canAdjustMasterModifier && modifier.active ? 'data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV"' : ""}>
+          <span>${escapeHTML(modifier.label)}${modifier.active ? "" : "<small>Inativo</small>"}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small><small>${escapeHTML(NVModifierService.getMovementLabel(modifier))}</small></span>
           <strong>${this._formatValue(modifier.value)}</strong>
           ${canAdjustMasterModifier ? `<button type="button" class="edit-nv-modifier" data-tooltip="Editar modificador"><i class="fa-solid fa-pen"></i></button>` : ""}
+          ${canAdjustMasterModifier ? `<button type="button" class="toggle-nv-modifier" data-tooltip="${modifier.active ? "Desativar modificador" : "Ativar modificador"}" aria-label="${modifier.active ? "Desativar" : "Ativar"} modificador"><i class="fa-solid ${modifier.active ? "fa-toggle-on" : "fa-toggle-off"}"></i></button>` : ""}
           ${canRemoveMasterModifier ? `<button type="button" class="remove-master-nv-modifier" data-modifier-id="${modifier.id}"><i class="fa-solid fa-trash"></i></button>` : ""}
         </li>
       `);
     }
 
-    const customModifiers = modifierState?.actorNVModifiers ?? actor.system.nvModifiers ?? [];
+    const customModifiers = (modifierState?.actorNVModifiers ?? actor.system.nvModifiers ?? [])
+      .map((modifier) => NVModifierService.normalize(modifier));
     const canAdjustActorModifiers = game.user.isGM || actor.isOwner;
     for (const [index, modifier] of customModifiers.entries()) {
       const value = Number(modifier.value) || 0;
       rows.push(`
-        <li class="nv-modifier-row custom ${canAdjustActorModifiers ? "adjustable has-edit" : ""} has-delete" data-modifier-source="actor" data-modifier-id="${modifier.id ?? ""}" data-modifier-index="${index}" data-modifier-value="${value}" ${canAdjustActorModifiers ? 'data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV"' : ""}>
-          <span>${escapeHTML(modifier.name || "Modificador personalizado")}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small><small>${escapeHTML(NVModifierService.getMovementLabel(modifier))}</small></span>
+        <li class="nv-modifier-row custom ${modifier.active ? "" : "inactive"} ${canAdjustActorModifiers ? `has-edit has-toggle ${modifier.active ? "adjustable" : ""}` : ""} has-delete" data-modifier-source="actor" data-modifier-id="${modifier.id ?? ""}" data-modifier-index="${index}" data-modifier-value="${value}" ${canAdjustActorModifiers && modifier.active ? 'data-tooltip="Clique: +1 NV • Shift+clique: +5 NV • Botão direito: -1 NV"' : ""}>
+          <span>${escapeHTML(modifier.name || "Modificador personalizado")}${modifier.active ? "" : "<small>Inativo</small>"}<small>${escapeHTML(NVModifierService.getAttributeLabel(modifier))}</small><small>${escapeHTML(NVModifierService.getMovementLabel(modifier))}</small></span>
           <strong>${this._formatValue(value)}</strong>
           ${canAdjustActorModifiers ? `<button type="button" class="edit-nv-modifier" data-tooltip="Editar modificador"><i class="fa-solid fa-pen"></i></button>` : ""}
+          ${canAdjustActorModifiers ? `<button type="button" class="toggle-nv-modifier" data-tooltip="${modifier.active ? "Desativar modificador" : "Ativar modificador"}" aria-label="${modifier.active ? "Desativar" : "Ativar"} modificador"><i class="fa-solid ${modifier.active ? "fa-toggle-on" : "fa-toggle-off"}"></i></button>` : ""}
           <button type="button" class="remove-nv-modifier" data-modifier-id="${modifier.id}"><i class="fa-solid fa-trash"></i></button>
         </li>
       `);
@@ -211,7 +221,7 @@ class ManageNVModifiersDialog extends Dialog {
       <div class="manage-nv-modifiers-dialog">
         <button type="button" class="add-nv-modifier">Adicionar novo modificador</button>
         ${game.user.isGM ? '<button type="button" class="add-master-local-nv-modifier">Adicionar novo modificador do mestre</button>' : ""}
-        <p class="hint">Clique em um modificador para +1, Shift+clique para +5 e use o botão direito para -1. Condições são apenas para consulta.</p>
+        <p class="hint">Clique em um modificador para +1, Shift+clique para +5 e use o botão direito para -1. Modificadores inativos permanecem visíveis, mas não afetam rolagens.</p>
         <ul class="nv-modifiers-list">${rows.join("")}</ul>
       </div>
     `;
@@ -224,6 +234,7 @@ class ManageNVModifiersDialog extends Dialog {
     html.find('.remove-nv-modifier').on('click', (event) => this._removeModifier(event.currentTarget.dataset.modifierId));
     html.find('.remove-master-nv-modifier').on('click', (event) => this._removeMasterLocalModifier(event.currentTarget.dataset.modifierId));
     html.on('click', '.edit-nv-modifier', (event) => this._openEditDialog(event.currentTarget.closest('.nv-modifier-row')));
+    html.on('click', '.toggle-nv-modifier', (event) => this._toggleModifier(event.currentTarget.closest('.nv-modifier-row')));
     html.on('click', '.nv-modifier-row.adjustable', (event) => {
       if (event.target.closest('button')) return;
       this._adjustModifier(event.currentTarget, event.shiftKey ? 5 : 1);
@@ -289,6 +300,37 @@ class ManageNVModifiersDialog extends Dialog {
       this._notifyRemoteRefresh();
     } catch (error) {
       ui.notifications.warn(error.message || "Não foi possível editar o modificador de NV.");
+    }
+  }
+
+  async _toggleModifier(row) {
+    const { modifierSource, modifierScope, modifierId, modifierIndex } = row.dataset;
+    const modifiers = modifierSource === "master"
+      ? (modifierScope === "Global" ? MasterNVModifierService.getGlobalModifiers() : MasterNVModifierService.getLocalModifiers(this._actor))
+      : (this._actor.system.nvModifiers ?? []);
+    const modifier = modifiers.find((candidate, index) => (
+      candidate.id === modifierId || index === Number(modifierIndex)
+    ));
+    if (!modifier) return ui.notifications.warn("Modificador de NV não encontrado.");
+
+    try {
+      const updatedModifier = { ...modifier, active: !NVModifierService.isActive(modifier) };
+      if (modifierSource === "master") {
+        if (!game.user.isGM) return ui.notifications.warn("Somente o Mestre pode alterar modificadores de NV do Mestre.");
+        if (modifierScope === "Global") await MasterNVModifierService.updateGlobalModifier(modifierId, updatedModifier);
+        else await MasterNVModifierService.updateLocalModifier(this._actor, modifierId, updatedModifier);
+      } else {
+        if (!game.user.isGM && !this._actor.isOwner) return ui.notifications.warn("Você não possui permissão para alterar este modificador de NV.");
+        const updatedModifiers = (this._actor.system.nvModifiers ?? []).map((candidate, index) => {
+          const isTarget = candidate.id === modifierId || index === Number(modifierIndex);
+          return isTarget ? updatedModifier : candidate;
+        });
+        await this._actor.update({ "system.nvModifiers": updatedModifiers });
+      }
+      this.refresh();
+      this._notifyRemoteRefresh();
+    } catch (error) {
+      ui.notifications.warn(error.message || "Não foi possível alterar o estado do modificador de NV.");
     }
   }
 
