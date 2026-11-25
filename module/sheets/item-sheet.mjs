@@ -32,6 +32,7 @@ export class BoilerplateItemSheet extends ItemSheet {
 
 		// Alternatively, you could use the following return statement to do a
 		// unique item sheet by type, like `weapon-sheet.html`.
+		if (["technique", "effect"].includes(this.item.type)) return `${path}/item-sheet.html`;
 		return `${path}/item-${this.item.type}-sheet.html`;
 	}
 
@@ -40,12 +41,13 @@ export class BoilerplateItemSheet extends ItemSheet {
 
 
 	/** @override */
-	getData() {
+	async getData() {
 		// Retrieve base data structure.
-		const context = super.getData();
+		const context = await super.getData();
 		const itemData = context.item;
 		context.system = itemData.system;
 		context.flags = itemData.flags;
+		context.isTechniqueOrEffect = ["technique", "effect"].includes(itemData.type);
 
 		// Retrieve the roll data for TinyMCE editors.
 		context.rollData = {};
@@ -78,15 +80,70 @@ export class BoilerplateItemSheet extends ItemSheet {
 			}
 			context.rankChoices = rankChoices;
 		}
+		if (itemData.type === "ability") {
+			const level = Math.max(0, Number(itemData.system.level) || 0);
+			context.techniques = await Promise.all((itemData.system.techniques ?? []).map(async (entry) => ({
+				...entry,
+				item: await this._resolveAbilityReference("technique", entry.name),
+				acquired: Number(entry.level) <= level
+			})));
+			const effectsPerLevel = Math.max(0, Math.floor(Number(itemData.system.effectsPerLevel) || 0));
+			const displayLevels = Math.max(level, Number(itemData.system.maxLevel) || 0);
+			context.effectSlots = await Promise.all(Array.from({ length: displayLevels * effectsPerLevel }, async (_, index) => {
+				const slotLevel = Math.floor(index / effectsPerLevel) + 1;
+				const name = itemData.system.effectSlots?.[index] || "";
+				return { index, level: slotLevel, available: slotLevel <= level, name, item: await this._resolveAbilityReference("effect", name) };
+			}));
+		}
 
 		console.log(context);
 		return context;
+	}
+
+	async _resolveAbilityReference(type, name) {
+		if (!name) return null;
+		const worldItem = game.items.find(item => item.type === type && item.name === name);
+		if (worldItem) return worldItem;
+		for (const pack of game.packs.filter(pack => pack.documentName === "Item")) {
+			try {
+				const index = await pack.getIndex({ fields: ["type"] });
+				const match = index.find(entry => entry.type === type && entry.name === name);
+				if (match) return await pack.getDocument(match._id);
+			} catch (error) {
+				console.warn(`Não foi possível consultar ${pack.collection}`, error);
+			}
+		}
+		return null;
 	}
 	/* -------------------------------------------- */
 
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
+		html.find(".add-ability-technique").click(async () => {
+			await this.object.update({ "system.techniques": [...(this.object.system.techniques ?? []), { id: randomID(7), level: 1, name: "" }] });
+		});
+		html.find(".ability-technique-level").change(async event => {
+			const id = event.currentTarget.closest("[data-technique-id]").dataset.techniqueId;
+			const techniques = (this.object.system.techniques ?? []).map(entry => entry.id === id
+				? { ...entry, level: Math.max(1, Math.floor(Number(event.currentTarget.value) || 1)) } : entry);
+			await this.object.update({ "system.techniques": techniques });
+		});
+		html.find(".remove-ability-technique").click(async event => {
+			const id = event.currentTarget.closest("[data-technique-id]").dataset.techniqueId;
+			await this.object.update({ "system.techniques": (this.object.system.techniques ?? []).filter(entry => entry.id !== id) });
+		});
+		html.find(".clear-ability-effect").click(async event => {
+			const index = Number(event.currentTarget.closest("[data-effect-slot]").dataset.effectSlot);
+			const slots = [...(this.object.system.effectSlots ?? [])];
+			slots[index] = null;
+			await this.object.update({ "system.effectSlots": slots });
+		});
+		html.find(".ability-reference-open").click(event => {
+			const name = event.currentTarget.dataset.name;
+			const type = event.currentTarget.dataset.type;
+			this._resolveAbilityReference(type, name).then(item => item?.sheet.render(true));
+		});
 
 		html.find(".add-condition-move-config").click(async (ev) => {
 			this._addNewCondition_MoveConfig();
@@ -264,6 +321,38 @@ export class BoilerplateItemSheet extends ItemSheet {
 			// Usar fromDropData para funcionar tanto com world items quanto owned items
 			const item = await Item.fromDropData(data);
 			if (!item) return;
+			if (this.object.type === "ability") {
+				const techniqueRow = e.target?.closest?.("[data-technique-id]");
+				const effectRow = e.target?.closest?.("[data-effect-slot]");
+				if (techniqueRow || effectRow) {
+					e.preventDefault();
+					e.stopPropagation();
+					const expectedType = techniqueRow ? "technique" : "effect";
+					if (item.type !== expectedType) {
+						ui.notifications.warn(`Arraste um item do tipo ${expectedType === "technique" ? "Técnica" : "Efeito"}.`);
+						return false;
+					}
+					if (techniqueRow) {
+						const id = techniqueRow.dataset.techniqueId;
+						const techniques = (this.object.system.techniques ?? []).map(entry => entry.id === id ? { ...entry, name: item.name } : entry);
+						await this.object.update({ "system.techniques": techniques });
+					} else {
+						if (effectRow.dataset.effectAvailable !== "true") {
+							ui.notifications.warn("Este slot de efeito ainda não foi liberado.");
+							return false;
+						}
+						const index = Number(effectRow.dataset.effectSlot);
+						const slots = [...(this.object.system.effectSlots ?? [])];
+						if (slots.includes(item.name) && slots[index] !== item.name) {
+							ui.notifications.warn("Este efeito já está associado à habilidade.");
+							return false;
+						}
+						slots[index] = item.name;
+						await this.object.update({ "system.effectSlots": slots });
+					}
+					return false;
+				}
+			}
 
 			if (item.type === "item") {
 				const scrollList = e.target?.closest?.(".scroll-items-list");

@@ -102,6 +102,8 @@
 			"condition",
 			"marker",
 			"ability",
+			"technique",
+			"effect",
 			"item"
 		],
 		"templates": {
@@ -258,7 +260,33 @@
 				"defaultChakraPoints": 0
 			},
 			"levelDescriptions": [],
+			"techniques": [],
+			"effectsEnabled": false,
+			"effectsPerLevel": 0,
+			"effectSlots": [],
 			"resources": []
+		},
+		"technique": {
+			"templates": ["base"],
+			"prerequisites": {
+				"rank": "0",
+				"keys": ""
+			},
+			"cost": {
+				"chakra": 0,
+				"techniquePoints": 0
+			}
+		},
+		"effect": {
+			"templates": ["base"],
+			"prerequisites": {
+				"rank": "0",
+				"keys": ""
+			},
+			"cost": {
+				"chakra": 0,
+				"techniquePoints": 0
+			}
 		},
 		"item": {
 			"scroll": {

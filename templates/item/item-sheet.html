@@ -11,7 +11,7 @@
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="description">Description</a>
-    <a class="item" data-tab="attributes">Attributes</a>
+    <a class="item" data-tab="attributes">{{#if isTechniqueOrEffect}}Configurações{{else}}Attributes{{/if}}</a>
   </nav>
 
   {{!-- Sheet Body --}}
@@ -24,7 +24,40 @@
 
     {{!-- Attributes Tab --}}
     <div class="tab attributes" data-group="primary" data-tab="attributes">
-      {{!-- As you add new fields, add them in here! --}}
+      {{#if isTechniqueOrEffect}}
+      <h3>Pré-requisitos</h3>
+      <div class="resource">
+        <label>Rank</label>
+        <select name="system.prerequisites.rank">
+          {{#select system.prerequisites.rank}}
+          <option value="0">Academia</option>
+          <option value="1">Genin</option>
+          <option value="2">Genin Avançado</option>
+          <option value="3">Chunin</option>
+          <option value="4">Chunin Avançado</option>
+          <option value="5">Tokubetsu Jounin</option>
+          <option value="6">Jounin</option>
+          <option value="7">Jounin de Elite (Jo-nin)</option>
+          <option value="8">Kage</option>
+          <option value="9">Kage Veterano</option>
+          <option value="10">Lendário</option>
+          {{/select}}
+        </select>
+      </div>
+      <div class="resource">
+        <label>Chaves</label>
+        <input type="text" name="system.prerequisites.keys" value="{{system.prerequisites.keys}}" placeholder="Separe as chaves por ponto e vírgula (;)" />
+      </div>
+      <h3>Custos</h3>
+      <div class="resource">
+        <label>Custo de pontos de chakra</label>
+        <input type="number" name="system.cost.chakra" min="0" step="1" value="{{system.cost.chakra}}" />
+      </div>
+      <div class="resource">
+        <label>Custo de pontos de técnica</label>
+        <input type="number" name="system.cost.techniquePoints" min="0" step="1" value="{{system.cost.techniquePoints}}" />
+      </div>
+      {{/if}}
     </div>
   </section>
 </form>

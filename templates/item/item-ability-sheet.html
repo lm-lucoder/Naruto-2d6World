@@ -25,7 +25,6 @@
         {{/unless}}
       </div>
     </header>
-  
     {{!-- Sheet Tab Navigation --}}
     <!-- {{#if system.isRankable}}
       {{#if item.isOwned}}
@@ -37,6 +36,7 @@
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>
       <a class="item" data-tab="attributes">Attributes</a>
+      {{#if system.effectsEnabled}}<a class="item" data-tab="effects">Efeitos</a>{{/if}}
     </nav>
   
     {{!-- Sheet Body --}}
@@ -46,6 +46,18 @@
       <div class="tab" data-group="primary" data-tab="description">
         {{!-- To render inline rolls in a TinyMCE editor, you need to pass the parent actor's (if any) roll data to the rollData prop. --}}
         {{editor system.description target="system.description" rollData=rollData button=true owner=owner editable=editable}}
+        {{#if techniques}}
+        <div class="ability-techniques">
+          <h3>Técnicas adquiridas</h3>
+          <ul class="ability-reference-list">
+            {{#each techniques as |entry|}}
+              {{#if entry.acquired}}
+              <li>Nível {{entry.level}}: {{#if entry.item}}<a class="ability-reference-open" data-name="{{entry.name}}" data-type="technique">{{entry.item.name}}</a>{{else}}Técnica não encontrada: {{entry.name}}{{/if}}</li>
+              {{/if}}
+            {{/each}}
+          </ul>
+        </div>
+        {{/if}}
       </div>
   
       {{!-- Attributes Tab --}}
@@ -144,7 +156,45 @@
             {{/each}}
           </ul>
         </div>
+        <div class="ability-progression-config">
+          <h3>Técnicas por nível</h3>
+          <div class="section-button"><a class="add-ability-technique"><i class="fa-solid fa-plus"></i> Adicionar técnica</a></div>
+          <ul class="ability-reference-list">
+            {{#each techniques as |entry|}}
+            <li data-technique-id="{{entry.id}}" class="ability-reference-row">
+              <label>Nível <input class="ability-technique-level" type="number" min="1" value="{{entry.level}}"></label>
+              <span class="ability-reference-drop">{{#if entry.name}}{{#if entry.item}}<a class="ability-reference-open" data-name="{{entry.name}}" data-type="technique">{{entry.item.name}}</a>{{else}}Técnica não encontrada: {{entry.name}}{{/if}}{{else}}Arraste uma Técnica aqui{{/if}}</span>
+              <a class="remove-ability-technique" title="Remover"><i class="fa-solid fa-trash"></i></a>
+            </li>
+            {{/each}}
+          </ul>
+          <h3>Efeitos</h3>
+          <div class="resource"><label>Permite efeitos <input type="checkbox" name="system.effectsEnabled" {{checked system.effectsEnabled}}></label></div>
+          {{#if system.effectsEnabled}}
+          <div class="resource"><label>Efeitos por nível <input type="number" name="system.effectsPerLevel" min="0" step="1" value="{{system.effectsPerLevel}}"></label></div>
+          {{/if}}
+        </div>
       </div>
+      {{#if system.effectsEnabled}}
+      <div class="tab ability-effects" data-group="primary" data-tab="effects">
+        <h3>Efeitos Escolhidos:</h3>
+        <table class="ability-effects-table">
+          <thead><tr><th>Nível</th><th>Efeito Escolhido</th></tr></thead>
+          <tbody>
+            {{#each effectSlots as |slot|}}
+            <tr data-effect-slot="{{slot.index}}" data-effect-available="{{slot.available}}" class="{{#unless slot.available}}effect-slot-locked{{/unless}}">
+              <td>{{slot.level}}</td>
+              <td title="{{#if slot.available}}Arraste um Efeito para este slot{{else}}Disponível no nível {{slot.level}}{{/if}}">
+                {{#if slot.name}}
+                  {{#if slot.item}}<a class="ability-reference-open" data-name="{{slot.name}}" data-type="effect">{{slot.item.name}}</a>{{else}}Efeito não encontrado: {{slot.name}}{{/if}}
+                  <a class="clear-ability-effect" title="Remover"><i class="fa-solid fa-trash"></i></a>
+                {{/if}}
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{/if}}
     </section>
   </form>
-  
