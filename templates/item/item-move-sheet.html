@@ -158,11 +158,6 @@
             <input type="checkbox" name="system.npcMoveUpgrades.canBePlayerAcquired" {{checked
               system.npcMoveUpgrades.canBePlayerAcquired}} />
           </div>
-          <div style="display: flex; gap: 15px;">
-            <label class="resource-label">Tags</label>
-            <textarea type="text" name="system.npcMoveUpgrades.tags" cols="30"
-              rows="10">{{system.npcMoveUpgrades.tags}}</textarea>
-          </div>
           {{/if}}
         </div>
         {{/if}}
@@ -182,6 +177,10 @@
         <label class="resource-label">Miss Hit Result</label>
         {{editor system.results.miss target="system.results.miss" rollData=rollData button=true owner=owner
         editable=editable}}
+      </div>
+      <div class="resource">
+        <label class="resource-label">Tags</label>
+        <textarea name="system.npcMoveUpgrades.tags" rows="3" placeholder="Separe as tags por ponto e vírgula (;)">{{system.npcMoveUpgrades.tags}}</textarea>
       </div>
     </div>
     {{/unless}}

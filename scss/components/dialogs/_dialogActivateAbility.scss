@@ -10,6 +10,22 @@
 		gap: 6px;
 		min-height: 28px;
 	}
+	.ability-activation-effects-scroll { overflow-x: auto; }
+	.ability-activation-effects-table {
+		width: 100%;
+		border-collapse: collapse;
+		th, td { border: 1px solid $c-beige; padding: 4px 6px; text-align: center; }
+		th:first-child, td:first-child { width: 15%; min-width: 55px; }
+		th:not(:first-child) { min-width: 150px; }
+		.effect-slot-locked { opacity: 0.5; }
+		.ability-activation-tag {
+			width: 100%;
+			border: 0;
+			background: transparent;
+			padding: 3px;
+			&:hover { background: rgba(0, 0, 0, 0.08); }
+		}
+	}
 	.ability-activation-tag, .ability-move-tag, .ability-no-move {
 		width: auto;
 		padding: 4px 9px;

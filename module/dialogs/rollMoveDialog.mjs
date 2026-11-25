@@ -333,12 +333,29 @@ class RollMoveDialog extends Dialog {
 				modifier
 			};
 		});
+		const activationLabel = this._activationContext?.type === "effect" ? "Efeito" : "Técnica";
+		const activationModifiers = (this._activationContext?.nvModifiers ?? []).map((source, index) => {
+			const modifier = NVModifierService.normalize(source);
+			const reason = `${activationLabel} — ${modifier.name}`;
+			return {
+				id: `activation:${modifier.id ?? index}`,
+				label: reason,
+				reason,
+				value: modifier.value,
+				active: modifier.active,
+				toggleable: true,
+				attributes: modifier.attributes,
+				moves: modifier.moves,
+				adjustable: false,
+				modifier
+			};
+		});
 		this._nvCalculation = {
 			baseEntries: [
 				{ id: "base", label: "NV base", reason: "Base", value: Number(actor.system.advantageLevel?.actual) || 0, active: true },
 				...actorModifiers
 			],
-			moveEntries: moveModifiers,
+			moveEntries: [...moveModifiers, ...activationModifiers],
 			masterEntries: MasterNVModifierService.getModifiers(actor).map((modifier) => ({
 				id: `master:${modifier.scope}:${modifier.id}`,
 				label: modifier.label,

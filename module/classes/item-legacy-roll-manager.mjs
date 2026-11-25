@@ -85,11 +85,12 @@ export class ItemLegacyRollManager {
 	static async abilityRoll(item) {
 		const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 		const label = ItemLegacyRollManager.getAbilityLabelRollTemplate(item);
+		const description = await TextEditor.enrichHTML(item.system.description ?? "", { documents: true, secrets: item.isOwner, relativeTo: item, rollData: item.actor?.getRollData() });
 
-		ChatMessage.create({
+		return ChatMessage.create({
 			speaker: speaker,
 			flavor: label,
-			content: item.system.description ?? "",
+			content: description,
 		});
 	}
 

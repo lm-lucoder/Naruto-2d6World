@@ -265,19 +265,28 @@
 			"techniques": [],
 			"effectsEnabled": false,
 			"effectsPerLevel": 0,
+			"effectTags": "",
 			"effectSlots": [],
 			"resources": []
 		},
 		"technique": {
 			"templates": ["base"],
 			"consumesTurn": false,
+			"canActivate": true,
+				"costsInitiative": false,
+				"nvModifiers": [],
 			"moves": [],
+			"acceptedMoveTags": "",
 			"prerequisites": {
 				"rank": "0",
 				"keys": ""
 			},
 			"cost": {
+				"pendingAdditional": false,
 				"chakra": 0,
+				"wounds": 0,
+				"momentum": 0,
+				"fireWill": 0,
 				"techniquePoints": 0,
 				"additional": []
 			}
@@ -285,13 +294,23 @@
 		"effect": {
 			"templates": ["base"],
 			"consumesTurn": false,
+			"canActivate": true,
+				"costsInitiative": false,
+				"nvModifiers": [],
 			"moves": [],
+			"acceptedMoveTags": "",
+				"tags": "",
 			"prerequisites": {
 				"rank": "0",
 				"keys": ""
 			},
 			"cost": {
+				"pendingAdditional": false,
 				"chakra": 0,
+				"wounds": 0,
+				"momentum": 0,
+				"fireWill": 0,
+				"addEffectLevel": true,
 				"techniquePoints": 0,
 				"additional": []
 			}

@@ -25,6 +25,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		// Sets para rastrear quais elementos têm descrições expandidas
 		this._expandedItems = new Set();
 		this._expandedAbilities = new Set();
+		this._abilityActiveTabs = new Map();
 		this._expandedMoves = new Set();
 		this._conditionTagDragging = false;
 	}
@@ -56,6 +57,10 @@ export class BoilerplateActorSheet extends ActorSheet {
 		return `systems/naruto2d6world/templates/actor/actor-${this.actor.type}-sheet.html`;
 	}
 	async _onDropItem(e, data) {
+		if (e.target?.closest?.(".ability-detail-panel")) {
+			e.preventDefault();
+			return false;
+		}
 		// Verificar se o drop está acontecendo em uma região de scroll do item-sheet
 		// Se sim, não processar aqui (deixar o item-sheet tratar)
 		const scrollList = e.target?.closest?.(".scroll-items-list");
@@ -161,12 +166,12 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 
 		if (actorData.type == "character") {
-			this._prepareCharacterItems(context);
+			await this._prepareCharacterItems(context);
 			await this._prepareCharacterData(context);
 		}
 
 		if (actorData.type == "npc") {
-			this._prepareCharacterItems(context);
+			await this._prepareCharacterItems(context);
 			this._prepareNPCItems(context)
 		}
 
@@ -207,7 +212,7 @@ export class BoilerplateActorSheet extends ActorSheet {
 		}
 	}
 
-	_prepareCharacterItems(context) {
+	async _prepareCharacterItems(context) {
 		// Initialize containers.
 		const moves = [];
 		const movesByCategory = {};
@@ -262,6 +267,9 @@ export class BoilerplateActorSheet extends ActorSheet {
 				}
 			}
 		}
+		await Promise.all(abilities.map(async ability => {
+			ability.showActivationButton = Boolean(ability.system.canActivate && await ActivateAbilityDialog.hasActivatableChoices(ability));
+		}));
 		// Foundry updates Item.sort when the player rearranges conditions by
 		// drag-and-drop. Reuse that native order in every condition view.
 		conditions.sort((left, right) => left.sort - right.sort);
@@ -458,6 +466,42 @@ export class BoilerplateActorSheet extends ActorSheet {
 		});
 		html.find(".show-ability-description-window-btn").click((event) => {
 			this._toggleAbilityDescriptionWindow(event);
+		});
+		html.on("click", ".ability-detail-tab", event => {
+			const button = event.currentTarget;
+			const card = button.closest(".ability-card");
+			card.querySelectorAll(".ability-detail-tab, .ability-detail-panel").forEach(element => {
+				element.classList.toggle("active", element.dataset.tab === button.dataset.tab);
+			});
+			this._abilityActiveTabs.set(card.dataset.itemId, button.dataset.tab);
+		});
+		html.on("click", ".ability-detail-open", async event => {
+			event.preventDefault();
+			const { type, name } = event.currentTarget.dataset;
+			const item = await this._resolveAbilityDetailItem(type, name);
+			if (item) item.sheet.render(true);
+			else ui.notifications.warn(`${name} não foi encontrado.`);
+		});
+		html.on("click", ".ability-detail-send-chat", async event => {
+			event.preventDefault();
+			const name = event.currentTarget.dataset.name;
+			const technique = await this._resolveAbilityDetailItem("technique", name);
+			if (technique) await technique.sendTechniqueToChat({ actor: this.actor });
+			else ui.notifications.warn(`${name} não foi encontrado.`);
+		});
+		html.on("click", ".activate-technique-dice", async event => {
+			event.preventDefault();
+			event.stopPropagation();
+			const button = event.currentTarget;
+			if (button.dataset.activating) return;
+			const ability = this.actor.items.get(button.closest(".ability-card")?.dataset.itemId);
+			if (ability?.type !== "ability") return;
+			button.dataset.activating = "true";
+			try {
+				await ActivateAbilityDialog.activateTechnique(ability, button.dataset.name);
+			} finally {
+				delete button.dataset.activating;
+			}
 		});
 		html.find(".show-move-description-window-btn").click((event) => {
 			this._toggleMoveDescriptionWindow(event);
@@ -1069,40 +1113,85 @@ export class BoilerplateActorSheet extends ActorSheet {
 			windowElement.innerHTML = "";
 		}
 	}
-	_toggleAbilityDescriptionWindow(event) {
+	async _toggleAbilityDescriptionWindow(event) {
 		const itemId = event.target.closest("li").getAttribute("data-item-id");
 		const windowElement = event.target
 			.closest("li")
 			.querySelector(".description-window");
 		const ability = this.actor.items.get(itemId);
-		const abilityResources = ability.system.resources;
 		if (windowElement.innerHTML.trim() === "") {
 			// Adicionar ao Set de abilities expandidas
 			this._expandedAbilities.add(itemId);
-
-			windowElement.innerHTML = `
-				<ul class="ability-resources-description-list">
-					${abilityResources.map(resource => {
-				console.log("attribute", resource)
-				return `
-							<li class="ability-resource-description-card" data-item-attribute-id="${resource.id}">
-								<span><b>${resource.name}:</b></span>
-								<span>${resource.value} / ${resource.maxValue}</span>
-							</li>
-						`
-			}).join('')}
-				</ul>
-				<div class="item-description">
-					${ability.system.description}
-				</div>
-			`
-				;
+			windowElement.classList.add("expanded");
+			windowElement.innerHTML = "<p>Carregando...</p>";
+			const content = await this._renderAbilityExpanded(ability);
+			if (this._expandedAbilities.has(itemId)) windowElement.innerHTML = content;
 		} else {
 			// Remover do Set de abilities expandidas
 			this._expandedAbilities.delete(itemId);
+			windowElement.classList.remove("expanded");
 
 			windowElement.innerHTML = "";
 		}
+	}
+
+	async _resolveAbilityDetailItem(type, name) {
+		if (!name) return null;
+		const worldItem = game.items.find(item => item.type === type && item.name === name);
+		if (worldItem) return worldItem;
+		for (const pack of game.packs.filter(pack => pack.documentName === "Item")) {
+			try {
+				const index = await pack.getIndex({ fields: ["type"] });
+				const match = index.find(item => item.type === type && item.name === name);
+				if (match) return await pack.getDocument(match._id);
+			} catch (error) { console.warn(`Não foi possível consultar ${pack.collection}`, error); }
+		}
+		return null;
+	}
+
+	async _renderAbilityExpanded(ability) {
+		const escape = value => foundry.utils.escapeHTML(String(value ?? ""));
+		const enrich = (item) => TextEditor.enrichHTML(item.system.description ?? "", {
+			documents: true,
+			secrets: this.actor.isOwner,
+			relativeTo: item,
+			rollData: this.actor.getRollData()
+		});
+		const enrichedDescription = await enrich(ability);
+		const level = Math.max(0, Number(ability.system.level) || 0);
+		const showTechniques = ability.system.techniquesEnabled !== false;
+		const showEffects = ability.system.effectsEnabled === true;
+		const savedTab = this._abilityActiveTabs.get(ability.id);
+		const activeTab = savedTab === "techniques" && showTechniques || savedTab === "effects" && showEffects ? savedTab : "description";
+		const techniques = showTechniques ? await Promise.all((ability.system.techniques ?? [])
+			.filter(entry => entry.name && Number(entry.level) <= level)
+			.map(async entry => {
+				const item = await this._resolveAbilityDetailItem("technique", entry.name);
+				return { ...entry, item, description: item ? await enrich(item) : "" };
+			})) : [];
+		const perLevel = Math.max(0, Math.floor(Number(ability.system.effectsPerLevel) || 0));
+		const displayLevels = Math.max(level, Number(ability.system.maxLevel) || 0);
+		const effectNames = showEffects ? ability.system.effectSlots ?? [] : [];
+		const effects = await Promise.all(effectNames.map(name => this._resolveAbilityDetailItem("effect", name)));
+		const tabs = [{ id: "description", label: "Descrição" }];
+		if (showTechniques) tabs.push({ id: "techniques", label: "Técnicas" });
+		if (showEffects) tabs.push({ id: "effects", label: "Efeitos" });
+		const tabButton = tab => `<button type="button" class="ability-detail-tab ${activeTab === tab.id ? "active" : ""}" data-tab="${tab.id}">${tab.label}</button>`;
+		const panel = (id, content) => `<div class="ability-detail-panel ${activeTab === id ? "active" : ""}" data-tab="${id}">${content}</div>`;
+		const resourceList = `<ul class="ability-resources-description-list">${(ability.system.resources ?? []).map(resource => `<li class="ability-resource-description-card"><span><b>${escape(resource.name)}:</b></span><span>${escape(resource.value)} / ${escape(resource.maxValue)}</span></li>`).join("")}</ul>`;
+		const techniqueList = `<ul class="ability-detail-techniques">${techniques.map(entry => `<li><details class="ability-detail-technique-card"><summary>${ability.system.canActivate && entry.item?.system.canActivate === true ? `<a class="activate-technique-dice" data-name="${escape(entry.name)}" title="Ativar técnica" aria-label="Ativar técnica"><i class="fa-solid fa-dice-d20 animate-roll-hover roll-dice-btn" aria-hidden="true"></i></a>` : ""}<strong>${escape(entry.item?.name ?? entry.name)}</strong><span>Nível ${escape(entry.level)}</span><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></summary><div class="ability-detail-technique-content">${entry.item ? `<div class="item-description">${entry.description}</div><div class="ability-detail-actions"><button type="button" class="ability-detail-open" data-type="technique" data-name="${escape(entry.name)}"><i class="fa-solid fa-up-right-from-square"></i> Abrir ficha da técnica</button><button type="button" class="ability-detail-send-chat" data-name="${escape(entry.name)}"><i class="fa-solid fa-comment"></i> Enviar para o chat</button></div>` : `<p>Técnica não encontrada: ${escape(entry.name)}</p>`}</div></details></li>`).join("")}</ul>`;
+		const columnLabel = index => {
+			let label = "";
+			for (let number = index + 1; number > 0; number = Math.floor((number - 1) / 26)) label = String.fromCharCode(65 + (number - 1) % 26) + label;
+			return label;
+		};
+		const effectRows = Array.from({ length: displayLevels }, (_, row) => `<tr class="${row + 1 > level ? "effect-slot-locked" : ""}"><td>${row + 1}</td>${Array.from({ length: perLevel }, (_, column) => {
+			const index = row * perLevel + column;
+			const name = effectNames[index];
+			return `<td>${name ? `<a class="ability-detail-open" data-type="effect" data-name="${escape(name)}">${escape(effects[index]?.name ?? name)}</a>` : ""}</td>`;
+		}).join("")}</tr>`).join("");
+		const effectTable = `<table class="ability-detail-effects"><thead><tr><th>Nível</th>${Array.from({ length: perLevel }, (_, index) => `<th>Efeito Escolhido ${columnLabel(index)}</th>`).join("")}</tr></thead><tbody>${effectRows}</tbody></table>`;
+		return `${resourceList}<nav class="ability-detail-tabs">${tabs.map(tabButton).join("")}</nav>${panel("description", `<div class="item-description">${enrichedDescription}</div>`)}${showTechniques ? panel("techniques", techniqueList) : ""}${showEffects ? panel("effects", effectTable) : ""}`;
 	}
 
 	_getUsedSpace(items) {

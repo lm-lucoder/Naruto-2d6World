@@ -49,10 +49,17 @@ export class BoilerplateItemSheet extends ItemSheet {
 		context.system = itemData.system;
 		context.flags = itemData.flags;
 		context.isTechniqueOrEffect = ["technique", "effect"].includes(itemData.type);
+		context.isEffect = itemData.type === "effect";
 		if (context.isTechniqueOrEffect) {
 			context.linkedMoves = await Promise.all((itemData.system.moves ?? []).map(async name => ({
 				name, item: await this._resolveAbilityReference("move", name)
 			})));
+			context.activationNVModifiers = (itemData.system.nvModifiers ?? []).map((modifier, index) => ({
+				...NVModifierService.normalize(modifier),
+				index,
+				attributeLabel: NVModifierService.getAttributeLabel(modifier),
+				movementLabel: NVModifierService.getMovementLabel(modifier)
+			}));
 		}
 
 		// Retrieve the roll data for TinyMCE editors.
@@ -88,13 +95,18 @@ export class BoilerplateItemSheet extends ItemSheet {
 		}
 		if (itemData.type === "ability") {
 			context.hasActor = this.object.parent instanceof Actor;
+			context.enrichedDescription = await TextEditor.enrichHTML(itemData.system.description ?? "", { documents: true, secrets: this.object.isOwner, relativeTo: this.object, rollData: context.rollData });
 			context.allowTechniques = itemData.system.techniquesEnabled !== false;
 			const level = Math.max(0, Number(itemData.system.level) || 0);
-			context.techniques = await Promise.all((itemData.system.techniques ?? []).map(async (entry) => ({
-				...entry,
-				item: await this._resolveAbilityReference("technique", entry.name),
-				acquired: Number(entry.level) <= level
-			})));
+			context.techniques = await Promise.all((itemData.system.techniques ?? []).map(async (entry) => {
+				const item = await this._resolveAbilityReference("technique", entry.name);
+				return {
+					...entry,
+					item,
+					enrichedDescription: item ? await TextEditor.enrichHTML(item.system.description ?? "", { documents: true, secrets: this.object.isOwner, relativeTo: item, rollData: context.rollData }) : "",
+					acquired: Number(entry.level) <= level
+				};
+			}));
 			const effectsPerLevel = Math.max(0, Math.floor(Number(itemData.system.effectsPerLevel) || 0));
 			const displayLevels = Math.max(level, Number(itemData.system.maxLevel) || 0);
 			const effectColumnLabel = index => {
@@ -115,6 +127,9 @@ export class BoilerplateItemSheet extends ItemSheet {
 				}));
 				return { level: slotLevel, available, slots };
 			}));
+			const hasActiveTechnique = context.allowTechniques && context.techniques.some(entry => entry.acquired && entry.item?.system.canActivate === true);
+			const hasActiveEffect = itemData.system.effectsEnabled && context.effectRows.some(row => row.available && row.slots.some(slot => slot.item && slot.item.system.canActivate !== false));
+			context.showActivationButton = Boolean(itemData.system.canActivate && (hasActiveTechnique || hasActiveEffect));
 		}
 
 		console.log(context);
@@ -176,6 +191,47 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const id = event.currentTarget.closest("[data-technique-id]").dataset.techniqueId;
 			await this.object.update({ "system.techniques": (this.object.system.techniques ?? []).filter(entry => entry.id !== id) });
 		});
+		const techniqueList = html.find(".ability-technique-config-list");
+		const reorderType = "application/x-naruto-technique-order";
+		const clearReorderStyles = () => techniqueList.find(".ability-reference-row").removeClass("is-dragging drag-over-before drag-over-after");
+		techniqueList.find(".ability-technique-reorder-handle").on("dragstart", event => {
+			const row = event.currentTarget.closest("[data-technique-index]");
+			const transfer = event.originalEvent.dataTransfer;
+			transfer.setData(reorderType, JSON.stringify({ abilityUuid: this.object.uuid, index: Number(row.dataset.techniqueIndex) }));
+			transfer.effectAllowed = "move";
+			row.classList.add("is-dragging");
+		});
+		techniqueList.find(".ability-technique-reorder-handle").on("dragend", clearReorderStyles);
+		techniqueList.on("dragover", event => {
+			if (!Array.from(event.originalEvent.dataTransfer.types).includes(reorderType)) return;
+			const row = event.target.closest("[data-technique-index]");
+			if (!row) return;
+			event.preventDefault();
+			event.originalEvent.dataTransfer.dropEffect = "move";
+			techniqueList.find(".ability-reference-row").removeClass("drag-over-before drag-over-after");
+			row.classList.add(event.originalEvent.clientY < row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2 ? "drag-over-before" : "drag-over-after");
+		});
+		techniqueList.on("drop", async event => {
+			const payload = event.originalEvent.dataTransfer.getData(reorderType);
+			if (!payload) return;
+			event.preventDefault();
+			event.stopPropagation();
+			const row = event.target.closest("[data-technique-index]");
+			clearReorderStyles();
+			if (!row) return;
+			let source;
+			try { source = JSON.parse(payload); } catch { return; }
+			if (source.abilityUuid !== this.object.uuid) return;
+			const techniques = [...(this.object.system.techniques ?? [])];
+			const sourceIndex = source.index;
+			const targetIndex = Number(row.dataset.techniqueIndex);
+			if (!Number.isInteger(sourceIndex) || !Number.isInteger(targetIndex) || sourceIndex < 0 || sourceIndex >= techniques.length || targetIndex < 0 || targetIndex >= techniques.length) return;
+			let insertAt = targetIndex + (event.originalEvent.clientY >= row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2 ? 1 : 0);
+			const [technique] = techniques.splice(sourceIndex, 1);
+			if (sourceIndex < insertAt) insertAt--;
+			techniques.splice(insertAt, 0, technique);
+			if (insertAt !== sourceIndex) await this.object.update({ "system.techniques": techniques });
+		});
 		html.find(".clear-ability-effect").click(async event => {
 			const index = Number(event.currentTarget.closest("[data-effect-slot]").dataset.effectSlot);
 			const slots = [...(this.object.system.effectSlots ?? [])];
@@ -186,6 +242,12 @@ export class BoilerplateItemSheet extends ItemSheet {
 			const name = event.currentTarget.dataset.name;
 			const type = event.currentTarget.dataset.type;
 			this._resolveAbilityReference(type, name).then(item => item?.sheet.render(true));
+		});
+		html.find(".ability-technique-send-chat").click(async event => {
+			const name = event.currentTarget.dataset.name;
+			const technique = await this._resolveAbilityReference("technique", name);
+			if (technique) await technique.sendTechniqueToChat({ actor: this.object.parent instanceof Actor ? this.object.parent : null });
+			else ui.notifications.warn(`${name} não foi encontrado.`);
 		});
 
 		html.find(".add-condition-move-config").click(async (ev) => {
@@ -293,30 +355,34 @@ export class BoilerplateItemSheet extends ItemSheet {
 		html.find(".add-move-nv-modifier").click(() => this._addMoveNVModifier());
 		html.find(".edit-move-nv-modifier").click((event) => this._editMoveNVModifier(Number(event.currentTarget.closest("[data-modifier-index]").dataset.modifierIndex)));
 		html.find(".remove-move-nv-modifier").click((event) => this._removeMoveNVModifier(Number(event.currentTarget.closest("[data-modifier-index]").dataset.modifierIndex)));
+		const activationOrigin = this.object.type === "effect" ? "do efeito" : "da técnica";
+		html.find(".add-activation-nv-modifier").click(() => this._addMoveNVModifier(activationOrigin));
+		html.find(".edit-activation-nv-modifier").click(event => this._editMoveNVModifier(Number(event.currentTarget.closest("[data-modifier-index]").dataset.modifierIndex), activationOrigin));
+		html.find(".remove-activation-nv-modifier").click(event => this._removeMoveNVModifier(Number(event.currentTarget.closest("[data-modifier-index]").dataset.modifierIndex), activationOrigin));
 	}
 
-	async _addMoveNVModifier() {
-		const result = await NVModifierFormDialog.prompt({ title: "Adicionar NV do movimento", submitLabel: "Adicionar", actor: this.object.actor });
+	async _addMoveNVModifier(origin = "do movimento") {
+		const result = await NVModifierFormDialog.prompt({ title: `Adicionar NV ${origin}`, submitLabel: "Adicionar", actor: this.object.actor });
 		if (!result) return;
 		await this.object.update({ "system.nvModifiers": [...(this.object.system.nvModifiers ?? []), { id: randomID(), ...result }] });
 	}
 
-	async _editMoveNVModifier(index) {
+	async _editMoveNVModifier(index, origin = "do movimento") {
 		const modifiers = [...(this.object.system.nvModifiers ?? [])];
 		const modifier = modifiers[index];
 		if (!modifier) return;
-		const result = await NVModifierFormDialog.prompt({ title: "Editar NV do movimento", modifier, actor: this.object.actor });
+		const result = await NVModifierFormDialog.prompt({ title: `Editar NV ${origin}`, modifier, actor: this.object.actor });
 		if (!result) return;
 		modifiers[index] = { ...modifier, ...result, id: modifier.id || randomID() };
 		await this.object.update({ "system.nvModifiers": modifiers });
 	}
 
-	async _removeMoveNVModifier(index) {
+	async _removeMoveNVModifier(index, origin = "do movimento") {
 		const modifiers = [...(this.object.system.nvModifiers ?? [])];
 		const modifier = modifiers[index];
 		if (!modifier) return;
 		const confirmed = await foundry.applications.api.DialogV2.confirm({
-			window: { title: "Remover NV do movimento" },
+			window: { title: `Remover NV ${origin}` },
 			content: `<p>Remover <strong>${foundry.utils.escapeHTML(modifier.name || "Modificador de NV")}</strong> deste movimento?</p>`,
 			yes: { label: "Remover", icon: "fa-solid fa-trash" },
 			no: { label: "Cancelar" }
@@ -392,12 +458,15 @@ export class BoilerplateItemSheet extends ItemSheet {
 							ui.notifications.warn("Este slot de efeito ainda não foi liberado.");
 							return false;
 						}
-						const index = Number(effectRow.dataset.effectSlot);
-						const slots = [...(this.object.system.effectSlots ?? [])];
-						if (slots.includes(item.name) && slots[index] !== item.name) {
-							ui.notifications.warn("Este efeito já está associado à habilidade.");
+						const tags = value => String(value ?? "").split(";").map(tag => tag.trim().toLocaleLowerCase("pt-BR")).filter(Boolean);
+						const acceptedTags = tags(this.object.system.effectTags);
+						const effect = await this._resolveAbilityReference("effect", item.name) ?? item;
+						if (acceptedTags.length && !tags(effect.system.tags).some(tag => acceptedTags.includes(tag))) {
+							ui.notifications.warn("Este efeito não possui uma tag aceita por esta habilidade.");
 							return false;
 						}
+						const index = Number(effectRow.dataset.effectSlot);
+						const slots = [...(this.object.system.effectSlots ?? [])];
 						slots[index] = item.name;
 						await this.object.update({ "system.effectSlots": slots });
 					}

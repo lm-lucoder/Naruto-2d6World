@@ -109,6 +109,17 @@ export class BoilerplateItem extends Item {
 		return RollManager.abilityRoll(this);
 	}
 
+	async sendTechniqueToChat({ actor = null } = {}) {
+		if (this.type !== "technique") return;
+		const name = foundry.utils.escapeHTML(this.name);
+		const description = await TextEditor.enrichHTML(this.system.description ?? "", { documents: true, secrets: Boolean(actor?.isOwner ?? this.isOwner), relativeTo: this, rollData: actor?.getRollData() });
+		const link = `<a class="ability-chat-link" data-item-type="technique" data-item-name="${name}" title="Abrir técnica">${name}</a>`;
+		return ChatMessage.create({
+			speaker: ChatMessage.getSpeaker({ actor: actor ?? this.parent ?? undefined }),
+			content: `<div class="rollCard"><h3 class="rollcard-title">Técnica: ${link}</h3><div class="rollcard-content"><div class="activation-item-description">${description}</div></div></div>`
+		});
+	}
+
 	async moveRoll(params) {
 		const RollManager = BoilerplateItem.getRollManager();
 		return RollManager.moveRoll(this, params);

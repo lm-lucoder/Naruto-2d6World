@@ -12,9 +12,13 @@ export function appendAbilityActivation(label, context) {
   const itemLink = `<a class="ability-chat-link" data-item-type="${context.type}" data-item-name="${escape(context.itemName)}" title="Abrir ${context.type === "effect" ? "efeito" : "técnica"}">${escape(context.itemName)}</a>`;
   const description = context.itemDescription ? `<div class="activation-item-description">${context.itemDescription}</div>` : "";
   const chakra = context.chakraCost > 0 ? `<span class="chat-tag chakra-info resource-change-display"><img src="systems/naruto2d6world/assets/icons/chakraIcon.png" alt="Chakra"><span class="chakra-change-value">-${context.chakraCost}</span></span>` : "";
+  const wounds = context.woundsCost > 0 ? `<span class="chat-tag resource-change-display"><img src="systems/naruto2d6world/assets/icons/woundIcon.png" alt="Ferimentos"><span>+${context.woundsCost}</span></span>` : "";
+  const momentum = context.momentumCost > 0 ? `<span class="chat-tag resource-change-display"><img src="systems/naruto2d6world/assets/icons/momentumIcon.png" alt="Momentum"><span>-${context.momentumCost}</span></span>` : "";
+  const fireWill = context.fireWillCost > 0 ? `<span class="chat-tag resource-change-display"><img src="systems/naruto2d6world/assets/icons/fireWillIcon.png" alt="Vontade do Fogo"><span>-${context.fireWillCost}</span></span>` : "";
   const technique = context.techniqueCost > 0 ? `<p class="chat-tag">Pontos de técnica utilizados: ${context.techniqueCost}</p>` : "";
   const additional = (context.additionalCosts ?? []).map(cost => `<p class="chat-tag">${escape(cost.name)} utilizado: ${cost.amount}</p>`).join("");
-  const footer = `<div class="rollcard-content"><p class="chat-tag"><strong>${escape(context.type === "effect" ? "Efeito" : "Técnica")}:</strong> ${itemLink}</p>${description}<p class="chat-tag"><strong>Habilidade:</strong> ${abilityLink}</p>${chakra}${technique}${additional}</div>`;
+  const pendingAdditional = context.pendingAdditionalCost ? `<p class="chat-tag pending-additional-cost">Custo adicional (O custo deve ser descontado manualmente)</p>` : "";
+  const footer = `<div class="rollcard-content"><p class="chat-tag"><strong>${escape(context.type === "effect" ? "Efeito" : "Técnica")}:</strong> ${itemLink}</p>${description}<p class="chat-tag"><strong>Habilidade:</strong> ${abilityLink}</p>${chakra}${wounds}${momentum}${fireWill}${technique}${additional}${pendingAdditional}</div>`;
   return label.replace(/<\/div>\s*$/, `${footer}</div>`);
 }
 
@@ -161,11 +165,12 @@ export class ItemRollManager {
   static async abilityRoll(item) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const label = ItemRollManager.getAbilityLabelRollTemplate(item);
+	const description = await TextEditor.enrichHTML(item.system.description ?? "", { documents: true, secrets: item.isOwner, relativeTo: item, rollData: item.actor?.getRollData() });
 
-    ChatMessage.create({
+    return ChatMessage.create({
       speaker: speaker,
       flavor: label,
-      content: item.system.description ?? "",
+      content: description,
     });
   }
 
