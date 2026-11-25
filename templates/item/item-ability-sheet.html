@@ -21,6 +21,7 @@
             <label for="system.level">Categoria: </label>
             <input type="text" class="category-input" name="system.category" value="{{system.category}}">
           </div>
+          {{#if hasActor}}{{#if system.canActivate}}<div class="resource"><button type="button" class="activate-ability"><i class="fa-solid fa-bolt"></i> Ativar</button></div>{{/if}}{{/if}}
         </div>
         {{/unless}}
       </div>
@@ -35,8 +36,9 @@
     {{/if}} -->
     <nav class="sheet-tabs tabs" data-group="primary">
       <a class="item" data-tab="description">Description</a>
-      <a class="item" data-tab="attributes">Attributes</a>
       {{#if system.effectsEnabled}}<a class="item" data-tab="effects">Efeitos</a>{{/if}}
+      {{#if allowTechniques}}<a class="item" data-tab="techniques">Técnicas</a>{{/if}}
+      <a class="item" data-tab="attributes">Attributes</a>
     </nav>
   
     {{!-- Sheet Body --}}
@@ -46,22 +48,41 @@
       <div class="tab" data-group="primary" data-tab="description">
         {{!-- To render inline rolls in a TinyMCE editor, you need to pass the parent actor's (if any) roll data to the rollData prop. --}}
         {{editor system.description target="system.description" rollData=rollData button=true owner=owner editable=editable}}
-        {{#if techniques}}
+      </div>
+      {{#if allowTechniques}}
+      <div class="tab" data-group="primary" data-tab="techniques">
         <div class="ability-techniques">
           <h3>Técnicas adquiridas</h3>
-          <ul class="ability-reference-list">
+          <ul class="ability-reference-list ability-technique-card-list">
             {{#each techniques as |entry|}}
-              {{#if entry.acquired}}
-              <li>Nível {{entry.level}}: {{#if entry.item}}<a class="ability-reference-open" data-name="{{entry.name}}" data-type="technique">{{entry.item.name}}</a>{{else}}Técnica não encontrada: {{entry.name}}{{/if}}</li>
-              {{/if}}
+              {{#if entry.acquired}}{{#if entry.name}}
+              <li class="ability-technique-description">
+                <details class="ability-technique-card">
+                  <summary class="ability-technique-card-header">
+                    <span class="ability-technique-card-title">{{#if entry.item}}{{entry.item.name}}{{else}}{{entry.name}}{{/if}}</span>
+                    <span class="ability-technique-card-level">Nível {{entry.level}}</span>
+                    <i class="fa-solid fa-chevron-down ability-technique-card-chevron" aria-hidden="true"></i>
+                  </summary>
+                  <div class="ability-technique-card-body">
+                    {{#if entry.item}}
+                    <div class="item-description">{{{entry.item.system.description}}}</div>
+                    <a class="ability-reference-open ability-technique-card-open" data-name="{{entry.name}}" data-type="technique">Abrir ficha da técnica</a>
+                    {{else}}
+                    <p>Técnica não encontrada: {{entry.name}}</p>
+                    {{/if}}
+                  </div>
+                </details>
+              </li>
+              {{/if}}{{/if}}
             {{/each}}
           </ul>
         </div>
-        {{/if}}
       </div>
+      {{/if}}
   
       {{!-- Attributes Tab --}}
       <div class="tab attributes" data-group="primary" data-tab="attributes">
+        <div class="resource"><label>Pode ativar? <input type="checkbox" name="system.canActivate" {{checked system.canActivate}}></label></div>
         {{!-- As you add new fields, add them in here! --}}
         <!-- <div class="resource">
           <label for="system.showMaxLevel">Show max Level</label>
@@ -158,6 +179,8 @@
         </div>
         <div class="ability-progression-config">
           <h3>Técnicas por nível</h3>
+          <div class="resource"><label>Permite técnicas <input type="checkbox" name="system.techniquesEnabled" {{checked allowTechniques}}></label></div>
+          {{#if allowTechniques}}
           <div class="section-button"><a class="add-ability-technique"><i class="fa-solid fa-plus"></i> Adicionar técnica</a></div>
           <ul class="ability-reference-list">
             {{#each techniques as |entry|}}
@@ -168,6 +191,7 @@
             </li>
             {{/each}}
           </ul>
+          {{/if}}
           <h3>Efeitos</h3>
           <div class="resource"><label>Permite efeitos <input type="checkbox" name="system.effectsEnabled" {{checked system.effectsEnabled}}></label></div>
           {{#if system.effectsEnabled}}
@@ -179,17 +203,19 @@
       <div class="tab ability-effects" data-group="primary" data-tab="effects">
         <h3>Efeitos Escolhidos:</h3>
         <table class="ability-effects-table">
-          <thead><tr><th>Nível</th><th>Efeito Escolhido</th></tr></thead>
+          <thead><tr><th>Nível</th>{{#each effectColumns as |column|}}<th>Efeito Escolhido {{column.label}}</th>{{/each}}</tr></thead>
           <tbody>
-            {{#each effectSlots as |slot|}}
-            <tr data-effect-slot="{{slot.index}}" data-effect-available="{{slot.available}}" class="{{#unless slot.available}}effect-slot-locked{{/unless}}">
-              <td>{{slot.level}}</td>
-              <td title="{{#if slot.available}}Arraste um Efeito para este slot{{else}}Disponível no nível {{slot.level}}{{/if}}">
+            {{#each effectRows as |row|}}
+            <tr class="{{#unless row.available}}effect-slot-locked{{/unless}}">
+              <td>{{row.level}}</td>
+              {{#each row.slots as |slot|}}
+              <td data-effect-slot="{{slot.index}}" data-effect-available="{{slot.available}}" title="{{#if slot.available}}Arraste um Efeito para este slot{{else}}Disponível no nível {{slot.level}}{{/if}}">
                 {{#if slot.name}}
                   {{#if slot.item}}<a class="ability-reference-open" data-name="{{slot.name}}" data-type="effect">{{slot.item.name}}</a>{{else}}Efeito não encontrado: {{slot.name}}{{/if}}
                   <a class="clear-ability-effect" title="Remover"><i class="fa-solid fa-trash"></i></a>
                 {{/if}}
               </td>
+              {{/each}}
             </tr>
             {{/each}}
           </tbody>

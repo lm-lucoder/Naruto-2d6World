@@ -13,6 +13,7 @@
                             <div class="content">
                                 <div class="info">
                                     <img src="{{ability.img}}" name="{{ability.name}}"> 
+                                    {{#if ability.system.canActivate}}<a class="activate-ability-dice" title="Ativar habilidade"><i class="fa-solid fa-dice-d20 animate-roll-hover roll-dice-btn"></i></a>{{/if}}
                                     <span class="name"><a class="show-ability-description-window-btn">{{ability.name}}</a></span>
                                     <span class="level">
                                         {{#if ability.system.level}}

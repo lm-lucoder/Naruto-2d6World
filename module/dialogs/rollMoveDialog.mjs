@@ -28,7 +28,7 @@ class RollMoveDialog extends Dialog {
 		this._rollInProgress = false
 	}
 
-	static async create(item, { session = null, isRemote = false } = {}) {
+	static async create(item, { session = null, isRemote = false, activationContext = null, beforeRoll = null, afterRoll = null } = {}) {
 		const actor = item.actor;
 		const advantageLevel = AdvantageLevelApi.buildAdvantageLevel(actor)
 		let newAdvantageLevel = 0
@@ -57,6 +57,7 @@ class RollMoveDialog extends Dialog {
 
 			let content = `
 				<div class="dialog-roll-move-content">
+					${activationContext ? `<div class="ability-roll-context"><strong>${foundry.utils.escapeHTML(activationContext.type === "effect" ? "Efeito" : "Técnica")}:</strong> ${foundry.utils.escapeHTML(activationContext.itemName)}<br><strong>Habilidade:</strong> ${foundry.utils.escapeHTML(activationContext.abilityName)}</div>` : ""}
 					<div class="modifier-content">
 						<label>Modificador:</label>
 						<input class="modifier-input" type="text" name="modifier" placeholder="Ex: +1, +2, -1, -2">
@@ -99,6 +100,9 @@ class RollMoveDialog extends Dialog {
 
 			dlg._currentResolve = resolve;
 			dlg._currentItem = item
+			dlg._activationContext = activationContext
+			dlg._beforeAbilityRoll = beforeRoll
+			dlg._afterAbilityRoll = afterRoll
 			dlg._advantageLevel = advantageLevel
 			dlg._newAdvantageLevel = newAdvantageLevel
 			dlg._moveRollSession = moveRollSession
@@ -181,6 +185,7 @@ class RollMoveDialog extends Dialog {
 		if (!checkedOption) {
 			return ui.notifications.warn("Escolha um atributo para rolar com o movimento!");
 		}
+		if (this._beforeAbilityRoll && !(await this._beforeAbilityRoll())) return;
 
 		this._rollInProgress = true;
 		const chosenAttribute = checkedOption.value;
@@ -202,8 +207,10 @@ class RollMoveDialog extends Dialog {
 				moveNVInfo: nvCalculation.moveNVInfo,
 				nvCalculation,
 				attribute: chosenAttribute,
-				rollModifier
+				rollModifier,
+				activationContext: this._activationContext
 			});
+			if (this._afterAbilityRoll) await this._afterAbilityRoll();
 			didRoll = true;
 		} finally {
 			this._moveRollResolved = didRoll;

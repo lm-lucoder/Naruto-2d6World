@@ -4,6 +4,20 @@
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 import { NVModifierService } from "../services/nv-modifier-service.mjs";
 
+export function appendAbilityActivation(label, context) {
+  if (!context) return label;
+  const escape = value => foundry.utils.escapeHTML(String(value));
+  const actor = escape(context.actorUuid || "");
+  const abilityLink = `<a class="ability-chat-link" data-item-type="ability" data-item-name="${escape(context.abilityName)}" data-actor-uuid="${actor}" title="Abrir habilidade (Shift: ficha do personagem)">${escape(context.abilityName)}</a>`;
+  const itemLink = `<a class="ability-chat-link" data-item-type="${context.type}" data-item-name="${escape(context.itemName)}" title="Abrir ${context.type === "effect" ? "efeito" : "técnica"}">${escape(context.itemName)}</a>`;
+  const description = context.itemDescription ? `<div class="activation-item-description">${context.itemDescription}</div>` : "";
+  const chakra = context.chakraCost > 0 ? `<span class="chat-tag chakra-info resource-change-display"><img src="systems/naruto2d6world/assets/icons/chakraIcon.png" alt="Chakra"><span class="chakra-change-value">-${context.chakraCost}</span></span>` : "";
+  const technique = context.techniqueCost > 0 ? `<p class="chat-tag">Pontos de técnica utilizados: ${context.techniqueCost}</p>` : "";
+  const additional = (context.additionalCosts ?? []).map(cost => `<p class="chat-tag">${escape(cost.name)} utilizado: ${cost.amount}</p>`).join("");
+  const footer = `<div class="rollcard-content"><p class="chat-tag"><strong>${escape(context.type === "effect" ? "Efeito" : "Técnica")}:</strong> ${itemLink}</p>${description}<p class="chat-tag"><strong>Habilidade:</strong> ${abilityLink}</p>${chakra}${technique}${additional}</div>`;
+  return label.replace(/<\/div>\s*$/, `${footer}</div>`);
+}
+
 export class ItemRollManager {
   /**
    * Apply advantage level (NV) modifications to challenge dice
@@ -390,7 +404,7 @@ export class ItemRollManager {
       await ChatMessage.create({
         user: game.user.id,
         speaker: ChatMessage.getSpeaker(),
-        flavor: label,
+        flavor: appendAbilityActivation(label, params.activationContext),
         rolls: rolls,
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         content: `
@@ -407,7 +421,7 @@ export class ItemRollManager {
    * Send a move to chat without rolling
    * @param {Item} item - The move item
    */
-  static async moveRollJustSend(item) {
+  static async moveRollJustSend(item, activationContext) {
     const speaker = ChatMessage.getSpeaker({ actor: item.actor });
     const rollMode = game.settings.get("core", "rollMode");
     const label = `<div class="rollCard">
@@ -417,10 +431,10 @@ export class ItemRollManager {
 				</div>
 			</div>`.trim()
 
-    ChatMessage.create({
+    return ChatMessage.create({
       speaker: speaker,
       rollMode: rollMode,
-      flavor: label,
+      flavor: appendAbilityActivation(label, activationContext),
     });
   }
 
@@ -758,12 +772,14 @@ export class ItemRollManager {
    */
   static getAbilityLabelRollTemplate(ability) {
     const hasImg = ability.img != "icons/svg/item-bag.svg";
+    const name = foundry.utils.escapeHTML(ability.name);
+    const actorUuid = foundry.utils.escapeHTML(ability.parent?.uuid ?? "");
     const label = `
     <div class="abilityRollChatTemplate">
       <div class="info">
         ${hasImg ? `<img src="${ability.img}" name="${ability.name}">` : ""}
         <div class="title">
-          <h3>Habilidade: ${ability.name}</h3>
+          <h3>Habilidade: <a class="ability-chat-link" data-item-type="ability" data-item-name="${name}" data-actor-uuid="${actorUuid}" title="Abrir habilidade (Shift: ficha do personagem)">${name}</a></h3>
           <i>Nível: ${ability.system.level}</i>
         </div>
       </div>

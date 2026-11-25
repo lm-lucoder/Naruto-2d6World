@@ -250,6 +250,7 @@
 				"base"
 			],
 			"category": "Normal",
+			"canActivate": true,
 			"level": 1,
 			"maxLevel": 0,
 			"showMaxLevel": true,
@@ -260,6 +261,7 @@
 				"defaultChakraPoints": 0
 			},
 			"levelDescriptions": [],
+			"techniquesEnabled": true,
 			"techniques": [],
 			"effectsEnabled": false,
 			"effectsPerLevel": 0,
@@ -268,24 +270,30 @@
 		},
 		"technique": {
 			"templates": ["base"],
+			"consumesTurn": false,
+			"moves": [],
 			"prerequisites": {
 				"rank": "0",
 				"keys": ""
 			},
 			"cost": {
 				"chakra": 0,
-				"techniquePoints": 0
+				"techniquePoints": 0,
+				"additional": []
 			}
 		},
 		"effect": {
 			"templates": ["base"],
+			"consumesTurn": false,
+			"moves": [],
 			"prerequisites": {
 				"rank": "0",
 				"keys": ""
 			},
 			"cost": {
 				"chakra": 0,
-				"techniquePoints": 0
+				"techniquePoints": 0,
+				"additional": []
 			}
 		},
 		"item": {

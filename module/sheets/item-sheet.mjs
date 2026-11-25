@@ -1,6 +1,7 @@
 import { ItemResourceManager } from "../classes/item-resource-manager.mjs";
 import { NVModifierService } from "../services/nv-modifier-service.mjs";
 import { NVModifierFormDialog } from "../dialogs/nvModifierFormDialog.mjs";
+import ActivateAbilityDialog from "../dialogs/activateAbilityDialog.mjs";
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -48,6 +49,11 @@ export class BoilerplateItemSheet extends ItemSheet {
 		context.system = itemData.system;
 		context.flags = itemData.flags;
 		context.isTechniqueOrEffect = ["technique", "effect"].includes(itemData.type);
+		if (context.isTechniqueOrEffect) {
+			context.linkedMoves = await Promise.all((itemData.system.moves ?? []).map(async name => ({
+				name, item: await this._resolveAbilityReference("move", name)
+			})));
+		}
 
 		// Retrieve the roll data for TinyMCE editors.
 		context.rollData = {};
@@ -81,6 +87,8 @@ export class BoilerplateItemSheet extends ItemSheet {
 			context.rankChoices = rankChoices;
 		}
 		if (itemData.type === "ability") {
+			context.hasActor = this.object.parent instanceof Actor;
+			context.allowTechniques = itemData.system.techniquesEnabled !== false;
 			const level = Math.max(0, Number(itemData.system.level) || 0);
 			context.techniques = await Promise.all((itemData.system.techniques ?? []).map(async (entry) => ({
 				...entry,
@@ -89,10 +97,23 @@ export class BoilerplateItemSheet extends ItemSheet {
 			})));
 			const effectsPerLevel = Math.max(0, Math.floor(Number(itemData.system.effectsPerLevel) || 0));
 			const displayLevels = Math.max(level, Number(itemData.system.maxLevel) || 0);
-			context.effectSlots = await Promise.all(Array.from({ length: displayLevels * effectsPerLevel }, async (_, index) => {
-				const slotLevel = Math.floor(index / effectsPerLevel) + 1;
-				const name = itemData.system.effectSlots?.[index] || "";
-				return { index, level: slotLevel, available: slotLevel <= level, name, item: await this._resolveAbilityReference("effect", name) };
+			const effectColumnLabel = index => {
+				let label = "";
+				for (let number = index + 1; number > 0; number = Math.floor((number - 1) / 26)) {
+					label = String.fromCharCode(65 + (number - 1) % 26) + label;
+				}
+				return label;
+			};
+			context.effectColumns = Array.from({ length: effectsPerLevel }, (_, index) => ({ label: effectColumnLabel(index) }));
+			context.effectRows = await Promise.all(Array.from({ length: displayLevels }, async (_, levelIndex) => {
+				const slotLevel = levelIndex + 1;
+				const available = slotLevel <= level;
+				const slots = await Promise.all(context.effectColumns.map(async (_, columnIndex) => {
+					const index = levelIndex * effectsPerLevel + columnIndex;
+					const name = itemData.system.effectSlots?.[index] || "";
+					return { index, level: slotLevel, available, name, item: await this._resolveAbilityReference("effect", name) };
+				}));
+				return { level: slotLevel, available, slots };
 			}));
 		}
 
@@ -120,6 +141,28 @@ export class BoilerplateItemSheet extends ItemSheet {
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
+		html.find(".add-additional-cost").click(async () => {
+			const additional = [...(this.object.system.cost?.additional ?? []), { id: randomID(7), name: "", amount: 0 }];
+			await this.object.update({ "system.cost.additional": additional });
+		});
+		html.find(".remove-additional-cost").click(async event => {
+			const id = event.currentTarget.closest("[data-cost-id]").dataset.costId;
+			await this.object.update({ "system.cost.additional": (this.object.system.cost?.additional ?? []).filter(cost => cost.id !== id) });
+		});
+		html.find(".additional-cost-name, .additional-cost-amount").change(async event => {
+			const id = event.currentTarget.closest("[data-cost-id]").dataset.costId;
+			const field = event.currentTarget.classList.contains("additional-cost-name") ? "name" : "amount";
+			const value = field === "name" ? event.currentTarget.value : Math.max(0, Number(event.currentTarget.value) || 0);
+			const additional = (this.object.system.cost?.additional ?? []).map(cost => cost.id === id ? { ...cost, [field]: value } : cost);
+			await this.object.update({ "system.cost.additional": additional });
+		});
+		html.find(".remove-linked-move").click(async event => {
+			const name = event.currentTarget.closest("[data-move-name]").dataset.moveName;
+			await this.object.update({ "system.moves": (this.object.system.moves ?? []).filter(move => move !== name) });
+		});
+		html.find(".activate-ability").click(() => {
+			ActivateAbilityDialog.createForAbility(this.object);
+		});
 		html.find(".add-ability-technique").click(async () => {
 			await this.object.update({ "system.techniques": [...(this.object.system.techniques ?? []), { id: randomID(7), level: 1, name: "" }] });
 		});
@@ -321,6 +364,14 @@ export class BoilerplateItemSheet extends ItemSheet {
 			// Usar fromDropData para funcionar tanto com world items quanto owned items
 			const item = await Item.fromDropData(data);
 			if (!item) return;
+			if (["technique", "effect"].includes(this.object.type) && e.target?.closest?.(".linked-moves-drop")) {
+				e.preventDefault();
+				e.stopPropagation();
+				if (item.type !== "move") return ui.notifications.warn("Arraste um item do tipo Movimento.");
+				const moves = this.object.system.moves ?? [];
+				if (!moves.includes(item.name)) await this.object.update({ "system.moves": [...moves, item.name] });
+				return false;
+			}
 			if (this.object.type === "ability") {
 				const techniqueRow = e.target?.closest?.("[data-technique-id]");
 				const effectRow = e.target?.closest?.("[data-effect-slot]");

@@ -114,9 +114,9 @@ export class BoilerplateItem extends Item {
 		return RollManager.moveRoll(this, params);
 	}
 
-	async moveRollJustSend() {
+	async moveRollJustSend(activationContext) {
 		const RollManager = BoilerplateItem.getRollManager();
-		return RollManager.moveRollJustSend(this);
+		return RollManager.moveRollJustSend(this, activationContext);
 	}
 
 	async moveRollNPC() {

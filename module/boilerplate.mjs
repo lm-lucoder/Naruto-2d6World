@@ -32,6 +32,36 @@ Hooks.once('init', async function () {
     }
   });
 
+  Hooks.on("renderChatMessageHTML", (message, html) => {
+    html.addEventListener("click", async event => {
+      const link = event.target.closest(".ability-chat-link");
+      if (!link || !html.contains(link)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const { itemType, itemName, actorUuid } = link.dataset;
+      let item = null;
+      if (itemType === "ability") {
+        if (event.shiftKey && actorUuid) {
+          const actor = await fromUuid(actorUuid);
+          item = actor?.items.find(entry => entry.type === "ability" && entry.name === itemName);
+        } else item = game.items.find(entry => entry.type === "ability" && entry.name === itemName);
+      } else if (["effect", "technique"].includes(itemType)) {
+        for (const pack of game.packs.filter(pack => pack.documentName === "Item")) {
+          try {
+            const index = await pack.getIndex({ fields: ["type"] });
+            const match = index.find(entry => entry.type === itemType && entry.name === itemName);
+            if (match) { item = await pack.getDocument(match._id); break; }
+          } catch (error) {
+            console.warn(`Não foi possível consultar ${pack.collection}`, error);
+          }
+        }
+        item ??= game.items.find(entry => entry.type === itemType && entry.name === itemName);
+      }
+      if (item) item.sheet.render(true);
+      else ui.notifications.warn(`${itemName} não foi encontrado.`);
+    });
+  });
+
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
   GameSettings.start();

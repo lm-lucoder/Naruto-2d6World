@@ -25,6 +25,19 @@
     {{!-- Attributes Tab --}}
     <div class="tab attributes" data-group="primary" data-tab="attributes">
       {{#if isTechniqueOrEffect}}
+      <div class="resource"><label>Consome turno <input type="checkbox" name="system.consumesTurn" {{checked system.consumesTurn}}></label></div>
+      <h3>Movimentos</h3>
+      <div class="linked-moves-drop" title="Arraste movimentos para esta área">
+        <ul class="ability-reference-list">
+          {{#each linkedMoves as |move|}}
+          <li data-move-name="{{move.name}}">
+            {{#if move.item}}{{move.item.name}}{{else}}Movimento não encontrado: {{move.name}}{{/if}}
+            <a class="remove-linked-move" title="Remover"><i class="fa-solid fa-trash"></i></a>
+          </li>
+          {{/each}}
+        </ul>
+        <span>Arraste um Movimento aqui</span>
+      </div>
       <h3>Pré-requisitos</h3>
       <div class="resource">
         <label>Rank</label>
@@ -57,6 +70,16 @@
         <label>Custo de pontos de técnica</label>
         <input type="number" name="system.cost.techniquePoints" min="0" step="1" value="{{system.cost.techniquePoints}}" />
       </div>
+      <div class="section-button"><a class="add-additional-cost"><i class="fa-solid fa-plus"></i> Adicionar novo custo</a></div>
+      <ul class="additional-costs-list">
+        {{#each system.cost.additional as |cost|}}
+        <li data-cost-id="{{cost.id}}">
+          <input class="additional-cost-name" type="text" value="{{cost.name}}" placeholder="Nome do recurso" aria-label="Nome do recurso" />
+          <input class="additional-cost-amount" type="number" min="0" step="1" value="{{cost.amount}}" aria-label="Quantidade" />
+          <a class="remove-additional-cost" title="Remover custo"><i class="fa-solid fa-trash"></i></a>
+        </li>
+        {{/each}}
+      </ul>
       {{/if}}
     </div>
   </section>

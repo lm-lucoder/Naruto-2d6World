@@ -4,6 +4,7 @@ import ManageActorResourceDialog from "../dialogs/manageActorResourceDialog.mjs"
 import ManageItemQuantityDialog from "../dialogs/manageItemQuantityDialog.mjs";
 import ManageNVModifiersDialog from "../dialogs/manageNVModifiersDialog.mjs";
 import RollMoveDialog from "../dialogs/rollMoveDialog.mjs";
+import ActivateAbilityDialog from "../dialogs/activateAbilityDialog.mjs";
 import UpgradeNPCMoveDialog from "../dialogs/upgradeNPCMoveDialog.mjs";
 import {
 	onManageActiveEffect,
@@ -391,6 +392,11 @@ export class BoilerplateActorSheet extends ActorSheet {
 
 		html.find(".rollableWithDialog").click((event) => {
 			this._onRollMove(event);
+		});
+		html.find(".activate-ability-dice").click(event => {
+			const abilityId = event.currentTarget.closest(".ability-card").dataset.itemId;
+			const ability = this.actor.items.get(abilityId);
+			if (ability?.type === "ability") ActivateAbilityDialog.createForAbility(ability);
 		});
 
 		html.find(".condition-card-checkbox").click((event) => {

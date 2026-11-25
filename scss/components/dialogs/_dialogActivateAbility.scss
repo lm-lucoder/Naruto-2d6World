@@ -1,0 +1,29 @@
+.dialog-activate-ability-content {
+	h3 {
+		border-bottom: 1px solid $c-beige;
+		margin: 10px 0;
+		padding-bottom: 5px;
+	}
+	.ability-activation-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		min-height: 28px;
+	}
+	.ability-activation-tag, .ability-move-tag, .ability-no-move {
+		width: auto;
+		padding: 4px 9px;
+		border: 1px solid $c-beige;
+		border-radius: 3px;
+		background: rgba(0, 0, 0, 0.05);
+		cursor: pointer;
+	}
+}
+
+.ability-roll-context {
+	padding: 6px 8px;
+	margin-bottom: 10px;
+	border: 1px solid $c-beige;
+	border-radius: 3px;
+	background: rgba(0, 0, 0, 0.05);
+}

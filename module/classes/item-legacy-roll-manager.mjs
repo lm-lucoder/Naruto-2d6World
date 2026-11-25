@@ -1,6 +1,7 @@
 import { GameSettings } from "../settings/settings.mjs";
 import { MasterNVModifierService } from "../services/master-nv-modifier-service.mjs";
 import { NVModifierService } from "../services/nv-modifier-service.mjs";
+import { appendAbilityActivation } from "./item-roll-manager.mjs";
 
 /**
  * Classe para gerenciar rolagens de itens no modo legado (com modos de rolagem)
@@ -313,7 +314,7 @@ export class ItemLegacyRollManager {
 			await ChatMessage.create({
 				user: game.user.id,
 				speaker: ChatMessage.getSpeaker(),
-				flavor: label,
+				flavor: appendAbilityActivation(label, params.activationContext),
 				rolls: rolls,
 				type: CONST.CHAT_MESSAGE_TYPES.OTHER,
 				content: `
@@ -330,7 +331,7 @@ export class ItemLegacyRollManager {
 	 * Send a move to chat without rolling
 	 * @param {Item} item - The move item
 	 */
-	static async moveRollJustSend(item) {
+	static async moveRollJustSend(item, activationContext) {
 		const speaker = ChatMessage.getSpeaker({ actor: item.actor });
 		const rollMode = game.settings.get("core", "rollMode");
 		const label = `<div class="rollCard">
@@ -340,10 +341,10 @@ export class ItemLegacyRollManager {
 				</div>
 			</div>`.trim()
 
-		ChatMessage.create({
+		return ChatMessage.create({
 			speaker: speaker,
 			rollMode: rollMode,
-			flavor: label,
+			flavor: appendAbilityActivation(label, activationContext),
 		});
 	}
 
@@ -632,12 +633,14 @@ export class ItemLegacyRollManager {
 	 */
 	static getAbilityLabelRollTemplate(ability) {
 		const hasImg = ability.img != "icons/svg/item-bag.svg";
+		const name = foundry.utils.escapeHTML(ability.name);
+		const actorUuid = foundry.utils.escapeHTML(ability.parent?.uuid ?? "");
 		const label = `
     <div class="abilityRollChatTemplate">
       <div class="info">
         ${hasImg ? `<img src="${ability.img}" name="${ability.name}">` : ""}
         <div class="title">
-          <h3>Habilidade: ${ability.name}</h3>
+          <h3>Habilidade: <a class="ability-chat-link" data-item-type="ability" data-item-name="${name}" data-actor-uuid="${actorUuid}" title="Abrir habilidade (Shift: ficha do personagem)">${name}</a></h3>
           <i>Nível: ${ability.system.level}</i>
         </div>
       </div>

@@ -21,7 +21,7 @@ export class ChatMessageAbilitiesChakraTemplates {
       <div class="info">
         ${hasImg ? `<img src="${ability.img}" name="${ability.name}">` : ""}
         <div class="title">
-          <h3>${ability.name}</h3>
+          <h3><a class="ability-chat-link" data-item-type="ability" data-item-name="${foundry.utils.escapeHTML(ability.name)}" data-actor-uuid="${foundry.utils.escapeHTML(ability.parent?.uuid ?? "")}" title="Abrir habilidade (Shift: ficha do personagem)">${foundry.utils.escapeHTML(ability.name)}</a></h3>
         </div>
       </div>`;
   }
